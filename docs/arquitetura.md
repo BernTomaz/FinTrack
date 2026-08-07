@@ -59,6 +59,7 @@ Responsabilidades:
 - Formularios
 - Consumo da API
 - Estado local simples
+- Layout responsivo mobile-first
 
 ## Regra de Dependencia
 
@@ -73,3 +74,4 @@ Web -> Api
 
 Comecar com services diretos e DTOs simples. Repositorios so entram se o acesso a dados comecar a repetir logica real.
 
+A solution .NET sera criada como `FinTrack.slnx`, nao `.sln`.

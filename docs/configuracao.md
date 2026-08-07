@@ -12,6 +12,8 @@ Este arquivo sera atualizado quando o codigo for criado.
 
 ## Backend
 
+Solution planejada: `FinTrack.slnx`.
+
 Comandos planejados:
 
 ```powershell
@@ -21,6 +23,8 @@ dotnet run --project src\FinTrack.Api
 ```
 
 ## Frontend
+
+O layout deve ser responsivo desde o inicio, com prioridade para boa experiencia mobile.
 
 Comandos planejados:
 
@@ -43,4 +47,3 @@ docker compose up -d
 ## Segredos Locais
 
 A chave JWT e senhas locais nao devem ser versionadas. Usar user-secrets no backend e `.env` local para Docker.
-

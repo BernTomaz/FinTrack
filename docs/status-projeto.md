@@ -13,9 +13,8 @@ Estruturacao inicial.
 
 ## Em Aberto
 
-- Criar solution .NET
+- Criar solution .NET no formato `.slnx`
 - Criar projetos backend
 - Criar projeto Angular
 - Configurar Docker Compose
 - Implementar MVP
-

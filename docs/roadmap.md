@@ -2,7 +2,7 @@
 
 ## Agora
 
-- Estruturar solution e projetos
+- Estruturar solution `.slnx` e projetos
 - Criar contratos iniciais
 - Configurar banco local
 - Criar autenticacao
@@ -37,4 +37,3 @@
 - Multi-moeda
 - Compartilhamento de contas
 - Assinatura paga
-

@@ -30,6 +30,7 @@ Frontend:
 - TypeScript
 - Reactive Forms
 - HttpClient
+- Layout responsivo mobile-first
 
 Testes:
 
@@ -78,7 +79,8 @@ FinTrack/
 
 O projeto deve seguir uma abordagem simples: menos abstracao, menos dependencia e mais fluxo direto. Recursos fora do MVP ficam documentados para depois.
 
+A solution .NET deve usar o formato `.slnx`.
+
 ## Status
 
 Projeto em estruturacao inicial. Ainda nao ha codigo de aplicacao.
-

@@ -2,7 +2,7 @@
 
 ## 1. Base
 
-- Criar solution
+- Criar solution `FinTrack.slnx`
 - Criar projetos
 - Configurar referencias
 - Configurar Swagger
@@ -39,10 +39,10 @@
 - Dashboard
 - CRUDs
 - Filtros
+- Responsividade mobile-first
 
 ## 7. Fechamento
 
 - Testes principais
 - README final
 - Docker Compose validado
-

@@ -21,3 +21,4 @@ Usuario entra, faz login, acessa dashboard e gerencia suas informacoes financeir
 
 Comecar com Angular simples, Reactive Forms e HttpClient. Biblioteca visual so entra se realmente acelerar o MVP.
 
+O layout deve nascer responsivo, com telas principais confortaveis no mobile.
