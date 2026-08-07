@@ -1,0 +1,30 @@
+# Build
+bin/
+obj/
+dist/
+out/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Environment
+.env
+.env.*
+!.env.example
+appsettings.*.local.json
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Logs
+*.log
+
+# SQL Server / local data
+*.bak
+*.mdf
+*.ldf
+
