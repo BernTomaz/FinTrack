@@ -2,16 +2,16 @@
 
 ## Objetivo
 
-Permitir cadastro, login e protecao dos dados do usuario.
+Permitir cadastro, login e proteção dos dados do usuário.
 
 ## Tarefas
 
-- Cadastro de usuario
+- Cadastro de usuário
 - Login
 - Hash de senha
 - Emissao de JWT
-- Identificacao do usuario logado
-- Protecao dos endpoints privados
+- Identificacao do usuário logado
+- Proteção dos endpoints privados
 
 ## Endpoints
 

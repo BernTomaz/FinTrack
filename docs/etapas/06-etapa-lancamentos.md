@@ -1,4 +1,4 @@
-# 06 - Lancamentos
+# 06 - Lançamentos
 
 ## Objetivo
 
@@ -6,16 +6,16 @@ Registrar receitas e despesas.
 
 ## Tarefas
 
-- Criar lancamento
-- Editar lancamento
-- Excluir lancamento
-- Listar lancamentos
-- Filtrar por mes, ano, tipo, categoria e conta
+- Criar lançamento
+- Editar lançamento
+- Excluir lançamento
+- Listar lançamentos
+- Filtrar por mês, ano, tipo, categoria e conta
 
 ## Regras
 
 - Valor deve ser maior que zero
-- Data e obrigatoria
-- Conta e categoria devem pertencer ao usuario logado
-- Tipo do lancamento deve combinar com a categoria
+- Data é obrigatória
+- Conta e categoria devem pertencer ao usuário logado
+- Tipo do lançamento deve combinar com a categoria
 

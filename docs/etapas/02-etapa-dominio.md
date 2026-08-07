@@ -1,4 +1,4 @@
-# 02 - Dominio
+# 02 - Domínio
 
 ## Objetivo
 
@@ -19,9 +19,9 @@ Modelar as entidades centrais do MVP.
 
 ## Regras Iniciais
 
-- Email de usuario deve ser unico
+- Email de usuário deve ser único
 - Senha deve ser salva como hash
-- Valor de lancamento deve ser maior que zero
-- Usuario so acessa os proprios dados
-- Tipo do lancamento deve combinar com o tipo da categoria
+- Valor de lançamento deve ser maior que zero
+- Usuário só acessa os próprios dados
+- Tipo do lançamento deve combinar com o tipo da categoria
 

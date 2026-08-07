@@ -1,23 +1,23 @@
-# 00 - Visao Geral
+# 00 - Visão Geral
 
-O FinTrack sera um sistema web de controle financeiro pessoal.
+O FinTrack será um sistema web de controle financeiro pessoal.
 
 ## Objetivo
 
-Permitir que o usuario registre contas, categorias e lancamentos, acompanhe o mes atual e exporte seus dados em CSV.
+Permitir que o usuário registre contas, categorias e lançamentos, acompanhe o mês atual e exporte seus dados em CSV.
 
 ## Escopo do MVP
 
-- Usuario cria conta
-- Usuario faz login
-- Usuario cria contas financeiras
-- Usuario cria categorias
-- Usuario cria receitas e despesas
-- Usuario filtra lancamentos
-- Usuario acompanha dashboard mensal
-- Usuario exporta lancamentos em CSV
+- Usuário cria conta
+- Usuário faz login
+- Usuário cria contas financeiras
+- Usuário cria categorias
+- Usuário cria receitas e despesas
+- Usuário filtra lançamentos
+- Usuário acompanha dashboard mensal
+- Usuário exporta lançamentos em CSV
 
-## Criterio de Pronto
+## Critério de Pronto
 
 O MVP termina quando os fluxos principais funcionarem de ponta a ponta com testes principais passando.
 

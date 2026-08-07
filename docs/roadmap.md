@@ -5,7 +5,7 @@
 - Estruturar solution `.slnx` e projetos
 - Criar contratos iniciais
 - Configurar banco local
-- Criar autenticacao
+- Criar autenticação
 
 ## MVP
 
@@ -13,26 +13,26 @@
 - Login
 - Contas
 - Categorias
-- Lancamentos
+- Lançamentos
 - Dashboard mensal
-- Exportacao CSV
+- Exportação CSV
 - Testes principais
 
 ## Depois do MVP
 
 - Melhorias visuais
-- Relatorios adicionais
-- Deploy publico
+- Relatórios adicionais
+- Deploy público
 - Backup e restauracao
 
 ## Fora do MVP
 
-- Integracao bancaria
+- Integração bancária
 - Pagamento online
 - IA
 - OCR
 - Upload de comprovantes
-- Notificacoes por email
+- Notificações por email
 - App mobile
 - Multi-moeda
 - Compartilhamento de contas

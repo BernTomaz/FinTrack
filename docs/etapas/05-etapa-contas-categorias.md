@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Permitir que o usuario organize onde o dinheiro entra/sai e como os gastos serao classificados.
+Permitir que o usuário organize onde o dinheiro entra/sai e como os gastos serão classificados.
 
 ## Contas
 
@@ -20,7 +20,7 @@ Permitir que o usuario organize onde o dinheiro entra/sai e como os gastos serao
 
 ## Regras
 
-- Conta pertence a um usuario
-- Categoria pertence a um usuario
-- Usuario nao acessa dados de outro usuario
+- Conta pertence a um usuário
+- Categoria pertence a um usuário
+- Usuário não acessa dados de outro usuário
 

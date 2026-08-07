@@ -1,19 +1,19 @@
-# 07 - Dashboard e Exportacao
+# 07 - Dashboard e Exportação
 
 ## Dashboard Mensal
 
 Mostrar:
 
-- Total de receitas do mes
-- Total de despesas do mes
-- Saldo do mes
+- Total de receitas do mês
+- Total de despesas do mês
+- Saldo do mês
 - Saldo geral atual
 - Gastos por categoria
-- Ultimos lancamentos
+- Últimos lançamentos
 
-## Exportacao CSV
+## Exportação CSV
 
-Permitir baixar lancamentos filtrados por periodo.
+Permitir baixar lançamentos filtrados por período.
 
 Endpoint planejado:
 

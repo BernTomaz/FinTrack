@@ -1,8 +1,8 @@
-# Configuracao Local
+# Configuração Local
 
-Este arquivo sera atualizado quando o codigo for criado.
+Este arquivo será atualizado quando o código for criado.
 
-## Pre-requisitos
+## Pré-requisitos
 
 - .NET 10 SDK
 - Node.js LTS
@@ -24,7 +24,7 @@ dotnet run --project src\FinTrack.Api
 
 ## Frontend
 
-O layout deve ser responsivo desde o inicio, com prioridade para boa experiencia mobile.
+O layout deve ser responsivo desde o inicio, com prioridade para boa experiência mobile.
 
 Comandos planejados:
 
@@ -36,7 +36,7 @@ npm start
 
 ## Banco
 
-O banco principal sera SQL Server.
+O banco principal será SQL Server.
 
 Uso planejado com Docker Compose:
 
@@ -46,4 +46,4 @@ docker compose up -d
 
 ## Segredos Locais
 
-A chave JWT e senhas locais nao devem ser versionadas. Usar user-secrets no backend e `.env` local para Docker.
+A chave JWT e senhas locais não devem ser versionadas. Usar user-secrets no backend e `.env` local para Docker.

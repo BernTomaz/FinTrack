@@ -1,13 +1,13 @@
 # Fluxo Financeiro
 
-## Preparacao
+## Preparação
 
 ```text
 Criar contas
 Criar categorias
 ```
 
-## Lancamento
+## Lançamento
 
 ```text
 Selecionar conta
@@ -20,5 +20,5 @@ Salvar
 
 ## Resultado
 
-O lancamento atualiza os calculos de saldo, dashboard e exportacao.
+O lançamento atualiza os cálculos de saldo, dashboard e exportação.
 

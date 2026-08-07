@@ -1,18 +1,18 @@
 # FinTrack
 
-Sistema web para controle financeiro pessoal, com cadastro de receitas, despesas, contas, categorias, dashboard mensal e exportacao CSV.
+Sistema web para controle financeiro pessoal, com cadastro de receitas, despesas, contas, categorias, dashboard mensal e exportação CSV.
 
-## Documentacao
+## Documentação
 
-- [Visao geral](docs/etapas/00-etapa-visao-geral.md)
+- [Visão geral](docs/etapas/00-etapa-visao-geral.md)
 - [Arquitetura](docs/arquitetura.md)
-- [Configuracao local](docs/configuracao.md)
+- [Configuração local](docs/configuracao.md)
 - [Endpoints planejados](docs/endpoints.md)
 - [Testes](docs/testes.md)
 - [Roadmap](docs/roadmap.md)
 - [Status do projeto](docs/status-projeto.md)
 - [Fluxo geral](docs/fluxos/00-fluxo-geral.md)
-- [Roadmap de implementacao](docs/fluxos/10-roadmap-implementacao.md)
+- [Roadmap de implementação](docs/fluxos/10-roadmap-implementacao.md)
 
 ## Stack Prevista
 
@@ -66,21 +66,21 @@ FinTrack/
 
 ## MVP
 
-- Cadastro de usuario
+- Cadastro de usuário
 - Login
 - Cadastro de contas financeiras
 - Cadastro de categorias
-- Cadastro de lancamentos financeiros
-- Listagem e filtros de lancamentos
+- Cadastro de lançamentos financeiros
+- Listagem e filtros de lançamentos
 - Dashboard mensal
-- Exportacao CSV de lancamentos
+- Exportação CSV de lançamentos
 
 ## Modo de Desenvolvimento
 
-O projeto deve seguir uma abordagem simples: menos abstracao, menos dependencia e mais fluxo direto. Recursos fora do MVP ficam documentados para depois.
+O projeto deve seguir uma abordagem simples: menos abstração, menos dependência e mais fluxo direto. Recursos fora do MVP ficam documentados para depois.
 
 A solution .NET deve usar o formato `.slnx`.
 
 ## Status
 
-Projeto em estruturacao inicial. Ainda nao ha codigo de aplicacao.
+Projeto em estruturação inicial. Ainda não há código de aplicação.

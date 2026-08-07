@@ -1,4 +1,4 @@
-# Roadmap de Implementacao
+# Roadmap de Implementação
 
 ## 1. Base
 
@@ -7,7 +7,7 @@
 - Configurar referencias
 - Configurar Swagger
 
-## 2. Dominio e Banco
+## 2. Domínio e Banco
 
 - Criar entidades e enums
 - Criar DbContext
@@ -19,19 +19,19 @@
 - Cadastro
 - Login
 - JWT
-- Usuario logado
+- Usuário logado
 
 ## 4. Financeiro
 
 - Contas
 - Categorias
-- Lancamentos
+- Lançamentos
 - Filtros
 
 ## 5. Resumo
 
 - Dashboard mensal
-- Exportacao CSV
+- Exportação CSV
 
 ## 6. Frontend
 

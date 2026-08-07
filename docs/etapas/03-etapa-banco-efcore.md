@@ -14,5 +14,5 @@ Configurar SQL Server e persistencia com Entity Framework Core.
 
 ## Banco
 
-Banco padrao planejado: `FinTrackDb`.
+Banco padrão planejado: `FinTrackDb`.
 

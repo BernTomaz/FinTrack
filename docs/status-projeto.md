@@ -4,12 +4,12 @@
 
 Estruturacao inicial.
 
-## Concluido
+## Concluído
 
 - Documento base `FinTrack.md`
 - Estrutura de pastas
 - README inicial
-- Documentacao inicial de arquitetura, fluxos, etapas, endpoints, testes e roadmap
+- Documentação inicial de arquitetura, fluxos, etapas, endpoints, testes e roadmap
 
 ## Em Aberto
 

@@ -16,7 +16,7 @@ Manter o FinTrack simples e focado no MVP.
 
 ## Fora do Escopo Inicial
 
-- Integracao bancaria
+- Integração bancária
 - IA
 - OCR
 - Mobile

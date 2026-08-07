@@ -5,18 +5,18 @@
 - xUnit
 - FluentAssertions
 
-## Testes Minimos do MVP
+## Testes Mínimos do MVP
 
-- Criar conta com dados validos
-- Impedir transacao com valor menor ou igual a zero
-- Impedir usuario de usar conta de outro usuario
-- Impedir usuario de usar categoria de outro usuario
-- Calcular total de receitas do mes
-- Calcular total de despesas do mes
+- Criar conta com dados válidos
+- Impedir transação com valor menor ou igual a zero
+- Impedir usuário de usar conta de outro usuário
+- Impedir usuário de usar categoria de outro usuário
+- Calcular total de receitas do mês
+- Calcular total de despesas do mês
 - Calcular saldo mensal
-- Exportar CSV com lancamentos filtrados
+- Exportar CSV com lançamentos filtrados
 
-## Estrategia
+## Estratégia
 
-Comecar por testes de regra de negocio e services principais. Testes de controller entram quando a autenticacao e os endpoints estiverem estaveis.
+Começar por testes de regra de negócio e services principais. Testes de controller entram quando a autenticação e os endpoints estiverem estáveis.
 

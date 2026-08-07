@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Criar a base tecnica do projeto sem implementar regra de negocio ainda.
+Criar a base técnica do projeto sem implementar regra de negócio ainda.
 
 ## Tarefas
 
@@ -27,6 +27,6 @@ tests/
   FinTrack.Tests/
 ```
 
-## Decisao
+## Decisão
 
 Usar `.slnx` como arquivo de solution do .NET.

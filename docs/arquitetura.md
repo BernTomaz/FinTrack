@@ -1,52 +1,52 @@
 # Arquitetura
 
-O FinTrack usa uma divisao simples em camadas, seguindo a base do GradeFlow.
+O FinTrack usa uma divisão simples em camadas, seguindo a base do GradeFlow.
 
 ## Camadas
 
 ### FinTrack.Api
 
-Entrada HTTP da aplicacao.
+Entrada HTTP da aplicação.
 
 Responsabilidades:
 
 - Controllers
-- Autenticacao JWT
+- Autenticação JWT
 - Swagger
-- Configuracao da API
+- Configuração da API
 - Health check
 
 ### FinTrack.Application
 
-Casos de uso da aplicacao.
+Casos de uso da aplicação.
 
 Responsabilidades:
 
 - Services
 - DTOs
-- Validacoes de fluxo
+- Validações de fluxo
 - Contratos usados pela API
 
 ### FinTrack.Domain
 
-Regras centrais do negocio.
+Regras centrais do negócio.
 
 Responsabilidades:
 
 - Entidades
 - Enums
-- Regras que nao dependem de banco ou HTTP
+- Regras que não dependem de banco ou HTTP
 
 ### FinTrack.Infrastructure
 
-Acesso a dados e integracoes locais.
+Acesso a dados e integrações locais.
 
 Responsabilidades:
 
 - DbContext
 - Entity Framework Core
 - Migrations
-- Repositorios, se forem necessarios
+- Repositórios, se forem necessários
 
 ### FinTrack.Web
 
@@ -56,12 +56,12 @@ Responsabilidades:
 
 - Telas
 - Rotas
-- Formularios
+- Formulários
 - Consumo da API
 - Estado local simples
 - Layout responsivo mobile-first
 
-## Regra de Dependencia
+## Regra de Dependência
 
 ```text
 Api -> Application -> Domain
@@ -70,8 +70,8 @@ Api -> Infrastructure
 Web -> Api
 ```
 
-## Decisao Inicial
+## Decisão Inicial
 
-Comecar com services diretos e DTOs simples. Repositorios so entram se o acesso a dados comecar a repetir logica real.
+Começar com services diretos e DTOs simples. Repositórios só entram se o acesso a dados começar a repetir lógica real.
 
-A solution .NET sera criada como `FinTrack.slnx`, nao `.sln`.
+A solution .NET será criada como `FinTrack.slnx`, não `.sln`.

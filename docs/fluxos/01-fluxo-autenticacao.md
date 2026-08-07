@@ -1,12 +1,12 @@
-# Fluxo de Autenticacao
+# Fluxo de Autenticação
 
 ## Cadastro
 
 ```text
 Nome + email + senha
-  -> validar email unico
+  -> validar email único
   -> salvar senha com hash
-  -> criar usuario
+  -> criar usuário
 ```
 
 ## Login

@@ -1,10 +1,10 @@
 # FinTrack
 
-Sistema web para controle financeiro pessoal, com foco em registrar receitas, despesas, contas e acompanhar a situacao mensal do dinheiro.
+Sistema web para controle financeiro pessoal, com foco em registrar receitas, despesas, contas e acompanhar a situação mensal do dinheiro.
 
 ## Objetivo
 
-Permitir que o usuario organize suas movimentacoes financeiras, visualize resumo mensal e entenda seus gastos por categoria.
+Permitir que o usuário organize suas movimentações financeiras, visualize resumo mensal e entenda seus gastos por categoria.
 
 ## Stack
 
@@ -29,36 +29,36 @@ Permitir que o usuario organize suas movimentacoes financeiras, visualize resumo
 
 - Docker
 - Docker Compose
-- README com instrucoes de execucao
+- README com instruções de execução
 
 ## MVP
 
-O MVP deve conter apenas o necessario para o sistema funcionar bem.
+O MVP deve conter apenas o necessário para o sistema funcionar bem.
 
 ### Funcionalidades
 
-- Cadastro de usuario
+- Cadastro de usuário
 - Login
 - Cadastro de contas financeiras
 - Cadastro de categorias
-- Cadastro de lancamentos financeiros
-- Listagem e filtros de lancamentos
+- Cadastro de lançamentos financeiros
+- Listagem e filtros de lançamentos
 - Dashboard mensal
-- Exportacao CSV de lancamentos
+- Exportação CSV de lançamentos
 
 ## Fora do MVP
 
-Nao implementar agora:
+Não implementar agora:
 
-- Integracao bancaria
+- Integração bancária
 - Pagamento online
 - IA
 - OCR
 - Upload de comprovantes
-- Notificacoes por email
+- Notificações por email
 - App mobile
 - Multi-moeda
-- Compartilhamento de contas entre usuarios
+- Compartilhamento de contas entre usuários
 - Assinatura paga
 
 Esses recursos podem ser pensados depois que o MVP estiver pronto.
@@ -67,7 +67,7 @@ Esses recursos podem ser pensados depois que o MVP estiver pronto.
 
 ### User
 
-Representa o usuario dono dos dados financeiros.
+Representa o usuário dono dos dados financeiros.
 
 Campos:
 
@@ -79,20 +79,20 @@ Campos:
 
 Regras:
 
-- Email deve ser unico
+- Email deve ser único
 - Senha deve ser armazenada como hash
-- Usuario so pode acessar os proprios dados
+- Usuário só pode acessar os próprios dados
 
 ### Account
 
-Representa uma conta financeira do usuario.
+Representa uma conta financeira do usuário.
 
 Exemplos:
 
 - Carteira
 - Conta corrente
-- Conta poupanca
-- Cartao de credito
+- Conta poupança
+- Cartão de crédito
 
 Campos:
 
@@ -112,8 +112,8 @@ Tipos sugeridos:
 
 Regras:
 
-- Conta pertence a um usuario
-- Nome da conta e obrigatorio
+- Conta pertence a um usuário
+- Nome da conta é obrigatório
 - Saldo inicial pode ser zero
 
 ### Category
@@ -122,12 +122,12 @@ Representa uma categoria de receita ou despesa.
 
 Exemplos:
 
-- Salario
+- Salário
 - Mercado
 - Aluguel
 - Transporte
 - Lazer
-- Saude
+- Saúde
 
 Campos:
 
@@ -144,13 +144,13 @@ Tipos:
 
 Regras:
 
-- Categoria pertence a um usuario
+- Categoria pertence a um usuário
 - Categoria deve ser de receita ou despesa
-- Nome e obrigatorio
+- Nome é obrigatório
 
 ### Transaction
 
-Representa uma movimentacao financeira.
+Representa uma movimentação financeira.
 
 Campos:
 
@@ -172,13 +172,13 @@ Tipos:
 Regras:
 
 - Valor deve ser maior que zero
-- Data e obrigatoria
-- Lancamento pertence a uma conta
-- Lancamento pertence a uma categoria
-- Tipo do lancamento deve ser compativel com o tipo da categoria
-- Usuario so pode usar contas e categorias dele
+- Data é obrigatória
+- Lançamento pertence a uma conta
+- Lançamento pertence a uma categoria
+- Tipo do lançamento deve ser compatível com o tipo da categoria
+- Usuário só pode usar contas e categorias dele
 
-## Regras de Negocio
+## Regras de Negócio
 
 ### Saldo
 
@@ -192,18 +192,18 @@ saldo inicial + receitas - despesas
 
 O dashboard deve mostrar:
 
-- Total de receitas do mes
-- Total de despesas do mes
-- Saldo do mes
+- Total de receitas do mês
+- Total de despesas do mês
+- Saldo do mês
 - Saldo geral atual
 - Gastos por categoria
-- Ultimos lancamentos
+- Últimos lançamentos
 
-### Filtros de lancamentos
+### Filtros de lançamentos
 
-Filtros necessarios:
+Filtros necessários:
 
-- Mes
+- Mês
 - Ano
 - Tipo
 - Categoria
@@ -285,40 +285,40 @@ FinTrack/
 
 ### FinTrack.Api
 
-Responsavel por:
+Responsável por:
 
 - Controllers
-- Autenticacao
-- Configuracao da API
+- Autenticação
+- Configuração da API
 - Swagger
 
 Controllers devem ser finos.
 
 ### FinTrack.Application
 
-Responsavel por:
+Responsável por:
 
 - Services
 - DTOs
-- Validacoes de caso de uso
-- Regras de aplicacao
+- Validações de caso de uso
+- Regras de aplicação
 
 ### FinTrack.Domain
 
-Responsavel por:
+Responsável por:
 
 - Entidades
 - Enums
-- Regras centrais do dominio
+- Regras centrais do domínio
 
 ### FinTrack.Infrastructure
 
-Responsavel por:
+Responsável por:
 
 - DbContext
 - Migrations
-- Repositorios, se forem necessarios
-- Configuracao do Entity Framework
+- Repositórios, se forem necessários
+- Configuração do Entity Framework
 
 ## DTOs Iniciais
 
@@ -379,9 +379,9 @@ Responsavel por:
 ### Dashboard
 
 - Cards de resumo
-- Grafico de gastos por categoria
-- Lista dos ultimos lancamentos
-- Filtro por mes e ano
+- Gráfico de gastos por categoria
+- Lista dos últimos lançamentos
+- Filtro por mês e ano
 
 ### Contas
 
@@ -397,28 +397,28 @@ Responsavel por:
 - Editar categoria
 - Excluir categoria
 
-### Lancamentos
+### Lançamentos
 
-- Listagem de lancamentos
-- Criar lancamento
-- Editar lancamento
-- Excluir lancamento
+- Listagem de lançamentos
+- Criar lançamento
+- Editar lançamento
+- Excluir lançamento
 - Filtros
 
 ## Testes
 
-Testes minimos:
+Testes mínimos:
 
-- Criar conta com dados validos
-- Impedir transacao com valor menor ou igual a zero
-- Impedir usuario de usar conta de outro usuario
-- Impedir usuario de usar categoria de outro usuario
-- Calcular total de receitas do mes
-- Calcular total de despesas do mes
+- Criar conta com dados válidos
+- Impedir transação com valor menor ou igual a zero
+- Impedir usuário de usar conta de outro usuário
+- Impedir usuário de usar categoria de outro usuário
+- Calcular total de receitas do mês
+- Calcular total de despesas do mês
 - Calcular saldo mensal
-- Exportar CSV com lancamentos filtrados
+- Exportar CSV com lançamentos filtrados
 
-## Etapas de Implementacao
+## Etapas de Implementação
 
 ### 1. Estrutura
 
@@ -427,11 +427,11 @@ Testes minimos:
 - Referenciar projetos
 - Configurar Swagger
 
-### 2. Dominio
+### 2. Domínio
 
 - Criar entidades
 - Criar enums
-- Criar regras basicas
+- Criar regras básicas
 
 ### 3. Banco
 
@@ -445,33 +445,33 @@ Testes minimos:
 - Cadastro
 - Login
 - JWT
-- Protecao de endpoints
+- Proteção de endpoints
 
 ### 5. Contas
 
 - CRUD de contas
-- Regras de usuario dono
+- Regras de usuário dono
 
 ### 6. Categorias
 
 - CRUD de categorias
 - Regras de tipo
 
-### 7. Lancamentos
+### 7. Lançamentos
 
-- CRUD de lancamentos
+- CRUD de lançamentos
 - Filtros
-- Validacoes
+- Validações
 
 ### 8. Dashboard
 
 - Resumo mensal
 - Gastos por categoria
-- Ultimos lancamentos
+- Últimos lançamentos
 
-### 9. Exportacao
+### 9. Exportação
 
-- CSV de lancamentos filtrados
+- CSV de lançamentos filtrados
 
 ### 10. Frontend
 
@@ -479,14 +479,14 @@ Testes minimos:
 - Dashboard
 - Contas
 - Categorias
-- Lancamentos
+- Lançamentos
 
 ### 11. Testes
 
-- Testes de regras de negocio
+- Testes de regras de negócio
 - Testes de services principais
 
-### 12. Finalizacao
+### 12. Finalização
 
 - README
 - Prints
@@ -496,7 +496,7 @@ Testes minimos:
 ## README Deve Conter
 
 - Nome do projeto
-- Descricao curta
+- Descrição curta
 - Tecnologias usadas
 - Funcionalidades do MVP
 - Como rodar backend
@@ -504,18 +504,18 @@ Testes minimos:
 - Como rodar banco com Docker
 - Como rodar testes
 - Prints ou GIFs
-- Proximos passos
+- Próximos passos
 
-## Criterio de Pronto
+## Critério de Pronto
 
-O FinTrack MVP esta pronto quando:
+O FinTrack MVP está pronto quando:
 
-- Usuario consegue cadastrar e logar
-- Usuario consegue criar contas
-- Usuario consegue criar categorias
-- Usuario consegue criar receitas e despesas
+- Usuário consegue cadastrar e logar
+- Usuário consegue criar contas
+- Usuário consegue criar categorias
+- Usuário consegue criar receitas e despesas
 - Dashboard mensal mostra os valores corretos
-- Lancamentos podem ser filtrados
+- Lançamentos podem ser filtrados
 - CSV pode ser exportado
 - Testes principais passam
 - README explica como rodar o projeto

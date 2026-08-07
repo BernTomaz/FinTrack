@@ -5,19 +5,19 @@ Cadastro/Login
   -> Dashboard
   -> Contas
   -> Categorias
-  -> Lancamentos
+  -> Lançamentos
   -> Filtros
-  -> Exportacao CSV
+  -> Exportação CSV
 ```
 
 ## Jornada Principal
 
-1. Usuario cria cadastro.
-2. Usuario faz login.
-3. Usuario cadastra uma ou mais contas.
-4. Usuario cadastra categorias de receita e despesa.
-5. Usuario registra receitas e despesas.
+1. Usuário cria cadastro.
+2. Usuário faz login.
+3. Usuário cadastra uma ou mais contas.
+4. Usuário cadastra categorias de receita e despesa.
+5. Usuário registra receitas e despesas.
 6. Dashboard mostra resumo mensal.
-7. Usuario filtra lancamentos.
-8. Usuario exporta CSV quando precisar.
+7. Usuário filtra lançamentos.
+8. Usuário exporta CSV quando precisar.
 

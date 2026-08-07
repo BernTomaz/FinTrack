@@ -1,18 +1,18 @@
-# Fluxo de Dashboard e Exportacao
+# Fluxo de Dashboard e Exportação
 
 ## Dashboard
 
 ```text
-Usuario escolhe mes/ano
-  -> API busca lancamentos do periodo
+Usuário escolhe mês/ano
+  -> API busca lançamentos do período
   -> API calcula totais
   -> frontend exibe resumo
 ```
 
-## Exportacao
+## Exportação
 
 ```text
-Usuario aplica filtros
+Usuário aplica filtros
   -> solicita CSV
   -> API gera arquivo
   -> navegador baixa o resultado
