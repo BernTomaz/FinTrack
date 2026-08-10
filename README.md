@@ -26,7 +26,7 @@ Backend:
 
 Frontend:
 
-- Angular
+- Angular 20
 - TypeScript
 - Reactive Forms
 - HttpClient
@@ -83,4 +83,41 @@ A solution .NET deve usar o formato `.slnx`.
 
 ## Status
 
-Projeto em estruturação inicial. Ainda não há código de aplicação.
+Projeto em estruturação inicial. A base .NET já possui solution `.slnx`, projetos, referências e endpoint `/health`.
+
+## Execução Local
+
+Restaurar e compilar o backend:
+
+```powershell
+dotnet restore FinTrack.slnx -m:1
+dotnet build FinTrack.slnx --no-restore -m:1
+```
+
+Executar a API:
+
+```powershell
+dotnet run --project src\FinTrack.Api
+```
+
+Endereços locais:
+
+- API: `http://localhost:5080`
+- Health check: `http://localhost:5080/health`
+- OpenAPI: `http://localhost:5080/openapi/v1.json`
+- Swagger UI: `http://localhost:5080/swagger`
+
+Subir o SQL Server:
+
+```powershell
+Copy-Item .env.example .env
+docker compose up -d
+```
+
+Instalar e executar o frontend:
+
+```powershell
+cd src\FinTrack.Web
+npm install
+npm start
+```

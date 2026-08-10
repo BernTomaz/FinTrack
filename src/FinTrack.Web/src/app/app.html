@@ -1,0 +1,39 @@
+<main class="shell">
+  <section class="hero" aria-labelledby="page-title">
+    <div>
+      <p class="eyebrow">Controle financeiro pessoal</p>
+      <h1 id="page-title">FinTrack</h1>
+      <p class="intro">
+        Base inicial do MVP para acompanhar receitas, despesas, contas e categorias.
+      </p>
+    </div>
+
+    <a class="health-link" href="http://localhost:5080/health">API health</a>
+  </section>
+
+  <section class="summary" aria-label="Resumo mensal">
+    @for (card of summaryCards; track card.label) {
+      <article class="summary-card">
+        <span>{{ card.label }}</span>
+        <strong>{{ card.value }}</strong>
+      </article>
+    }
+  </section>
+
+  <section class="workspace" aria-labelledby="workspace-title">
+    <div>
+      <p class="eyebrow">Próximo fluxo</p>
+      <h2 id="workspace-title">Estrutura pronta para o MVP</h2>
+      <p>
+        O frontend começa simples e responsivo. As telas reais entram conforme os endpoints forem
+        implementados.
+      </p>
+    </div>
+
+    <div class="actions" aria-label="Áreas planejadas">
+      @for (step of nextSteps; track step) {
+        <button type="button">{{ step }}</button>
+      }
+    </div>
+  </section>
+</main>

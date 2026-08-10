@@ -10,11 +10,15 @@ Estruturacao inicial.
 - Estrutura de pastas
 - README inicial
 - Documentação inicial de arquitetura, fluxos, etapas, endpoints, testes e roadmap
+- Solution `FinTrack.slnx`
+- Projetos .NET iniciais
+- Referências entre projetos
+- Endpoint `/health`
+- Swagger UI em desenvolvimento
+- Docker Compose inicial para SQL Server
+- Projeto Angular 20 inicial
+- Tela inicial responsiva do FinTrack
 
 ## Em Aberto
 
-- Criar solution .NET no formato `.slnx`
-- Criar projetos backend
-- Criar projeto Angular
-- Configurar Docker Compose
 - Implementar MVP
