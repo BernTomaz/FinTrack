@@ -18,7 +18,11 @@ Estruturacao inicial.
 - Docker Compose inicial para SQL Server
 - Projeto Angular 20 inicial
 - Tela inicial responsiva do FinTrack
+- Entidades centrais do domínio
+- Enums do domínio
+- Testes iniciais de regras do domínio
 
 ## Em Aberto
 
+- Configurar banco com EF Core
 - Implementar MVP

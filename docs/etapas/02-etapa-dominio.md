@@ -4,6 +4,10 @@
 
 Modelar as entidades centrais do MVP.
 
+## Status
+
+Concluída.
+
 ## Entidades
 
 - User
