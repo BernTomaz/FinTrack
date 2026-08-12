@@ -21,8 +21,12 @@ Estruturacao inicial.
 - Entidades centrais do domínio
 - Enums do domínio
 - Testes iniciais de regras do domínio
+- `FinTrackDbContext`
+- Mapeamento EF Core das entidades
+- Migration inicial
+- Script SQL idempotente para migrations
+- Suporte documentado para SQL Server via Docker, SQL Server local e LocalDB
 
 ## Em Aberto
 
-- Configurar banco com EF Core
 - Implementar MVP

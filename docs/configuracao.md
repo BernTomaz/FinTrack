@@ -7,8 +7,8 @@ Este arquivo será atualizado quando o código for criado.
 - .NET 10 SDK
 - Node.js 20.19
 - Angular CLI
-- Docker Desktop
-- SQL Server via Docker ou instalacao local
+- Docker Desktop, se for usar banco em container
+- SQL Server local ou LocalDB, se não for usar Docker
 
 ## Backend
 
@@ -43,14 +43,37 @@ npm start
 
 ## Banco
 
-O banco principal será SQL Server.
+O banco principal será SQL Server. O projeto pode usar SQL Server no Docker, SQL Server local ou LocalDB.
 
-Uso com Docker Compose:
+### Docker
 
 ```powershell
 Copy-Item .env.example .env
 docker compose up -d
+dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build
 ```
+
+Connection string padrão:
+
+```text
+Server=localhost,1433;Database=FinTrackDb;User Id=sa;Password=Your_strong_password123;Encrypt=False;TrustServerCertificate=True
+```
+
+### SQL Server local
+
+```powershell
+dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build --connection "Server=localhost;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
+```
+
+Se o servidor local tiver outro nome, troque `localhost` pelo nome exibido no SSMS.
+
+### LocalDB
+
+```powershell
+dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build --connection "Server=(localdb)\MSSQLLocalDB;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
+```
+
+Para rodar a API com outro banco sem editar `appsettings.json`, defina `ConnectionStrings__DefaultConnection` como variável de ambiente ou use user-secrets.
 
 ## Segredos Locais
 

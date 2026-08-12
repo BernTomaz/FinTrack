@@ -107,11 +107,24 @@ Endereços locais:
 - OpenAPI: `http://localhost:5080/openapi/v1.json`
 - Swagger UI: `http://localhost:5080/swagger`
 
-Subir o SQL Server:
+Usar SQL Server via Docker:
 
 ```powershell
 Copy-Item .env.example .env
 docker compose up -d
+dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build
+```
+
+Usar SQL Server local:
+
+```powershell
+dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build --connection "Server=localhost;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
+```
+
+Usar LocalDB:
+
+```powershell
+dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build --connection "Server=(localdb)\MSSQLLocalDB;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
 ```
 
 Instalar e executar o frontend:

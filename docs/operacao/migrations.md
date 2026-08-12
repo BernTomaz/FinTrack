@@ -12,3 +12,11 @@ Manter a evolucao do banco rastreavel.
 4. Aplicar no banco local.
 5. Atualizar scripts de Docker quando existirem.
 
+## Comandos
+
+```powershell
+dotnet ef migrations add NomeDaMigration --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --output-dir Migrations --no-build
+dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build
+.\scripts\database\generate-migration-script.ps1
+```
+
