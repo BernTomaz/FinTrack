@@ -26,6 +26,10 @@ Estruturacao inicial.
 - Migration inicial
 - Script SQL idempotente para migrations
 - Suporte documentado para SQL Server via Docker, SQL Server local e LocalDB
+- Cadastro e login de usuário
+- Hash de senha
+- Emissão de JWT
+- Endpoint protegido `/auth/me`
 
 ## Em Aberto
 

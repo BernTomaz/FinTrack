@@ -9,8 +9,8 @@ Permitir cadastro, login e proteção dos dados do usuário.
 - Cadastro de usuário
 - Login
 - Hash de senha
-- Emissao de JWT
-- Identificacao do usuário logado
+- Emissão de JWT
+- Identificação do usuário logado
 - Proteção dos endpoints privados
 
 ## Endpoints
@@ -18,5 +18,10 @@ Permitir cadastro, login e proteção dos dados do usuário.
 ```text
 POST /auth/register
 POST /auth/login
+GET /auth/me
 ```
+
+## Status
+
+Concluída no backend.
 
