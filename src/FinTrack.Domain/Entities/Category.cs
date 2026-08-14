@@ -23,4 +23,12 @@ public sealed class Category
     public string Name { get; private set; }
     public CategoryType Type { get; private set; }
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+
+    public void Update(string name, CategoryType type)
+    {
+        Name = string.IsNullOrWhiteSpace(name)
+            ? throw new ArgumentException("Name is required.", nameof(name))
+            : name.Trim();
+        Type = type;
+    }
 }

@@ -25,4 +25,13 @@ public sealed class Account
     public AccountType Type { get; private set; }
     public decimal InitialBalance { get; private set; }
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+
+    public void Update(string name, AccountType type, decimal initialBalance)
+    {
+        Name = string.IsNullOrWhiteSpace(name)
+            ? throw new ArgumentException("Name is required.", nameof(name))
+            : name.Trim();
+        Type = type;
+        InitialBalance = initialBalance;
+    }
 }

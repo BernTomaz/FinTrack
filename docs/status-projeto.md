@@ -30,6 +30,8 @@ Estruturacao inicial.
 - Hash de senha
 - Emissão de JWT
 - Endpoint protegido `/auth/me`
+- CRUD de contas protegido por usuário
+- CRUD de categorias protegido por usuário
 
 ## Em Aberto
 

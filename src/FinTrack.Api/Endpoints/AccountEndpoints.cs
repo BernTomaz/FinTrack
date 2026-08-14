@@ -1,0 +1,93 @@
+using System.Security.Claims;
+using FinTrack.Api.Auth;
+using FinTrack.Application.DTOs.Accounts;
+using FinTrack.Domain.Entities;
+using FinTrack.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+
+namespace FinTrack.Api.Endpoints;
+
+public static class AccountEndpoints
+{
+    public static IEndpointRouteBuilder MapAccountEndpoints(this IEndpointRouteBuilder app)
+    {
+        var group = app.MapGroup("/accounts").WithTags("Accounts").RequireAuthorization();
+
+        group.MapGet("/", async (FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>
+        {
+            var userId = user.GetUserId();
+            var accounts = await db.Accounts
+                .Where(account => account.UserId == userId)
+                .OrderBy(account => account.Name)
+                .Select(account => new AccountResponse(account.Id, account.Name, account.Type, account.InitialBalance, account.CreatedAt))
+                .ToListAsync(cancellationToken);
+
+            return Results.Ok(accounts);
+        });
+
+        group.MapGet("/{id:guid}", async (Guid id, FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>
+        {
+            var userId = user.GetUserId();
+            var account = await db.Accounts
+                .Where(account => account.UserId == userId && account.Id == id)
+                .Select(account => new AccountResponse(account.Id, account.Name, account.Type, account.InitialBalance, account.CreatedAt))
+                .SingleOrDefaultAsync(cancellationToken);
+
+            return account is null ? Results.NotFound() : Results.Ok(account);
+        });
+
+        group.MapPost("/", async (AccountRequest request, FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.Name))
+            {
+                return Results.BadRequest("Name is required.");
+            }
+
+            var account = new Account(user.GetUserId(), request.Name, request.Type, request.InitialBalance);
+            db.Accounts.Add(account);
+            await db.SaveChangesAsync(cancellationToken);
+
+            return Results.Created($"/accounts/{account.Id}", ToResponse(account));
+        });
+
+        group.MapPut("/{id:guid}", async (Guid id, AccountRequest request, FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.Name))
+            {
+                return Results.BadRequest("Name is required.");
+            }
+
+            var userId = user.GetUserId();
+            var account = await db.Accounts.SingleOrDefaultAsync(account => account.UserId == userId && account.Id == id, cancellationToken);
+            if (account is null)
+            {
+                return Results.NotFound();
+            }
+
+            account.Update(request.Name, request.Type, request.InitialBalance);
+            await db.SaveChangesAsync(cancellationToken);
+
+            return Results.Ok(ToResponse(account));
+        });
+
+        group.MapDelete("/{id:guid}", async (Guid id, FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>
+        {
+            var userId = user.GetUserId();
+            var account = await db.Accounts.SingleOrDefaultAsync(account => account.UserId == userId && account.Id == id, cancellationToken);
+            if (account is null)
+            {
+                return Results.NotFound();
+            }
+
+            db.Accounts.Remove(account);
+            await db.SaveChangesAsync(cancellationToken);
+
+            return Results.NoContent();
+        });
+
+        return app;
+    }
+
+    private static AccountResponse ToResponse(Account account) =>
+        new(account.Id, account.Name, account.Type, account.InitialBalance, account.CreatedAt);
+}

@@ -1,5 +1,7 @@
 using System.Text;
+using System.Diagnostics.CodeAnalysis;
 using FinTrack.Api.Auth;
+using FinTrack.Api.Endpoints;
 using FinTrack.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -11,7 +13,6 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 var jwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()
     ?? throw new InvalidOperationException("JWT options are not configured.");
 
-builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddInfrastructure(connectionString);
@@ -39,7 +40,6 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -50,5 +50,10 @@ app.UseAuthorization();
 app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }))
     .WithName("HealthCheck");
 app.MapAuthEndpoints();
+app.MapAccountEndpoints();
+app.MapCategoryEndpoints();
 
 app.Run();
+
+[ExcludeFromCodeCoverage]
+public partial class Program;
