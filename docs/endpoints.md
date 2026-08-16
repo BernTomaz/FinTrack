@@ -38,7 +38,7 @@ PUT /transactions/{id}
 DELETE /transactions/{id}
 ```
 
-Filtros planejados:
+Filtros:
 
 ```text
 GET /transactions?year=2026&month=8&type=Expense&categoryId=1&accountId=2

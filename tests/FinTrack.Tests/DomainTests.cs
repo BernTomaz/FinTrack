@@ -143,6 +143,49 @@ public class DomainTests
     }
 
     [Fact]
+    public void Transaction_update_changes_values()
+    {
+        var accountId = Guid.NewGuid();
+        var categoryId = Guid.NewGuid();
+        var transaction = new Transaction(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            TransactionType.Expense,
+            10,
+            DateOnly.FromDateTime(DateTime.Today));
+
+        transaction.Update(accountId, categoryId, TransactionType.Income, 20, new DateOnly(2026, 8, 16), " Salário ");
+
+        Assert.Equal(accountId, transaction.AccountId);
+        Assert.Equal(categoryId, transaction.CategoryId);
+        Assert.Equal(TransactionType.Income, transaction.Type);
+        Assert.Equal(20, transaction.Amount);
+        Assert.Equal(new DateOnly(2026, 8, 16), transaction.Date);
+        Assert.Equal("Salário", transaction.Description);
+
+        transaction.Update(accountId, categoryId, TransactionType.Income, 20, new DateOnly(2026, 8, 16), " ");
+
+        Assert.Null(transaction.Description);
+    }
+
+    [Fact]
+    public void Transaction_update_requires_valid_values()
+    {
+        var transaction = new Transaction(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            TransactionType.Expense,
+            10,
+            DateOnly.FromDateTime(DateTime.Today));
+
+        Assert.Throws<ArgumentException>(() => transaction.Update(Guid.Empty, Guid.NewGuid(), TransactionType.Expense, 10, DateOnly.FromDateTime(DateTime.Today)));
+        Assert.Throws<ArgumentException>(() => transaction.Update(Guid.NewGuid(), Guid.Empty, TransactionType.Expense, 10, DateOnly.FromDateTime(DateTime.Today)));
+        Assert.Throws<ArgumentOutOfRangeException>(() => transaction.Update(Guid.NewGuid(), Guid.NewGuid(), TransactionType.Expense, 0, DateOnly.FromDateTime(DateTime.Today)));
+    }
+
+    [Fact]
     public void Transaction_accepts_matching_account_and_category()
     {
         var userId = Guid.NewGuid();

@@ -32,6 +32,8 @@ Estruturacao inicial.
 - Endpoint protegido `/auth/me`
 - CRUD de contas protegido por usuário
 - CRUD de categorias protegido por usuário
+- CRUD de lançamentos protegido por usuário
+- Filtros de lançamentos por ano, mês, tipo, conta e categoria
 
 ## Em Aberto
 

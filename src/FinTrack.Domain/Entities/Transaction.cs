@@ -72,4 +72,35 @@ public sealed class Transaction
             throw new InvalidOperationException("Account belongs to another user.");
         }
     }
+
+    public void Update(
+        Guid accountId,
+        Guid categoryId,
+        TransactionType type,
+        decimal amount,
+        DateOnly date,
+        string? description = null)
+    {
+        if (accountId == Guid.Empty)
+        {
+            throw new ArgumentException("Account is required.", nameof(accountId));
+        }
+
+        if (categoryId == Guid.Empty)
+        {
+            throw new ArgumentException("Category is required.", nameof(categoryId));
+        }
+
+        if (amount <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be greater than zero.");
+        }
+
+        AccountId = accountId;
+        CategoryId = categoryId;
+        Type = type;
+        Amount = amount;
+        Date = date;
+        Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim();
+    }
 }
