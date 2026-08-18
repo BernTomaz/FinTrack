@@ -15,9 +15,20 @@ Mostrar:
 
 Permitir baixar lançamentos filtrados por período.
 
-Endpoint planejado:
+Endpoint:
 
 ```text
 GET /exports/transactions.csv?year=2026&month=8
 ```
+
+## Endpoints
+
+```text
+GET /dashboard/monthly?year=2026&month=8
+GET /exports/transactions.csv?year=2026&month=8
+```
+
+## Status
+
+Concluída no backend.
 

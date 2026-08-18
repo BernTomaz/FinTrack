@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using FinTrack.Application.DTOs.Accounts;
 using FinTrack.Application.DTOs.Auth;
 using FinTrack.Application.DTOs.Categories;
+using FinTrack.Application.DTOs.Dashboard;
 using FinTrack.Application.DTOs.Transactions;
 using FinTrack.Domain.Enums;
 using FinTrack.Infrastructure.Data;
@@ -172,6 +173,63 @@ public sealed class ApiFlowTests
     }
 
     [Fact]
+    public async Task Dashboard_and_export_flow_works()
+    {
+        await using var app = new FinTrackApiFactory();
+        using var client = app.CreateClient();
+        await RegisterAndAuthorize(client);
+
+        var account = await CreateAccount(client, "Conta Corrente");
+        var expenseCategory = await CreateCategory(client, "Mercado", CategoryType.Expense);
+        var billsCategory = await CreateCategory(client, "Contas", CategoryType.Expense);
+        var incomeCategory = await CreateCategory(client, "Salário", CategoryType.Income);
+
+        await CreateTransaction(client, account.Id, incomeCategory.Id, TransactionType.Income, 1000, new DateOnly(2026, 8, 1), "Salário");
+        await CreateTransaction(client, account.Id, expenseCategory.Id, TransactionType.Expense, 200, new DateOnly(2026, 8, 2), "Mercado, mês");
+        await CreateTransaction(client, account.Id, billsCategory.Id, TransactionType.Expense, 100, new DateOnly(2026, 8, 3), null);
+        await CreateTransaction(client, account.Id, expenseCategory.Id, TransactionType.Expense, 50, new DateOnly(2026, 7, 1), "Mercado anterior");
+
+        var dashboardResponse = await client.GetAsync("/dashboard/monthly?year=2026&month=8");
+        Assert.True(dashboardResponse.StatusCode == HttpStatusCode.OK, await dashboardResponse.Content.ReadAsStringAsync());
+
+        var dashboard = await dashboardResponse.Content.ReadFromJsonAsync<MonthlyDashboardResponse>();
+        Assert.NotNull(dashboard);
+        Assert.Equal(1000, dashboard.TotalIncome);
+        Assert.Equal(300, dashboard.TotalExpense);
+        Assert.Equal(700, dashboard.MonthBalance);
+        Assert.Equal(650, dashboard.CurrentBalance);
+        Assert.Equal(2, dashboard.ExpensesByCategory.Count);
+        Assert.Equal("Mercado", dashboard.ExpensesByCategory[0].CategoryName);
+        Assert.Equal(3, dashboard.LatestTransactions.Count);
+
+        var csvResponse = await client.GetAsync($"/exports/transactions.csv?year=2026&month=8&type=Expense&accountId={account.Id}&categoryId={expenseCategory.Id}");
+        Assert.Equal(HttpStatusCode.OK, csvResponse.StatusCode);
+        Assert.Equal("text/csv", csvResponse.Content.Headers.ContentType?.MediaType);
+
+        var csv = await csvResponse.Content.ReadAsStringAsync();
+        Assert.Contains("Date,Type,Amount,Description", csv);
+        Assert.Contains("2026-08-02,Expense,200.00,\"Mercado, mês\"", csv);
+
+        var allCsvResponse = await client.GetAsync("/exports/transactions.csv?year=2026&month=8");
+        var allCsv = await allCsvResponse.Content.ReadAsStringAsync();
+        Assert.Contains("2026-08-03,Expense,100.00,", allCsv);
+    }
+
+    [Fact]
+    public async Task Dashboard_and_export_validate_month()
+    {
+        await using var app = new FinTrackApiFactory();
+        using var client = app.CreateClient();
+        await RegisterAndAuthorize(client);
+
+        var dashboard = await client.GetAsync("/dashboard/monthly?year=2026&month=13");
+        Assert.Equal(HttpStatusCode.BadRequest, dashboard.StatusCode);
+
+        var export = await client.GetAsync("/exports/transactions.csv?year=2026&month=13");
+        Assert.Equal(HttpStatusCode.BadRequest, export.StatusCode);
+    }
+
+    [Fact]
     public async Task Auth_returns_expected_errors()
     {
         await using var app = new FinTrackApiFactory();
@@ -277,6 +335,24 @@ public sealed class ApiFlowTests
         Assert.NotNull(category);
 
         return category;
+    }
+
+    private static async Task<TransactionResponse> CreateTransaction(
+        HttpClient client,
+        Guid accountId,
+        Guid categoryId,
+        TransactionType type,
+        decimal amount,
+        DateOnly date,
+        string? description)
+    {
+        var response = await client.PostAsJsonAsync("/transactions", new TransactionRequest(accountId, categoryId, type, amount, date, description));
+        Assert.True(response.StatusCode == HttpStatusCode.Created, await response.Content.ReadAsStringAsync());
+
+        var transaction = await response.Content.ReadFromJsonAsync<TransactionResponse>();
+        Assert.NotNull(transaction);
+
+        return transaction;
     }
 
     private sealed class FinTrackApiFactory : WebApplicationFactory<Program>

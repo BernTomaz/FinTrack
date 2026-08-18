@@ -34,6 +34,8 @@ Estruturacao inicial.
 - CRUD de categorias protegido por usuário
 - CRUD de lançamentos protegido por usuário
 - Filtros de lançamentos por ano, mês, tipo, conta e categoria
+- Dashboard mensal com totais, saldo, gastos por categoria e últimos lançamentos
+- Exportação CSV de lançamentos
 
 ## Em Aberto
 
