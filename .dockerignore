@@ -1,0 +1,9 @@
+**/bin
+**/obj
+**/node_modules
+**/.angular
+**/dist
+.git
+.vs
+TestResults
+tests/**/TestResults

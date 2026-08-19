@@ -41,6 +41,33 @@ npm install
 npm start
 ```
 
+### Frontend via Docker
+
+```powershell
+docker compose up web
+```
+
+Endereço:
+
+- Web: `http://localhost:4200`
+
+## Aplicação via Docker
+
+Para subir frontend, API e SQL Server:
+
+```powershell
+Copy-Item .env.example .env
+docker compose up --build
+```
+
+Na primeira execução, a API aplica as migrations automaticamente quando o SQL Server ficar disponível.
+
+Endereços:
+
+- Web: `http://localhost:4200`
+- API: `http://localhost:5080`
+- Swagger UI: `http://localhost:5080/swagger`
+
 ## Banco
 
 O banco principal será SQL Server. O projeto pode usar SQL Server no Docker, SQL Server local ou LocalDB.
@@ -49,9 +76,10 @@ O banco principal será SQL Server. O projeto pode usar SQL Server no Docker, SQ
 
 ```powershell
 Copy-Item .env.example .env
-docker compose up -d
-dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build
+docker compose up -d sqlserver
 ```
+
+Se a API também estiver rodando pelo Docker, ela aplica as migrations automaticamente.
 
 Connection string padrão:
 

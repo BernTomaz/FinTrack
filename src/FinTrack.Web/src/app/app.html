@@ -1,39 +1,372 @@
-<main class="shell">
-  <section class="hero" aria-labelledby="page-title">
-    <div>
-      <p class="eyebrow">Controle financeiro pessoal</p>
-      <h1 id="page-title">FinTrack</h1>
-      <p class="intro">
-        Base inicial do MVP para acompanhar receitas, despesas, contas e categorias.
-      </p>
-    </div>
+@if (!isLoggedIn()) {
+  <main class="login-page">
+    <section class="login-brand" aria-labelledby="login-title">
+      <div class="brand-row">
+        <span class="brand-mark">▥</span>
+        <div class="brand-title">
+          <strong>FinTrack</strong>
+          <small>Controle Financeiro Pessoal</small>
+        </div>
+      </div>
+      <div class="login-copy">
+        <h1 id="login-title">Controle suas <span>finanças</span> com clareza</h1>
+        <p><span class="shield">▢</span> FinTrack organiza o básico do seu mês</p>
+        <small>Receitas, despesas, contas e categorias em uma visão simples.</small>
+      </div>
+      <div class="ghost-chart" aria-hidden="true">
+        <i></i><i></i><i></i><i></i>
+      </div>
+    </section>
 
-    <a class="health-link" href="http://localhost:5080/health">API health</a>
-  </section>
+    <section class="auth-card" aria-label="Acesso">
+      <form [formGroup]="loginForm" (ngSubmit)="login()">
+        <h2>Entrar</h2>
+        <p>Entre com seu e-mail e senha.</p>
+        <label>
+          E-mail
+          <input type="email" formControlName="email" autocomplete="email" placeholder="seu@email.com" />
+        </label>
+        <label>
+          Senha
+          <input type="password" formControlName="password" autocomplete="current-password" placeholder="Sua senha" />
+        </label>
+        <div class="form-line">
+          <label class="check">
+            <input type="checkbox" />
+            Lembrar-me
+          </label>
+          <button type="button" class="link">Esqueci minha senha</button>
+        </div>
+        <button type="submit" class="primary">Entrar</button>
+      </form>
 
-  <section class="summary" aria-label="Resumo mensal">
-    @for (card of summaryCards; track card.label) {
-      <article class="summary-card">
-        <span>{{ card.label }}</span>
-        <strong>{{ card.value }}</strong>
-      </article>
-    }
-  </section>
+      <form class="register-strip" [formGroup]="registerForm" (ngSubmit)="register()">
+        <span>Não tem conta?</span>
+        <input type="text" formControlName="name" autocomplete="name" placeholder="Nome" />
+        <input type="email" formControlName="email" autocomplete="email" placeholder="E-mail" />
+        <input type="password" formControlName="password" autocomplete="new-password" placeholder="Senha" />
+        <button type="submit" class="link strong">Criar conta grátis</button>
+      </form>
+    </section>
+  </main>
+} @else {
+  <main class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-row">
+        <span class="brand-mark">▥</span>
+        <strong>Controle Financeiro Pessoal</strong>
+      </div>
 
-  <section class="workspace" aria-labelledby="workspace-title">
-    <div>
-      <p class="eyebrow">Próximo fluxo</p>
-      <h2 id="workspace-title">Estrutura pronta para o MVP</h2>
-      <p>
-        O frontend começa simples e responsivo. As telas reais entram conforme os endpoints forem
-        implementados.
-      </p>
-    </div>
+      <nav aria-label="Menu principal">
+        <a class="active" href="#dashboard"><span>⌂</span> Dashboard</a>
+        <a href="#receitas"><span>↗</span> Receitas</a>
+        <a href="#despesas"><span>↘</span> Despesas</a>
+        <a href="#contas"><span>▣</span> Contas</a>
+        <a href="#categorias"><span>◇</span> Categorias</a>
+        <a href="#relatorios"><span>▥</span> Relatórios</a>
+        <button type="button" (click)="exportCsv()"><span>⇩</span> Exportação CSV</button>
+      </nav>
 
-    <div class="actions" aria-label="Áreas planejadas">
-      @for (step of nextSteps; track step) {
-        <button type="button">{{ step }}</button>
+      <div class="safe-note">
+        <span>▢</span>
+        <div>
+        <strong>Seus dados estão seguros</strong>
+          <small>Informações organizadas no seu ambiente</small>
+        </div>
+      </div>
+    </aside>
+
+    <section class="content">
+      <header class="topbar">
+        <h1>{{ pageTitle() }}</h1>
+        <div class="top-actions">
+          <button type="button" class="ghost" (click)="loadAll()">Atualizar</button>
+          <button type="button" class="primary">+ Nova receita</button>
+          <button type="button" class="blue">+ Nova despesa</button>
+          <div class="user-menu">
+            <button type="button" class="avatar" (click)="toggleUserMenu()" title="Menu do usuário">{{ initial() }}</button>
+            @if (userMenuOpen()) {
+              <div class="menu-popover">
+                <strong>{{ userName() }}</strong>
+                <button type="button" (click)="openView('profile')">Meu perfil</button>
+                <button type="button" (click)="openView('password')">Alterar senha</button>
+                <button type="button" (click)="openView('preferences')">Preferências</button>
+                <button type="button" class="danger" (click)="logout()">Sair</button>
+              </div>
+            }
+          </div>
+        </div>
+      </header>
+
+      @if (activeView() === 'profile') {
+        <section class="settings-page">
+          <article class="panel settings-card">
+            <div class="panel-head">
+              <h2>Meu perfil</h2>
+              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
+            </div>
+            <div class="profile-box">
+              <span class="avatar large">{{ initial() }}</span>
+              <div>
+                <strong>{{ userName() }}</strong>
+                <small>Usuário do FinTrack</small>
+              </div>
+            </div>
+            <label>Nome<input type="text" [value]="userName()" readonly /></label>
+            <label>E-mail<input type="email" [value]="userEmail()" readonly /></label>
+          </article>
+        </section>
       }
-    </div>
-  </section>
-</main>
+
+      @if (activeView() === 'password') {
+        <section class="settings-page">
+          <article class="panel settings-card">
+            <div class="panel-head">
+              <h2>Alterar senha</h2>
+              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
+            </div>
+            <label>Senha atual<input type="password" placeholder="Informe sua senha atual" /></label>
+            <label>Nova senha<input type="password" placeholder="Informe a nova senha" /></label>
+            <label>Confirmar nova senha<input type="password" placeholder="Repita a nova senha" /></label>
+            <button type="button" class="primary">Salvar alteração</button>
+          </article>
+        </section>
+      }
+
+      @if (activeView() === 'preferences') {
+        <section class="settings-page">
+          <article class="panel settings-card">
+            <div class="panel-head">
+              <h2>Preferências</h2>
+              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
+            </div>
+            <label>Moeda padrão<input type="text" value="Real brasileiro (BRL)" readonly /></label>
+            <label>Tema
+              <select>
+                <option>Claro</option>
+                <option>Escuro</option>
+              </select>
+            </label>
+            <label>Mês atual<input type="month" [value]="currentMonthValue()" /></label>
+            <label class="check">
+              <input type="checkbox" checked />
+              Exibir resumo mensal no dashboard
+            </label>
+          </article>
+        </section>
+      }
+
+      @if (activeView() === 'dashboard') {
+      <section class="toolbar">
+        <button type="button" class="select-like">▣ {{ currentMonthLabel() }}</button>
+      </section>
+
+      <section id="dashboard" class="summary" aria-label="Resumo mensal">
+        <article class="metric income">
+          <span>↗</span>
+          <div>
+            <p>Receitas</p>
+            <strong>{{ money(dashboard()?.totalIncome ?? 0) }}</strong>
+            <small>↑ 8,5% em relação a Jul/2026</small>
+          </div>
+        </article>
+        <article class="metric expense">
+          <span>↘</span>
+          <div>
+            <p>Despesas</p>
+            <strong>{{ money(dashboard()?.totalExpense ?? 0) }}</strong>
+            <small>↑ 5,2% em relação a Jul/2026</small>
+          </div>
+        </article>
+        <article class="metric balance">
+          <span>▣</span>
+          <div>
+            <p>Saldo</p>
+            <strong>{{ money(dashboard()?.monthBalance ?? 0) }}</strong>
+            <small>↑ 17,8% em relação a Jul/2026</small>
+          </div>
+        </article>
+        <article class="metric bills">
+          <span>▤</span>
+          <div>
+            <p>Saldo atual</p>
+            <strong>{{ money(dashboard()?.currentBalance ?? 0) }}</strong>
+            <small>Contas e lançamentos atualizados</small>
+          </div>
+        </article>
+      </section>
+
+      <section class="grid">
+        <article class="panel chart-panel">
+          <div class="panel-head">
+            <h2>Fluxo de caixa mensal</h2>
+            <button type="button" class="select-like">Últimos 8 meses</button>
+          </div>
+          @if (transactions().length > 0) {
+            <div class="bar-chart" aria-label="Gráfico demonstrativo de fluxo de caixa">
+              @for (month of chartMonths; track month.label) {
+                <div class="bar-group">
+                  <span class="income-bar" [style.height.%]="month.income"></span>
+                  <span class="expense-bar" [style.height.%]="month.expense"></span>
+                  <small>{{ month.label }}</small>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty-state">
+              <strong>Nenhum lançamento cadastrado</strong>
+              <span>Cadastre receitas e despesas para visualizar o fluxo de caixa.</span>
+            </div>
+          }
+        </article>
+
+        @if ((dashboard()?.expensesByCategory?.length ?? 0) > 0) {
+          <article id="categorias" class="panel">
+            <div class="panel-head">
+              <h2>Despesas por categoria</h2>
+              <button type="button" class="select-like">Este mês</button>
+            </div>
+            <div class="category-card">
+              <div class="donut"><span>Total<br />{{ money(dashboard()?.totalExpense ?? 0) }}</span></div>
+              <div class="list compact">
+                @for (item of dashboard()?.expensesByCategory ?? []; track item.categoryName) {
+                  <div class="line">
+                    <span>{{ item.categoryName }}</span>
+                    <strong>{{ money(item.total) }}</strong>
+                  </div>
+                }
+              </div>
+            </div>
+          </article>
+        } @else {
+          <article id="categorias" class="panel">
+            <div class="panel-head">
+              <h2>Despesas por categoria</h2>
+            </div>
+            <div class="empty-state">
+              <strong>Sem despesas por enquanto</strong>
+              <span>As categorias aparecem aqui depois dos primeiros lançamentos.</span>
+            </div>
+          </article>
+        }
+
+        <article id="relatorios" class="panel table-panel">
+          <div class="panel-head">
+            <h2>Transações recentes</h2>
+            <button type="button" class="link strong" (click)="loadAll()">Ver todas →</button>
+          </div>
+          <div class="table">
+            <div class="table-row table-head">
+              <span>Data</span>
+              <span>Descrição</span>
+              <span>Categoria</span>
+              <span>Tipo</span>
+              <span>Valor</span>
+              <span>Conta</span>
+            </div>
+            @for (transaction of transactions(); track transaction.id) {
+              <div class="table-row">
+                <span>{{ transaction.date }}</span>
+                <span>{{ transaction.description || 'Lançamento' }}</span>
+                <span>{{ categoryName(transaction.categoryId) }}</span>
+                <span [class.positive]="transaction.type === 'Income'" [class.negative]="transaction.type === 'Expense'">
+                  {{ transaction.type === 'Income' ? 'Receita' : 'Despesa' }}
+                </span>
+                <strong [class.positive]="transaction.type === 'Income'" [class.negative]="transaction.type === 'Expense'">
+                  {{ money(transaction.amount) }}
+                </strong>
+                <span>{{ accountName(transaction.accountId) }}</span>
+              </div>
+            }
+          </div>
+        </article>
+
+        <article id="contas" class="panel accounts-panel">
+          <div class="panel-head">
+            <h2>Saldos das contas</h2>
+            <button type="button" class="link strong">Ver todas →</button>
+          </div>
+          <div class="list">
+            @for (account of accounts(); track account.id) {
+              <div class="account-line">
+                <span class="coin">▣</span>
+                <div>
+                  <strong>{{ account.name }}</strong>
+                  <small>{{ account.type }}</small>
+                </div>
+                <button type="button" class="icon" title="Excluir conta" (click)="deleteAccount(account.id)">×</button>
+              </div>
+            }
+          </div>
+        </article>
+      </section>
+
+      <section class="forms-grid">
+        <form id="contas" class="panel" [formGroup]="accountForm" (ngSubmit)="createAccount()">
+          <h2>Nova conta</h2>
+          <label>Nome<input type="text" formControlName="name" /></label>
+          <label>Tipo
+            <select formControlName="type">
+              @for (type of accountTypes; track type) {
+                <option [value]="type">{{ type }}</option>
+              }
+            </select>
+          </label>
+          <label>Saldo inicial<input type="number" formControlName="initialBalance" /></label>
+          <button type="submit" class="primary">Salvar conta</button>
+        </form>
+
+        <form class="panel" [formGroup]="categoryForm" (ngSubmit)="createCategory()">
+          <h2>Nova categoria</h2>
+          <label>Nome<input type="text" formControlName="name" /></label>
+          <label>Tipo
+            <select formControlName="type">
+              @for (type of categoryTypes; track type) {
+                <option [value]="type">{{ type }}</option>
+              }
+            </select>
+          </label>
+          <button type="submit" class="primary">Salvar categoria</button>
+        </form>
+
+        <form id="receitas" class="panel transaction-form" [formGroup]="transactionForm" (ngSubmit)="createTransaction()">
+          <h2>Novo lançamento</h2>
+          <div class="form-grid">
+            <label>Conta
+              <select formControlName="accountId">
+                <option value="">Selecione</option>
+                @for (account of accounts(); track account.id) {
+                  <option [value]="account.id">{{ account.name }}</option>
+                }
+              </select>
+            </label>
+            <label>Categoria
+              <select formControlName="categoryId">
+                <option value="">Selecione</option>
+                @for (category of categories(); track category.id) {
+                  <option [value]="category.id">{{ category.name }}</option>
+                }
+              </select>
+            </label>
+            <label>Tipo
+              <select formControlName="type">
+                @for (type of transactionTypes; track type) {
+                  <option [value]="type">{{ type }}</option>
+                }
+              </select>
+            </label>
+            <label>Valor<input type="number" formControlName="amount" min="0.01" step="0.01" /></label>
+            <label>Data<input type="date" formControlName="date" /></label>
+            <label>Descrição<input type="text" formControlName="description" /></label>
+          </div>
+          <button type="submit" class="primary">Salvar lançamento</button>
+        </form>
+      </section>
+      }
+    </section>
+
+    @if (message()) {
+      <p class="message">{{ message() }}</p>
+    }
+  </main>
+}

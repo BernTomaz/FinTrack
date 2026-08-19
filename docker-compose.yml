@@ -1,4 +1,30 @@
 services:
+  api:
+    build:
+      context: .
+      dockerfile: src/FinTrack.Api/Dockerfile
+    container_name: fintrack-api
+    depends_on:
+      - sqlserver
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Server=sqlserver,1433;Database=${FINTRACK_DB_NAME};User Id=sa;Password=${MSSQL_SA_PASSWORD};Encrypt=False;TrustServerCertificate=True
+    ports:
+      - "5080:5080"
+
+  web:
+    image: node:20-alpine
+    container_name: fintrack-web
+    working_dir: /app
+    command: sh -c "npm install && npm start -- --host 0.0.0.0 --port 4200 --poll 2000"
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./src/FinTrack.Web:/app
+      - fintrack-web-node-modules:/app/node_modules
+    depends_on:
+      - api
+
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: fintrack-sqlserver
@@ -11,4 +37,5 @@ services:
       - fintrack-sqlserver-data:/var/opt/mssql
 
 volumes:
+  fintrack-web-node-modules:
   fintrack-sqlserver-data:

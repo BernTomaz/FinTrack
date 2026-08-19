@@ -36,6 +36,8 @@ Estruturacao inicial.
 - Filtros de lançamentos por ano, mês, tipo, conta e categoria
 - Dashboard mensal com totais, saldo, gastos por categoria e últimos lançamentos
 - Exportação CSV de lançamentos
+- Primeira versão funcional do frontend Angular
+- Telas de login, cadastro, dashboard, contas, categorias e lançamentos
 
 ## Em Aberto
 

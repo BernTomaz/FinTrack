@@ -3,7 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 using FinTrack.Api.Auth;
 using FinTrack.Api.Endpoints;
 using FinTrack.Infrastructure;
+using FinTrack.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +17,14 @@ var jwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+        policy
+            .WithOrigins("http://localhost:4200", "http://127.0.0.1:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
 builder.Services.AddInfrastructure(connectionString);
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<PasswordHasher>();
@@ -38,12 +48,15 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+await ApplyMigrations(app);
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -57,6 +70,32 @@ app.MapDashboardEndpoints();
 app.MapExportEndpoints();
 
 app.Run();
+
+static async Task ApplyMigrations(WebApplication app)
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<FinTrackDbContext>();
+
+    if (!string.Equals(db.Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer", StringComparison.Ordinal))
+    {
+        return;
+    }
+
+    for (var attempt = 1; attempt <= 20; attempt++)
+    {
+        try
+        {
+            await db.Database.MigrateAsync();
+            return;
+        }
+        catch when (attempt < 20)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(3));
+        }
+    }
+
+    await db.Database.MigrateAsync();
+}
 
 [ExcludeFromCodeCoverage]
 public partial class Program;
