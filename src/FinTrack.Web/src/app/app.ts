@@ -6,7 +6,19 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 type AccountType = 'Wallet' | 'Checking' | 'Savings' | 'CreditCard';
 type CategoryType = 'Income' | 'Expense';
 type TransactionType = 'Income' | 'Expense';
-type View = 'dashboard' | 'profile' | 'password' | 'preferences';
+type Theme = 'light' | 'dark';
+type View =
+  | 'dashboard'
+  | 'income'
+  | 'expense'
+  | 'accounts'
+  | 'categories'
+  | 'reports'
+  | 'export'
+  | 'profile'
+  | 'password'
+  | 'preferences'
+  | 'about';
 
 interface AuthResponse {
   name: string;
@@ -56,9 +68,9 @@ export class App {
   private readonly fb = inject(FormBuilder);
   private readonly apiUrl = 'http://localhost:5080';
 
-  protected readonly token = signal(localStorage.getItem('fintrack.token') ?? '');
-  protected readonly userName = signal(localStorage.getItem('fintrack.name') ?? '');
-  protected readonly userEmail = signal(localStorage.getItem('fintrack.email') ?? '');
+  protected readonly token = signal(sessionStorage.getItem('fintrack.token') ?? '');
+  protected readonly userName = signal(sessionStorage.getItem('fintrack.name') ?? '');
+  protected readonly userEmail = signal(sessionStorage.getItem('fintrack.email') ?? '');
   protected readonly message = signal('');
   protected readonly accounts = signal<Account[]>([]);
   protected readonly categories = signal<Category[]>([]);
@@ -66,6 +78,7 @@ export class App {
   protected readonly dashboard = signal<Dashboard | null>(null);
   protected readonly userMenuOpen = signal(false);
   protected readonly activeView = signal<View>('dashboard');
+  protected readonly theme = signal<Theme>((localStorage.getItem('fintrack.theme') as Theme | null) ?? 'light');
 
   protected readonly isLoggedIn = computed(() => this.token().length > 0);
   protected readonly accountTypes: AccountType[] = ['Wallet', 'Checking', 'Savings', 'CreditCard'];
@@ -147,6 +160,9 @@ export class App {
     localStorage.removeItem('fintrack.token');
     localStorage.removeItem('fintrack.name');
     localStorage.removeItem('fintrack.email');
+    sessionStorage.removeItem('fintrack.token');
+    sessionStorage.removeItem('fintrack.name');
+    sessionStorage.removeItem('fintrack.email');
     this.token.set('');
     this.userName.set('');
     this.userEmail.set('');
@@ -231,6 +247,25 @@ export class App {
     return this.categories().find((category) => category.id === id)?.name ?? 'Categoria';
   }
 
+  protected accountTypeLabel(type: AccountType): string {
+    const labels: Record<AccountType, string> = {
+      Wallet: 'Carteira',
+      Checking: 'Conta corrente',
+      Savings: 'Poupança',
+      CreditCard: 'Cartão de crédito',
+    };
+
+    return labels[type];
+  }
+
+  protected categoryTypeLabel(type: CategoryType): string {
+    return type === 'Income' ? 'Receita' : 'Despesa';
+  }
+
+  protected transactionTypeLabel(type: TransactionType): string {
+    return type === 'Income' ? 'Receita' : 'Despesa';
+  }
+
   protected money(value: number): string {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
   }
@@ -246,6 +281,10 @@ export class App {
   protected openView(view: View): void {
     this.activeView.set(view);
     this.userMenuOpen.set(false);
+
+    if (view === 'income' || view === 'expense') {
+      this.transactionForm.patchValue({ type: view === 'income' ? 'Income' : 'Expense' });
+    }
   }
 
   protected currentMonthValue(): string {
@@ -260,12 +299,25 @@ export class App {
   protected pageTitle(): string {
     const titles: Record<View, string> = {
       dashboard: 'Dashboard',
+      income: 'Receitas',
+      expense: 'Despesas',
+      accounts: 'Contas',
+      categories: 'Categorias',
+      reports: 'Relatórios',
+      export: 'Exportação CSV',
       profile: 'Meu perfil',
       password: 'Alterar senha',
       preferences: 'Preferências',
+      about: 'Sobre',
     };
 
     return titles[this.activeView()];
+  }
+
+  protected setTheme(theme: string): void {
+    const nextTheme: Theme = theme === 'dark' ? 'dark' : 'light';
+    localStorage.setItem('fintrack.theme', nextTheme);
+    this.theme.set(nextTheme);
   }
 
   protected loadAll(): void {
@@ -281,9 +333,9 @@ export class App {
   }
 
   private startSession(auth: AuthResponse): void {
-    localStorage.setItem('fintrack.token', auth.token);
-    localStorage.setItem('fintrack.name', auth.name);
-    localStorage.setItem('fintrack.email', auth.email);
+    sessionStorage.setItem('fintrack.token', auth.token);
+    sessionStorage.setItem('fintrack.name', auth.name);
+    sessionStorage.setItem('fintrack.email', auth.email);
     this.token.set(auth.token);
     this.userName.set(auth.name);
     this.userEmail.set(auth.email);

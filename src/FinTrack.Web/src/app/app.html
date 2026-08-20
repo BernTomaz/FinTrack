@@ -1,8 +1,8 @@
 @if (!isLoggedIn()) {
-  <main class="login-page">
+  <main class="login-page" [class.dark-theme]="theme() === 'dark'">
     <section class="login-brand" aria-labelledby="login-title">
       <div class="brand-row">
-        <span class="brand-mark">▥</span>
+        <span class="brand-mark" aria-hidden="true">FT</span>
         <div class="brand-title">
           <strong>FinTrack</strong>
           <small>Controle Financeiro Pessoal</small>
@@ -50,21 +50,24 @@
     </section>
   </main>
 } @else {
-  <main class="app-shell">
+  <main class="app-shell" [class.dark-theme]="theme() === 'dark'">
     <aside class="sidebar">
-      <div class="brand-row">
-        <span class="brand-mark">▥</span>
-        <strong>Controle Financeiro Pessoal</strong>
-      </div>
+      <button type="button" class="brand-row brand-button" (click)="openView('dashboard')" title="Ir para o dashboard">
+        <span class="brand-mark" aria-hidden="true">FT</span>
+        <div class="brand-title sidebar-title">
+          <strong>FinTrack</strong>
+          <small>Controle Financeiro Pessoal</small>
+        </div>
+      </button>
 
       <nav aria-label="Menu principal">
-        <a class="active" href="#dashboard"><span>⌂</span> Dashboard</a>
-        <a href="#receitas"><span>↗</span> Receitas</a>
-        <a href="#despesas"><span>↘</span> Despesas</a>
-        <a href="#contas"><span>▣</span> Contas</a>
-        <a href="#categorias"><span>◇</span> Categorias</a>
-        <a href="#relatorios"><span>▥</span> Relatórios</a>
-        <button type="button" (click)="exportCsv()"><span>⇩</span> Exportação CSV</button>
+        <button type="button" [class.active]="activeView() === 'dashboard'" (click)="openView('dashboard')"><span>⌂</span> Dashboard</button>
+        <button type="button" [class.active]="activeView() === 'income'" (click)="openView('income')"><span>↗</span> Receitas</button>
+        <button type="button" [class.active]="activeView() === 'expense'" (click)="openView('expense')"><span>↘</span> Despesas</button>
+        <button type="button" [class.active]="activeView() === 'accounts'" (click)="openView('accounts')"><span>▣</span> Contas</button>
+        <button type="button" [class.active]="activeView() === 'categories'" (click)="openView('categories')"><span>◇</span> Categorias</button>
+        <button type="button" [class.active]="activeView() === 'reports'" (click)="openView('reports')"><span>▥</span> Relatórios</button>
+        <button type="button" [class.active]="activeView() === 'export'" (click)="openView('export')"><span>⇩</span> Exportação CSV</button>
       </nav>
 
       <div class="safe-note">
@@ -80,9 +83,11 @@
       <header class="topbar">
         <h1>{{ pageTitle() }}</h1>
         <div class="top-actions">
-          <button type="button" class="ghost" (click)="loadAll()">Atualizar</button>
-          <button type="button" class="primary">+ Nova receita</button>
-          <button type="button" class="blue">+ Nova despesa</button>
+          @if (activeView() === 'dashboard') {
+            <button type="button" class="ghost" (click)="loadAll()">Atualizar</button>
+            <button type="button" class="primary" (click)="openView('income')">+ Nova receita</button>
+            <button type="button" class="blue" (click)="openView('expense')">+ Nova despesa</button>
+          }
           <div class="user-menu">
             <button type="button" class="avatar" (click)="toggleUserMenu()" title="Menu do usuário">{{ initial() }}</button>
             @if (userMenuOpen()) {
@@ -91,6 +96,7 @@
                 <button type="button" (click)="openView('profile')">Meu perfil</button>
                 <button type="button" (click)="openView('password')">Alterar senha</button>
                 <button type="button" (click)="openView('preferences')">Preferências</button>
+                <button type="button" (click)="openView('about')">Sobre</button>
                 <button type="button" class="danger" (click)="logout()">Sair</button>
               </div>
             }
@@ -142,9 +148,9 @@
             </div>
             <label>Moeda padrão<input type="text" value="Real brasileiro (BRL)" readonly /></label>
             <label>Tema
-              <select>
-                <option>Claro</option>
-                <option>Escuro</option>
+              <select [value]="theme()" (change)="setTheme($any($event.target).value)">
+                <option value="light">Claro</option>
+                <option value="dark">Escuro</option>
               </select>
             </label>
             <label>Mês atual<input type="month" [value]="currentMonthValue()" /></label>
@@ -152,6 +158,131 @@
               <input type="checkbox" checked />
               Exibir resumo mensal no dashboard
             </label>
+          </article>
+        </section>
+      }
+
+      @if (activeView() === 'about') {
+        <section class="settings-page">
+          <article class="panel settings-card">
+            <div class="panel-head">
+              <h2>Sobre</h2>
+              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
+            </div>
+            <div class="about-box">
+              <span class="brand-mark" aria-hidden="true">FT</span>
+              <div>
+                <strong>FinTrack</strong>
+                <small>Controle financeiro pessoal</small>
+              </div>
+            </div>
+            <p>Desenvolvido por Bernardo de Almeida Tomaz.</p>
+            <a class="github-link" href="https://github.com/BernTomaz" target="_blank" rel="noopener noreferrer">
+              github.com/BernTomaz
+            </a>
+          </article>
+        </section>
+      }
+
+      @if (activeView() === 'income' || activeView() === 'expense') {
+        <section class="settings-page">
+          <form class="panel settings-card" [formGroup]="transactionForm" (ngSubmit)="createTransaction()">
+            <div class="panel-head">
+              <h2>{{ activeView() === 'income' ? 'Nova receita' : 'Nova despesa' }}</h2>
+              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
+            </div>
+            <label>Conta
+              <select formControlName="accountId">
+                <option value="">Selecione</option>
+                @for (account of accounts(); track account.id) {
+                  <option [value]="account.id">{{ account.name }}</option>
+                }
+              </select>
+            </label>
+            <label>Categoria
+              <select formControlName="categoryId">
+                <option value="">Selecione</option>
+                @for (category of categories(); track category.id) {
+                  <option [value]="category.id">{{ category.name }}</option>
+                }
+              </select>
+            </label>
+            <label>Valor<input type="number" formControlName="amount" min="0.01" step="0.01" /></label>
+            <label>Data<input type="date" formControlName="date" /></label>
+            <label>Descrição<input type="text" formControlName="description" /></label>
+            <button type="submit" class="primary">Salvar lançamento</button>
+          </form>
+        </section>
+      }
+
+      @if (activeView() === 'accounts') {
+        <section class="settings-page">
+          <form class="panel settings-card" [formGroup]="accountForm" (ngSubmit)="createAccount()">
+            <div class="panel-head">
+              <h2>Nova conta</h2>
+              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
+            </div>
+            <label>Nome<input type="text" formControlName="name" /></label>
+            <label>Tipo
+              <select formControlName="type">
+                @for (type of accountTypes; track type) {
+                  <option [value]="type">{{ accountTypeLabel(type) }}</option>
+                }
+              </select>
+            </label>
+            <label>Saldo inicial<input type="number" formControlName="initialBalance" /></label>
+            <button type="submit" class="primary">Salvar conta</button>
+          </form>
+        </section>
+      }
+
+      @if (activeView() === 'categories') {
+        <section class="settings-page">
+          <form class="panel settings-card" [formGroup]="categoryForm" (ngSubmit)="createCategory()">
+            <div class="panel-head">
+              <h2>Nova categoria</h2>
+              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
+            </div>
+            <label>Nome<input type="text" formControlName="name" /></label>
+            <label>Tipo
+              <select formControlName="type">
+                @for (type of categoryTypes; track type) {
+                  <option [value]="type">{{ categoryTypeLabel(type) }}</option>
+                }
+              </select>
+            </label>
+            <button type="submit" class="primary">Salvar categoria</button>
+          </form>
+        </section>
+      }
+
+      @if (activeView() === 'reports') {
+        <section class="settings-page">
+          <article class="panel settings-card">
+            <div class="panel-head">
+              <h2>Relatórios</h2>
+              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
+            </div>
+            <div class="empty-state">
+              <strong>Relatórios em preparação</strong>
+              <span>Por enquanto, use a exportação CSV para acompanhar seus lançamentos.</span>
+            </div>
+          </article>
+        </section>
+      }
+
+      @if (activeView() === 'export') {
+        <section class="settings-page">
+          <article class="panel settings-card">
+            <div class="panel-head">
+              <h2>Exportação CSV</h2>
+              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
+            </div>
+            <div class="empty-state">
+              <strong>Baixar lançamentos do mês</strong>
+              <span>O arquivo CSV usa os lançamentos cadastrados no período atual.</span>
+              <button type="button" class="primary" (click)="exportCsv()">Baixar CSV</button>
+            </div>
           </article>
         </section>
       }
@@ -292,7 +423,7 @@
                 <span class="coin">▣</span>
                 <div>
                   <strong>{{ account.name }}</strong>
-                  <small>{{ account.type }}</small>
+                  <small>{{ accountTypeLabel(account.type) }}</small>
                 </div>
                 <button type="button" class="icon" title="Excluir conta" (click)="deleteAccount(account.id)">×</button>
               </div>
@@ -308,7 +439,7 @@
           <label>Tipo
             <select formControlName="type">
               @for (type of accountTypes; track type) {
-                <option [value]="type">{{ type }}</option>
+                <option [value]="type">{{ accountTypeLabel(type) }}</option>
               }
             </select>
           </label>
@@ -322,7 +453,7 @@
           <label>Tipo
             <select formControlName="type">
               @for (type of categoryTypes; track type) {
-                <option [value]="type">{{ type }}</option>
+                <option [value]="type">{{ categoryTypeLabel(type) }}</option>
               }
             </select>
           </label>
@@ -351,7 +482,7 @@
             <label>Tipo
               <select formControlName="type">
                 @for (type of transactionTypes; track type) {
-                  <option [value]="type">{{ type }}</option>
+                  <option [value]="type">{{ transactionTypeLabel(type) }}</option>
                 }
               </select>
             </label>
