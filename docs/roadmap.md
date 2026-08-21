@@ -2,38 +2,38 @@
 
 ## Agora
 
-- Estruturar solution `.slnx` e projetos
-- Criar contratos iniciais
-- Configurar banco local
-- Criar autenticação
+- Validar o MVP ponta a ponta.
+- Revisar as telas principais no desktop e no mobile.
+- Atualizar a documentação de status e operação.
+- Preparar o checklist final de entrega.
 
 ## MVP
 
-- Usuarios
-- Login
-- Contas
-- Categorias
-- Lançamentos
-- Dashboard mensal
-- Exportação CSV
-- Testes principais
+- Usuários.
+- Login.
+- Contas.
+- Categorias.
+- Lançamentos.
+- Dashboard mensal.
+- Exportação CSV.
+- Testes principais.
 
 ## Depois do MVP
 
-- Melhorias visuais
-- Relatórios adicionais
-- Deploy público
-- Backup e restauracao
+- Melhorias visuais.
+- Relatórios adicionais.
+- Deploy público.
+- Backup e restauração.
 
 ## Fora do MVP
 
-- Integração bancária
-- Pagamento online
-- IA
-- OCR
-- Upload de comprovantes
-- Notificações por email
-- App mobile
-- Multi-moeda
-- Compartilhamento de contas
-- Assinatura paga
+- Integração bancária.
+- Pagamento online.
+- IA.
+- OCR.
+- Upload de comprovantes.
+- Notificações por e-mail.
+- App mobile.
+- Multi-moeda.
+- Compartilhamento de contas.
+- Assinatura paga.

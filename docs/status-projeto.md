@@ -2,7 +2,7 @@
 
 ## Status Atual
 
-Estruturacao inicial.
+MVP funcional em fase de validação final.
 
 ## Concluído
 
@@ -41,4 +41,7 @@ Estruturacao inicial.
 
 ## Em Aberto
 
-- Implementar MVP
+- Validar a execução local ponta a ponta com API, banco e frontend.
+- Revisar a responsividade mobile das telas principais.
+- Ajustar pequenos problemas encontrados no uso real.
+- Preparar o checklist final para entrega ou deploy local.

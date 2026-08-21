@@ -720,6 +720,15 @@ nav .active {
   grid-template-columns: auto minmax(0, 1fr) auto;
 }
 
+.account-line strong,
+.account-line small {
+  display: block;
+}
+
+.account-line small {
+  margin-top: 2px;
+}
+
 .coin {
   align-items: center;
   background: #eaf2ff;
@@ -845,6 +854,19 @@ nav .active {
 }
 
 @media (max-width: 760px) {
+  .app-shell,
+  .sidebar,
+  .content,
+  .panel {
+    box-sizing: border-box;
+    max-width: 100vw;
+    min-width: 0;
+  }
+
+  .app-shell {
+    overflow-x: hidden;
+  }
+
   .login-page {
     gap: 24px;
     grid-template-columns: 1fr;
@@ -886,6 +908,19 @@ nav .active {
   .form-grid,
   .category-card {
     grid-template-columns: 1fr;
+  }
+
+  nav {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+
+  nav button {
+    flex: 1 1 calc(50% - 8px);
+  }
+
+  .brand-button {
+    width: 100%;
   }
 
   .metric {

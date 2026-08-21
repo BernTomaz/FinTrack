@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Diagnostics.CodeAnalysis;
 using FinTrack.Api.Auth;
 using FinTrack.Api.Endpoints;
@@ -17,6 +18,10 @@ var jwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>

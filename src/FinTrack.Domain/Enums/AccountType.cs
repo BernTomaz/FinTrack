@@ -1,5 +1,8 @@
+using System.Text.Json.Serialization;
+
 namespace FinTrack.Domain.Enums;
 
+[JsonConverter(typeof(JsonStringEnumConverter<AccountType>))]
 public enum AccountType
 {
     Wallet = 1,
