@@ -83,7 +83,7 @@ A solution .NET deve usar o formato `.slnx`.
 
 ## Status
 
-Projeto em estruturação inicial. A base .NET já possui solution `.slnx`, projetos, referências e endpoint `/health`.
+MVP funcional validado localmente. O projeto já possui autenticação, contas, categorias, lançamentos, dashboard mensal, exportação CSV, frontend Angular e testes principais.
 
 ## Execução Local
 

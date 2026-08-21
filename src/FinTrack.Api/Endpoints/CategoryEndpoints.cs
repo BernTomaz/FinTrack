@@ -80,6 +80,14 @@ public static class CategoryEndpoints
                 return Results.NotFound();
             }
 
+            var hasTransactions = await db.Transactions.AnyAsync(
+                transaction => transaction.UserId == userId && transaction.CategoryId == id,
+                cancellationToken);
+            if (hasTransactions)
+            {
+                return Results.Text("Exclua os lançamentos desta categoria antes de remover a categoria.", statusCode: StatusCodes.Status409Conflict);
+            }
+
             db.Categories.Remove(category);
             await db.SaveChangesAsync(cancellationToken);
 

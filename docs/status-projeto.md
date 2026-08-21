@@ -2,7 +2,7 @@
 
 ## Status Atual
 
-MVP funcional em fase de validação final.
+MVP funcional validado localmente.
 
 ## Concluído
 
@@ -38,10 +38,20 @@ MVP funcional em fase de validação final.
 - Exportação CSV de lançamentos
 - Primeira versão funcional do frontend Angular
 - Telas de login, cadastro, dashboard, contas, categorias e lançamentos
+- Validação ponta a ponta com API, banco e frontend via Docker
+- Revisão visual básica em desktop e mobile
+- Correção da integração de enums entre Angular e API
+- Checklist final de entrega
 
 ## Em Aberto
 
-- Validar a execução local ponta a ponta com API, banco e frontend.
-- Revisar a responsividade mobile das telas principais.
-- Ajustar pequenos problemas encontrados no uso real.
-- Preparar o checklist final para entrega ou deploy local.
+- Preparar commit final do MVP.
+- Decidir se o próximo passo será deploy público ou melhorias pós-MVP.
+
+## Última Validação
+
+- Data: 21/08/2026.
+- Ambiente: Docker Compose com SQL Server, API e frontend.
+- Usuário de teste: `mvp-fechamento-20260821130648@fintrack.local`.
+- Fluxo validado: cadastro, conta, categoria de receita, categoria de despesa, receita, despesa, dashboard mensal e exportação CSV.
+- Resultado: aprovado.

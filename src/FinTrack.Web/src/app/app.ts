@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -67,11 +67,14 @@ export class App {
   private readonly http = inject(HttpClient);
   private readonly fb = inject(FormBuilder);
   private readonly apiUrl = 'http://localhost:5080';
+  private messageTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private messageClearTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly token = signal(sessionStorage.getItem('fintrack.token') ?? '');
   protected readonly userName = signal(sessionStorage.getItem('fintrack.name') ?? '');
   protected readonly userEmail = signal(sessionStorage.getItem('fintrack.email') ?? '');
   protected readonly message = signal('');
+  protected readonly isMessageLeaving = signal(false);
   protected readonly accounts = signal<Account[]>([]);
   protected readonly categories = signal<Category[]>([]);
   protected readonly transactions = signal<Transaction[]>([]);
@@ -134,25 +137,25 @@ export class App {
 
   protected login(): void {
     if (this.loginForm.invalid) {
-      this.message.set('Informe e-mail e senha.');
+      this.showMessage('Informe e-mail e senha.');
       return;
     }
 
     this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, this.loginForm.getRawValue()).subscribe({
       next: (auth) => this.startSession(auth),
-      error: () => this.message.set('Não foi possível entrar.'),
+      error: () => this.showMessage('Não foi possível entrar.'),
     });
   }
 
   protected register(): void {
     if (this.registerForm.invalid) {
-      this.message.set('Preencha nome, e-mail e senha.');
+      this.showMessage('Preencha nome, e-mail e senha.');
       return;
     }
 
     this.http.post<AuthResponse>(`${this.apiUrl}/auth/register`, this.registerForm.getRawValue()).subscribe({
       next: (auth) => this.startSession(auth),
-      error: () => this.message.set('Não foi possível criar a conta.'),
+      error: () => this.showMessage('Não foi possível criar a conta.'),
     });
   }
 
@@ -167,6 +170,7 @@ export class App {
     this.userName.set('');
     this.userEmail.set('');
     this.message.set('');
+    this.isMessageLeaving.set(false);
     this.userMenuOpen.set(false);
   }
 
@@ -180,14 +184,14 @@ export class App {
         this.accountForm.reset({ name: '', type: 'Checking', initialBalance: 0 });
         this.loadAll();
       },
-      error: () => this.message.set('Não foi possível salvar a conta.'),
+      error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível salvar a conta.')),
     });
   }
 
   protected deleteAccount(id: string): void {
     this.http.delete(`${this.apiUrl}/accounts/${id}`, this.options()).subscribe({
       next: () => this.loadAll(),
-      error: () => this.message.set('Não foi possível excluir a conta.'),
+      error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível excluir a conta.')),
     });
   }
 
@@ -201,14 +205,14 @@ export class App {
         this.categoryForm.reset({ name: '', type: 'Expense' });
         this.loadAll();
       },
-      error: () => this.message.set('Não foi possível salvar a categoria.'),
+      error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível salvar a categoria.')),
     });
   }
 
   protected deleteCategory(id: string): void {
     this.http.delete(`${this.apiUrl}/categories/${id}`, this.options()).subscribe({
       next: () => this.loadAll(),
-      error: () => this.message.set('Não foi possível excluir a categoria.'),
+      error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível excluir a categoria.')),
     });
   }
 
@@ -224,14 +228,14 @@ export class App {
           this.transactionForm.patchValue({ amount: 0, description: '' });
           this.loadAll();
         },
-        error: () => this.message.set('Não foi possível salvar o lançamento.'),
+        error: () => this.showMessage('Não foi possível salvar o lançamento.'),
       });
   }
 
   protected deleteTransaction(id: string): void {
     this.http.delete(`${this.apiUrl}/transactions/${id}`, this.options()).subscribe({
       next: () => this.loadAll(),
-      error: () => this.message.set('Não foi possível excluir o lançamento.'),
+      error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível excluir o lançamento.')),
     });
   }
 
@@ -332,6 +336,16 @@ export class App {
       .subscribe((dashboard) => this.dashboard.set(dashboard));
   }
 
+  protected showAllTransactions(): void {
+    this.loadAll();
+    this.openView('reports');
+  }
+
+  protected showAllAccounts(): void {
+    this.loadAll();
+    this.openView('accounts');
+  }
+
   private startSession(auth: AuthResponse): void {
     sessionStorage.setItem('fintrack.token', auth.token);
     sessionStorage.setItem('fintrack.name', auth.name);
@@ -340,7 +354,38 @@ export class App {
     this.userName.set(auth.name);
     this.userEmail.set(auth.email);
     this.message.set('');
+    this.isMessageLeaving.set(false);
     this.loadAll();
+  }
+
+  private showMessage(text: string): void {
+    if (this.messageTimeoutId) {
+      clearTimeout(this.messageTimeoutId);
+    }
+
+    if (this.messageClearTimeoutId) {
+      clearTimeout(this.messageClearTimeoutId);
+    }
+
+    this.isMessageLeaving.set(false);
+    this.message.set(text);
+    this.messageTimeoutId = setTimeout(() => {
+      this.isMessageLeaving.set(true);
+      this.messageTimeoutId = null;
+      this.messageClearTimeoutId = setTimeout(() => {
+        this.message.set('');
+        this.isMessageLeaving.set(false);
+        this.messageClearTimeoutId = null;
+      }, 520);
+    }, 3500);
+  }
+
+  private errorMessage(error: unknown, fallback: string): string {
+    if (error instanceof HttpErrorResponse && typeof error.error === 'string' && error.error.trim().length > 0) {
+      return error.error;
+    }
+
+    return fallback;
   }
 
   private options(): { headers: HttpHeaders } {

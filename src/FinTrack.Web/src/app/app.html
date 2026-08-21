@@ -217,11 +217,32 @@
 
       @if (activeView() === 'accounts') {
         <section class="settings-page">
-          <form class="panel settings-card" [formGroup]="accountForm" (ngSubmit)="createAccount()">
+          <div class="panel settings-card">
             <div class="panel-head">
-              <h2>Nova conta</h2>
+              <h2>Contas</h2>
               <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
             </div>
+            <div class="list">
+              @for (account of accounts(); track account.id) {
+                <div class="account-line">
+                  <span class="coin">▣</span>
+                  <div>
+                    <strong>{{ account.name }}</strong>
+                    <small>{{ accountTypeLabel(account.type) }}</small>
+                  </div>
+                  <button type="button" class="icon" title="Excluir conta" (click)="deleteAccount(account.id)">×</button>
+                </div>
+              } @empty {
+                <div class="empty-state">
+                  <strong>Nenhuma conta cadastrada</strong>
+                  <span>Cadastre uma conta para começar a organizar seus lançamentos.</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <form class="panel settings-card" [formGroup]="accountForm" (ngSubmit)="createAccount()">
+            <h2>Nova conta</h2>
             <label>Nome<input type="text" formControlName="name" /></label>
             <label>Tipo
               <select formControlName="type">
@@ -263,9 +284,36 @@
               <h2>Relatórios</h2>
               <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
             </div>
-            <div class="empty-state">
-              <strong>Relatórios em preparação</strong>
-              <span>Por enquanto, use a exportação CSV para acompanhar seus lançamentos.</span>
+            <div class="table">
+              <div class="table-row table-head">
+                <span>Data</span>
+                <span>Descrição</span>
+                <span>Categoria</span>
+                <span>Tipo</span>
+                <span>Valor</span>
+                <span>Conta</span>
+                <span>Ações</span>
+              </div>
+              @for (transaction of transactions(); track transaction.id) {
+                <div class="table-row">
+                  <span>{{ transaction.date }}</span>
+                  <span>{{ transaction.description || 'Lançamento' }}</span>
+                  <span>{{ categoryName(transaction.categoryId) }}</span>
+                  <span [class.positive]="transaction.type === 'Income'" [class.negative]="transaction.type === 'Expense'">
+                    {{ transaction.type === 'Income' ? 'Receita' : 'Despesa' }}
+                  </span>
+                  <strong [class.positive]="transaction.type === 'Income'" [class.negative]="transaction.type === 'Expense'">
+                    {{ money(transaction.amount) }}
+                  </strong>
+                  <span>{{ accountName(transaction.accountId) }}</span>
+                  <button type="button" class="icon danger-icon" title="Excluir lançamento" (click)="deleteTransaction(transaction.id)">×</button>
+                </div>
+              } @empty {
+                <div class="empty-state">
+                  <strong>Nenhum lançamento encontrado</strong>
+                  <span>Cadastre receitas e despesas para acompanhar seus relatórios.</span>
+                </div>
+              }
             </div>
           </article>
         </section>
@@ -384,7 +432,7 @@
         <article id="relatorios" class="panel table-panel">
           <div class="panel-head">
             <h2>Transações recentes</h2>
-            <button type="button" class="link strong" (click)="loadAll()">Ver todas →</button>
+            <button type="button" class="link strong" (click)="showAllTransactions()">Ver todas →</button>
           </div>
           <div class="table">
             <div class="table-row table-head">
@@ -394,6 +442,7 @@
               <span>Tipo</span>
               <span>Valor</span>
               <span>Conta</span>
+              <span>Ações</span>
             </div>
             @for (transaction of transactions(); track transaction.id) {
               <div class="table-row">
@@ -407,6 +456,7 @@
                   {{ money(transaction.amount) }}
                 </strong>
                 <span>{{ accountName(transaction.accountId) }}</span>
+                <button type="button" class="icon danger-icon" title="Excluir lançamento" (click)="deleteTransaction(transaction.id)">×</button>
               </div>
             }
           </div>
@@ -415,7 +465,7 @@
         <article id="contas" class="panel accounts-panel">
           <div class="panel-head">
             <h2>Saldos das contas</h2>
-            <button type="button" class="link strong">Ver todas →</button>
+            <button type="button" class="link strong" (click)="showAllAccounts()">Ver todas →</button>
           </div>
           <div class="list">
             @for (account of accounts(); track account.id) {
@@ -497,7 +547,7 @@
     </section>
 
     @if (message()) {
-      <p class="message">{{ message() }}</p>
+      <p class="message" [class.leaving]="isMessageLeaving()">{{ message() }}</p>
     }
   </main>
 }

@@ -124,6 +124,26 @@ public sealed class ApiFlowTests
     }
 
     [Fact]
+    public async Task Accounts_and_categories_with_transactions_cannot_be_deleted()
+    {
+        await using var app = new FinTrackApiFactory();
+        using var client = app.CreateClient();
+        await RegisterAndAuthorize(client);
+
+        var account = await CreateAccount(client, "Conta Corrente");
+        var category = await CreateCategory(client, "Mercado", CategoryType.Expense);
+        await CreateTransaction(client, account.Id, category.Id, TransactionType.Expense, 10, new DateOnly(2026, 8, 21), "Mercado");
+
+        var deleteAccount = await client.DeleteAsync($"/accounts/{account.Id}");
+        Assert.Equal(HttpStatusCode.Conflict, deleteAccount.StatusCode);
+        Assert.Equal("Exclua os lançamentos desta conta antes de remover a conta.", await deleteAccount.Content.ReadAsStringAsync());
+
+        var deleteCategory = await client.DeleteAsync($"/categories/{category.Id}");
+        Assert.Equal(HttpStatusCode.Conflict, deleteCategory.StatusCode);
+        Assert.Equal("Exclua os lançamentos desta categoria antes de remover a categoria.", await deleteCategory.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
     public async Task Transactions_return_expected_errors()
     {
         await using var app = new FinTrackApiFactory();

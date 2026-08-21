@@ -4,15 +4,16 @@ O deploy público fica fora do MVP, mas o projeto já deve estar pronto para uma
 
 ## Fechamento do MVP
 
-- Confirmar que `docker compose up --build` sobe SQL Server, API e frontend.
-- Validar o health check da API em `/health`.
-- Criar um usuário de teste pelo frontend.
-- Criar uma conta, uma categoria e um lançamento.
-- Conferir o dashboard mensal após o lançamento.
-- Exportar o CSV de lançamentos.
-- Revisar as telas principais no desktop e no mobile.
-- Rodar os testes automatizados do backend.
-- Rodar o build de produção do frontend.
+- [x] Confirmar que `docker compose up --build` sobe SQL Server, API e frontend.
+- [x] Validar o health check da API em `/health`.
+- [x] Criar um usuário de teste pelo frontend.
+- [x] Criar uma conta, uma categoria de receita e uma categoria de despesa.
+- [x] Criar uma receita e uma despesa.
+- [x] Conferir o dashboard mensal após os lançamentos.
+- [x] Exportar o CSV de lançamentos.
+- [x] Revisar as telas principais no desktop e no mobile.
+- [x] Rodar os testes automatizados do backend.
+- [x] Rodar o build de produção do frontend.
 
 ## Antes de Publicar
 

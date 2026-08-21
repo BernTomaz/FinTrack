@@ -79,6 +79,14 @@ public static class AccountEndpoints
                 return Results.NotFound();
             }
 
+            var hasTransactions = await db.Transactions.AnyAsync(
+                transaction => transaction.UserId == userId && transaction.AccountId == id,
+                cancellationToken);
+            if (hasTransactions)
+            {
+                return Results.Text("Exclua os lançamentos desta conta antes de remover a conta.", statusCode: StatusCodes.Status409Conflict);
+            }
+
             db.Accounts.Remove(account);
             await db.SaveChangesAsync(cancellationToken);
 
