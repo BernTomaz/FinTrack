@@ -4,7 +4,7 @@
 
 - Criar solution `FinTrack.slnx`
 - Criar projetos
-- Configurar referencias
+- Configurar referências
 - Configurar Swagger
 
 ## 2. Domínio e Banco
@@ -46,3 +46,11 @@
 - Testes principais
 - README final
 - Docker Compose validado
+
+## 8. Ajustes de Validação do MVP
+
+- Gráfico de fluxo de caixa com dados reais.
+- Exclusão de lançamentos pela interface.
+- Bloqueio de exclusão de contas e categorias com lançamentos vinculados.
+- Mensagens de erro temporárias com saída suave.
+- Documentação final de status, endpoints, testes e fluxos.

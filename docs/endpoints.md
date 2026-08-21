@@ -1,4 +1,4 @@
-# Endpoints Planejados
+# Endpoints
 
 ## Auth
 
@@ -18,6 +18,12 @@ PUT /accounts/{id}
 DELETE /accounts/{id}
 ```
 
+Observações:
+
+- `DELETE /accounts/{id}` retorna `404 Not Found` quando a conta não existe ou não pertence ao usuário autenticado.
+- `DELETE /accounts/{id}` retorna `409 Conflict` quando a conta possui lançamentos vinculados.
+- Para excluir uma conta com lançamentos, exclua primeiro os lançamentos relacionados.
+
 ## Categories
 
 ```text
@@ -28,6 +34,12 @@ PUT /categories/{id}
 DELETE /categories/{id}
 ```
 
+Observações:
+
+- `DELETE /categories/{id}` retorna `404 Not Found` quando a categoria não existe ou não pertence ao usuário autenticado.
+- `DELETE /categories/{id}` retorna `409 Conflict` quando a categoria possui lançamentos vinculados.
+- Para excluir uma categoria com lançamentos, exclua primeiro os lançamentos relacionados.
+
 ## Transactions
 
 ```text
@@ -37,6 +49,11 @@ POST /transactions
 PUT /transactions/{id}
 DELETE /transactions/{id}
 ```
+
+Observações:
+
+- `DELETE /transactions/{id}` remove um lançamento do usuário autenticado.
+- Após excluir lançamentos vinculados a uma conta ou categoria, a conta ou categoria pode ser removida.
 
 Filtros:
 

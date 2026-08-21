@@ -379,14 +379,14 @@
         <article class="panel chart-panel">
           <div class="panel-head">
             <h2>Fluxo de caixa mensal</h2>
-            <button type="button" class="select-like">Últimos 8 meses</button>
+            <button type="button" class="select-like">{{ chartRangeLabel() }}</button>
           </div>
           @if (transactions().length > 0) {
-            <div class="bar-chart" aria-label="Gráfico demonstrativo de fluxo de caixa">
-              @for (month of chartMonths; track month.label) {
+            <div class="bar-chart" aria-label="Gráfico de fluxo de caixa mensal">
+              @for (month of chartMonths(); track month.label) {
                 <div class="bar-group">
-                  <span class="income-bar" [style.height.%]="month.income"></span>
-                  <span class="expense-bar" [style.height.%]="month.expense"></span>
+                  <span class="income-bar" [style.height.%]="month.income" [title]="'Receitas: ' + money(month.incomeAmount)"></span>
+                  <span class="expense-bar" [style.height.%]="month.expense" [title]="'Despesas: ' + money(month.expenseAmount)"></span>
                   <small>{{ month.label }}</small>
                 </div>
               }

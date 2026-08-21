@@ -41,6 +41,10 @@ MVP funcional validado localmente.
 - Validação ponta a ponta com API, banco e frontend via Docker
 - Revisão visual básica em desktop e mobile
 - Correção da integração de enums entre Angular e API
+- Bloqueio de exclusão de contas e categorias com lançamentos vinculados
+- Exclusão de lançamentos pela interface
+- Mensagens de erro temporárias com saída suave
+- Gráfico de fluxo de caixa baseado em lançamentos reais
 - Checklist final de entrega
 
 ## Em Aberto
@@ -53,5 +57,5 @@ MVP funcional validado localmente.
 - Data: 21/08/2026.
 - Ambiente: Docker Compose com SQL Server, API e frontend.
 - Usuário de teste: `mvp-fechamento-20260821130648@fintrack.local`.
-- Fluxo validado: cadastro, conta, categoria de receita, categoria de despesa, receita, despesa, dashboard mensal e exportação CSV.
+- Fluxo validado: cadastro, conta, categoria de receita, categoria de despesa, receita, despesa, dashboard mensal, gráfico de fluxo de caixa com dados reais, exportação CSV e regra de bloqueio para exclusão de conta com lançamentos.
 - Resultado: aprovado.

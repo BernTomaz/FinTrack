@@ -73,7 +73,10 @@ FinTrack/
 - Cadastro de lançamentos financeiros
 - Listagem e filtros de lançamentos
 - Dashboard mensal
+- Gráfico de fluxo de caixa com dados reais
 - Exportação CSV de lançamentos
+- Exclusão de lançamentos
+- Bloqueio de exclusão de contas e categorias com lançamentos vinculados
 
 ## Modo de Desenvolvimento
 
@@ -84,6 +87,8 @@ A solution .NET deve usar o formato `.slnx`.
 ## Status
 
 MVP funcional validado localmente. O projeto já possui autenticação, contas, categorias, lançamentos, dashboard mensal, exportação CSV, frontend Angular e testes principais.
+
+Contas e categorias com lançamentos vinculados não podem ser excluídas diretamente. Para removê-las, exclua primeiro os lançamentos relacionados.
 
 ## Execução Local
 

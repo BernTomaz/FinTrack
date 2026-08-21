@@ -2,10 +2,9 @@
 
 ## Agora
 
-- Validar o MVP ponta a ponta.
-- Revisar as telas principais no desktop e no mobile.
-- Atualizar a documentação de status e operação.
-- Preparar o checklist final de entrega.
+- Preparar o commit final do MVP.
+- Revisar o histórico de alterações antes do commit.
+- Decidir entre deploy público ou início das melhorias pós-MVP.
 
 ## MVP
 
@@ -15,14 +14,17 @@
 - Categorias.
 - Lançamentos.
 - Dashboard mensal.
+- Gráfico de fluxo de caixa com dados reais.
 - Exportação CSV.
+- Exclusão de lançamentos.
+- Bloqueio de exclusão de contas e categorias com lançamentos vinculados.
 - Testes principais.
 
 ## Depois do MVP
 
+- Deploy público.
 - Melhorias visuais.
 - Relatórios adicionais.
-- Deploy público.
 - Backup e restauração.
 
 ## Fora do MVP

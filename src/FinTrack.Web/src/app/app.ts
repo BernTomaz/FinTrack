@@ -87,16 +87,40 @@ export class App {
   protected readonly accountTypes: AccountType[] = ['Wallet', 'Checking', 'Savings', 'CreditCard'];
   protected readonly categoryTypes: CategoryType[] = ['Income', 'Expense'];
   protected readonly transactionTypes: TransactionType[] = ['Income', 'Expense'];
-  protected readonly chartMonths = [
-    { label: 'Jan/26', income: 62, expense: 48 },
-    { label: 'Fev/26', income: 70, expense: 52 },
-    { label: 'Mar/26', income: 78, expense: 51 },
-    { label: 'Abr/26', income: 80, expense: 55 },
-    { label: 'Mai/26', income: 77, expense: 53 },
-    { label: 'Jun/26', income: 78, expense: 51 },
-    { label: 'Jul/26', income: 77, expense: 50 },
-    { label: 'Ago/26', income: 72, expense: 49 },
-  ];
+  protected readonly chartMonths = computed(() => {
+    const monthTotals = new Map<string, { label: string; incomeAmount: number; expenseAmount: number }>();
+
+    for (const transaction of this.transactions()) {
+      const date = new Date(`${transaction.date}T00:00:00`);
+      const key = transaction.date.slice(0, 7);
+      const current = monthTotals.get(key) ?? {
+        label: this.shortMonthLabel(date),
+        incomeAmount: 0,
+        expenseAmount: 0,
+      };
+
+      if (transaction.type === 'Income') {
+        current.incomeAmount += transaction.amount;
+      } else {
+        current.expenseAmount += transaction.amount;
+      }
+
+      monthTotals.set(key, current);
+    }
+
+    const rows = [...monthTotals.entries()]
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([, value]) => value);
+    const maxAmount = Math.max(...rows.flatMap((month) => [month.incomeAmount, month.expenseAmount]), 0);
+
+    return rows.map((month) => ({
+      label: month.label,
+      income: maxAmount > 0 ? Math.max((month.incomeAmount / maxAmount) * 100, month.incomeAmount > 0 ? 12 : 0) : 0,
+      expense: maxAmount > 0 ? Math.max((month.expenseAmount / maxAmount) * 100, month.expenseAmount > 0 ? 12 : 0) : 0,
+      incomeAmount: month.incomeAmount,
+      expenseAmount: month.expenseAmount,
+    }));
+  });
 
   protected readonly loginForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -300,6 +324,11 @@ export class App {
     return label[0].toUpperCase() + label.slice(1);
   }
 
+  protected chartRangeLabel(): string {
+    const total = this.chartMonths().length;
+    return total === 1 ? 'Mês atual' : `${total} meses`;
+  }
+
   protected pageTitle(): string {
     const titles: Record<View, string> = {
       dashboard: 'Dashboard',
@@ -386,6 +415,11 @@ export class App {
     }
 
     return fallback;
+  }
+
+  private shortMonthLabel(date: Date): string {
+    const month = new Intl.DateTimeFormat('pt-BR', { month: 'short' }).format(date).replace('.', '');
+    return `${month[0].toUpperCase()}${month.slice(1)}/${String(date.getFullYear()).slice(2)}`;
   }
 
   private options(): { headers: HttpHeaders } {

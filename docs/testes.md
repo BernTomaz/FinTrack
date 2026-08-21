@@ -15,8 +15,11 @@
 - Calcular total de despesas do mês
 - Calcular saldo mensal
 - Exportar CSV com lançamentos filtrados
+- Impedir exclusão de conta com lançamentos vinculados
+- Impedir exclusão de categoria com lançamentos vinculados
+- Permitir exclusão de lançamentos pela API
 
 ## Estratégia
 
-Começar por testes de regra de negócio e services principais. Testes de controller entram quando a autenticação e os endpoints estiverem estáveis.
+Começar por testes de regra de negócio e fluxos principais da API. Os testes de endpoints devem cobrir autenticação, isolamento por usuário, validações, dashboard, exportação CSV e regras de exclusão.
 

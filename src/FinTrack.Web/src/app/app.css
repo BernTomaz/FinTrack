@@ -614,8 +614,9 @@ nav .active {
   border-bottom: 1px solid #cbd5e1;
   display: grid;
   gap: 18px;
-  grid-template-columns: repeat(8, minmax(38px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(58px, 88px));
   height: 230px;
+  justify-content: start;
   padding: 28px 10px 0;
 }
 
