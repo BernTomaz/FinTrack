@@ -18,6 +18,9 @@
 - Impedir exclusão de conta com lançamentos vinculados
 - Impedir exclusão de categoria com lançamentos vinculados
 - Permitir exclusão de lançamentos pela API
+- Validar nome, e-mail e senha no cadastro e login
+- Validar nome de conta e categoria
+- Validar descrição máxima de lançamento
 
 ## Estratégia
 

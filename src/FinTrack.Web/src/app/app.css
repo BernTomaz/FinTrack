@@ -180,7 +180,7 @@ small {
 }
 
 .auth-card form,
-.register-strip,
+.auth-switch,
 .forms-grid form {
   display: grid;
   gap: 18px;
@@ -260,7 +260,7 @@ select {
   padding: 0;
 }
 
-.register-strip {
+.auth-switch {
   border-top: 1px solid #e5e7eb;
   padding-top: 18px;
   text-align: center;

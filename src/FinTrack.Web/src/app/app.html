@@ -19,34 +19,56 @@
     </section>
 
     <section class="auth-card" aria-label="Acesso">
-      <form [formGroup]="loginForm" (ngSubmit)="login()">
-        <h2>Entrar</h2>
-        <p>Entre com seu e-mail e senha.</p>
-        <label>
-          E-mail
-          <input type="email" formControlName="email" autocomplete="email" placeholder="seu@email.com" />
-        </label>
-        <label>
-          Senha
-          <input type="password" formControlName="password" autocomplete="current-password" placeholder="Sua senha" />
-        </label>
-        <div class="form-line">
-          <label class="check">
-            <input type="checkbox" />
-            Lembrar-me
+      @if (authMode() === 'login') {
+        <form [formGroup]="loginForm" (ngSubmit)="login()">
+          <h2>Entrar</h2>
+          <p>Entre com seu e-mail e senha.</p>
+          <label>
+            E-mail
+            <input type="email" formControlName="email" autocomplete="email" placeholder="seu@email.com" />
           </label>
-          <button type="button" class="link">Esqueci minha senha</button>
-        </div>
-        <button type="submit" class="primary">Entrar</button>
-      </form>
+          <label>
+            Senha
+            <input type="password" formControlName="password" autocomplete="current-password" placeholder="Sua senha" />
+          </label>
+          <div class="form-line">
+            <label class="check">
+              <input type="checkbox" />
+              Lembrar-me
+            </label>
+            <button type="button" class="link">Esqueci minha senha</button>
+          </div>
+          <button type="submit" class="primary">Entrar</button>
+        </form>
 
-      <form class="register-strip" [formGroup]="registerForm" (ngSubmit)="register()">
-        <span>Não tem conta?</span>
-        <input type="text" formControlName="name" autocomplete="name" placeholder="Nome" />
-        <input type="email" formControlName="email" autocomplete="email" placeholder="E-mail" />
-        <input type="password" formControlName="password" autocomplete="new-password" placeholder="Senha" />
-        <button type="submit" class="link strong">Criar conta grátis</button>
-      </form>
+        <div class="auth-switch">
+          <span>Não tem conta?</span>
+          <button type="button" class="link strong" (click)="showRegister()">Criar conta grátis</button>
+        </div>
+      } @else {
+        <form [formGroup]="registerForm" (ngSubmit)="register()">
+          <h2>Criar conta</h2>
+          <p>Informe seus dados para começar.</p>
+          <label>
+            Nome
+            <input type="text" formControlName="name" autocomplete="name" placeholder="Seu nome" />
+          </label>
+          <label>
+            E-mail
+            <input type="email" formControlName="email" autocomplete="email" placeholder="seu@email.com" />
+          </label>
+          <label>
+            Senha
+            <input type="password" formControlName="password" autocomplete="new-password" placeholder="Crie uma senha" />
+          </label>
+          <button type="submit" class="primary">Criar conta</button>
+        </form>
+
+        <div class="auth-switch">
+          <span>Já tem conta?</span>
+          <button type="button" class="link strong" (click)="showLogin()">Voltar para login</button>
+        </div>
+      }
     </section>
   </main>
 } @else {
@@ -84,7 +106,7 @@
         <h1>{{ pageTitle() }}</h1>
         <div class="top-actions">
           @if (activeView() === 'dashboard') {
-            <button type="button" class="ghost" (click)="loadAll()">Atualizar</button>
+            <button type="button" class="ghost" (click)="refreshData()">Atualizar</button>
             <button type="button" class="primary" (click)="openView('income')">+ Nova receita</button>
             <button type="button" class="blue" (click)="openView('expense')">+ Nova despesa</button>
           }
@@ -134,7 +156,7 @@
             <label>Senha atual<input type="password" placeholder="Informe sua senha atual" /></label>
             <label>Nova senha<input type="password" placeholder="Informe a nova senha" /></label>
             <label>Confirmar nova senha<input type="password" placeholder="Repita a nova senha" /></label>
-            <button type="button" class="primary">Salvar alteração</button>
+            <button type="button" class="primary" (click)="showUnavailableFeature('Alteração de senha')">Salvar alteração</button>
           </article>
         </section>
       }

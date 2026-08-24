@@ -7,6 +7,7 @@ type AccountType = 'Wallet' | 'Checking' | 'Savings' | 'CreditCard';
 type CategoryType = 'Income' | 'Expense';
 type TransactionType = 'Income' | 'Expense';
 type Theme = 'light' | 'dark';
+type AuthMode = 'login' | 'register';
 type View =
   | 'dashboard'
   | 'income'
@@ -80,6 +81,7 @@ export class App {
   protected readonly transactions = signal<Transaction[]>([]);
   protected readonly dashboard = signal<Dashboard | null>(null);
   protected readonly userMenuOpen = signal(false);
+  protected readonly authMode = signal<AuthMode>('login');
   protected readonly activeView = signal<View>('dashboard');
   protected readonly theme = signal<Theme>((localStorage.getItem('fintrack.theme') as Theme | null) ?? 'light');
 
@@ -123,24 +125,24 @@ export class App {
   });
 
   protected readonly loginForm = this.fb.nonNullable.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email, Validators.maxLength(120)]],
+    password: ['', [Validators.required, Validators.maxLength(100)]],
   });
 
   protected readonly registerForm = this.fb.nonNullable.group({
-    name: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required],
+    name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
+    email: ['', [Validators.required, Validators.email, Validators.maxLength(120)]],
+    password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(100)]],
   });
 
   protected readonly accountForm = this.fb.nonNullable.group({
-    name: ['', Validators.required],
+    name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
     type: ['Checking' as AccountType, Validators.required],
     initialBalance: [0, Validators.required],
   });
 
   protected readonly categoryForm = this.fb.nonNullable.group({
-    name: ['', Validators.required],
+    name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
     type: ['Expense' as CategoryType, Validators.required],
   });
 
@@ -150,7 +152,7 @@ export class App {
     type: ['Expense' as TransactionType, Validators.required],
     amount: [0, [Validators.required, Validators.min(0.01)]],
     date: [new Date().toISOString().slice(0, 10), Validators.required],
-    description: [''],
+    description: ['', Validators.maxLength(160)],
   });
 
   constructor() {
@@ -160,8 +162,10 @@ export class App {
   }
 
   protected login(): void {
-    if (this.loginForm.invalid) {
-      this.showMessage('Informe e-mail e senha.');
+    const validation = this.loginValidationMessage();
+    if (validation) {
+      this.loginForm.markAllAsTouched();
+      this.showMessage(validation);
       return;
     }
 
@@ -172,8 +176,10 @@ export class App {
   }
 
   protected register(): void {
-    if (this.registerForm.invalid) {
-      this.showMessage('Preencha nome, e-mail e senha.');
+    const validation = this.registerValidationMessage();
+    if (validation) {
+      this.registerForm.markAllAsTouched();
+      this.showMessage(validation);
       return;
     }
 
@@ -181,6 +187,18 @@ export class App {
       next: (auth) => this.startSession(auth),
       error: () => this.showMessage('Não foi possível criar a conta.'),
     });
+  }
+
+  protected showLogin(): void {
+    this.authMode.set('login');
+    this.message.set('');
+    this.isMessageLeaving.set(false);
+  }
+
+  protected showRegister(): void {
+    this.authMode.set('register');
+    this.message.set('');
+    this.isMessageLeaving.set(false);
   }
 
   protected logout(): void {
@@ -199,7 +217,10 @@ export class App {
   }
 
   protected createAccount(): void {
-    if (this.accountForm.invalid) {
+    const validation = this.accountValidationMessage();
+    if (validation) {
+      this.accountForm.markAllAsTouched();
+      this.showMessage(validation);
       return;
     }
 
@@ -207,6 +228,7 @@ export class App {
       next: () => {
         this.accountForm.reset({ name: '', type: 'Checking', initialBalance: 0 });
         this.loadAll();
+        this.showMessage('Conta salva com sucesso.');
       },
       error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível salvar a conta.')),
     });
@@ -220,7 +242,10 @@ export class App {
   }
 
   protected createCategory(): void {
-    if (this.categoryForm.invalid) {
+    const validation = this.categoryValidationMessage();
+    if (validation) {
+      this.categoryForm.markAllAsTouched();
+      this.showMessage(validation);
       return;
     }
 
@@ -228,6 +253,7 @@ export class App {
       next: () => {
         this.categoryForm.reset({ name: '', type: 'Expense' });
         this.loadAll();
+        this.showMessage('Categoria salva com sucesso.');
       },
       error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível salvar a categoria.')),
     });
@@ -241,7 +267,10 @@ export class App {
   }
 
   protected createTransaction(): void {
-    if (this.transactionForm.invalid) {
+    const validation = this.transactionValidationMessage();
+    if (validation) {
+      this.transactionForm.markAllAsTouched();
+      this.showMessage(validation);
       return;
     }
 
@@ -251,6 +280,7 @@ export class App {
         next: () => {
           this.transactionForm.patchValue({ amount: 0, description: '' });
           this.loadAll();
+          this.showMessage('Lançamento salvo com sucesso.');
         },
         error: () => this.showMessage('Não foi possível salvar o lançamento.'),
       });
@@ -365,6 +395,15 @@ export class App {
       .subscribe((dashboard) => this.dashboard.set(dashboard));
   }
 
+  protected refreshData(): void {
+    this.loadAll();
+    this.showMessage('Dados atualizados.');
+  }
+
+  protected showUnavailableFeature(feature: string): void {
+    this.showMessage(`${feature} ainda não está disponível no MVP.`);
+  }
+
   protected showAllTransactions(): void {
     this.loadAll();
     this.openView('reports');
@@ -415,6 +454,118 @@ export class App {
     }
 
     return fallback;
+  }
+
+  private loginValidationMessage(): string | null {
+    const email = this.loginForm.controls.email.value.trim();
+    const password = this.loginForm.controls.password.value;
+
+    if (!email) {
+      return 'Informe o e-mail.';
+    }
+
+    if (this.loginForm.controls.email.invalid) {
+      return 'Informe um e-mail válido.';
+    }
+
+    if (!password) {
+      return 'Informe a senha.';
+    }
+
+    return null;
+  }
+
+  private registerValidationMessage(): string | null {
+    const name = this.registerForm.controls.name.value.trim();
+    const email = this.registerForm.controls.email.value.trim();
+    const password = this.registerForm.controls.password.value;
+
+    if (name.length < 2) {
+      return 'Informe um nome com pelo menos 2 caracteres.';
+    }
+
+    if (name.length > 80) {
+      return 'O nome deve ter no máximo 80 caracteres.';
+    }
+
+    if (!email) {
+      return 'Informe o e-mail.';
+    }
+
+    if (this.registerForm.controls.email.invalid) {
+      return 'Informe um e-mail válido.';
+    }
+
+    if (password.length < 6) {
+      return 'A senha deve ter pelo menos 6 caracteres.';
+    }
+
+    if (password.length > 100) {
+      return 'A senha deve ter no máximo 100 caracteres.';
+    }
+
+    return null;
+  }
+
+  private accountValidationMessage(): string | null {
+    const name = this.accountForm.controls.name.value.trim();
+
+    if (name.length < 2) {
+      return 'Informe uma conta com pelo menos 2 caracteres.';
+    }
+
+    if (name.length > 80) {
+      return 'O nome da conta deve ter no máximo 80 caracteres.';
+    }
+
+    return null;
+  }
+
+  private categoryValidationMessage(): string | null {
+    const name = this.categoryForm.controls.name.value.trim();
+
+    if (name.length < 2) {
+      return 'Informe uma categoria com pelo menos 2 caracteres.';
+    }
+
+    if (name.length > 80) {
+      return 'O nome da categoria deve ter no máximo 80 caracteres.';
+    }
+
+    return null;
+  }
+
+  private transactionValidationMessage(): string | null {
+    const form = this.transactionForm.controls;
+    const amount = Number(form.amount.value);
+    const category = this.categories().find((item) => item.id === form.categoryId.value);
+    const description = form.description.value.trim();
+
+    if (!form.accountId.value) {
+      return 'Selecione uma conta.';
+    }
+
+    if (!form.categoryId.value) {
+      return 'Selecione uma categoria.';
+    }
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return 'Informe um valor maior que zero.';
+    }
+
+    if (!form.date.value) {
+      return 'Informe a data.';
+    }
+
+    if (description.length > 160) {
+      return 'A descrição deve ter no máximo 160 caracteres.';
+    }
+
+    if (category && category.type !== form.type.value) {
+      return 'A categoria deve ser do mesmo tipo do lançamento.';
+    }
+
+    return null;
   }
 
   private shortMonthLabel(date: Date): string {

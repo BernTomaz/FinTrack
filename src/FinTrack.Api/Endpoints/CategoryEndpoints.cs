@@ -39,9 +39,10 @@ public static class CategoryEndpoints
 
         group.MapPost("/", async (CategoryRequest request, FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>
         {
-            if (string.IsNullOrWhiteSpace(request.Name))
+            var validation = ValidateRequest(request);
+            if (validation is not null)
             {
-                return Results.BadRequest("Name is required.");
+                return validation;
             }
 
             var category = new Category(user.GetUserId(), request.Name, request.Type);
@@ -53,9 +54,10 @@ public static class CategoryEndpoints
 
         group.MapPut("/{id:guid}", async (Guid id, CategoryRequest request, FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>
         {
-            if (string.IsNullOrWhiteSpace(request.Name))
+            var validation = ValidateRequest(request);
+            if (validation is not null)
             {
-                return Results.BadRequest("Name is required.");
+                return validation;
             }
 
             var userId = user.GetUserId();
@@ -99,4 +101,20 @@ public static class CategoryEndpoints
 
     private static CategoryResponse ToResponse(Category category) =>
         new(category.Id, category.Name, category.Type, category.CreatedAt);
+
+    private static IResult? ValidateRequest(CategoryRequest request)
+    {
+        var name = request.Name.Trim();
+        if (name.Length == 0)
+        {
+            return Results.BadRequest("Name is required.");
+        }
+
+        if (name.Length < 2 || name.Length > 80)
+        {
+            return Results.BadRequest("Name must have between 2 and 80 characters.");
+        }
+
+        return null;
+    }
 }

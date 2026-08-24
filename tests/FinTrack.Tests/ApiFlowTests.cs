@@ -166,6 +166,9 @@ public sealed class ApiFlowTests
         var invalidDate = await client.PostAsJsonAsync("/transactions", new TransactionRequest(account.Id, category.Id, TransactionType.Expense, 10, default, null));
         Assert.Equal(HttpStatusCode.BadRequest, invalidDate.StatusCode);
 
+        var invalidDescription = await client.PostAsJsonAsync("/transactions", new TransactionRequest(account.Id, category.Id, TransactionType.Expense, 10, date, new string('a', 161)));
+        Assert.Equal(HttpStatusCode.BadRequest, invalidDescription.StatusCode);
+
         var invalidAccount = await client.PostAsJsonAsync("/transactions", new TransactionRequest(Guid.NewGuid(), category.Id, TransactionType.Expense, 10, date, null));
         Assert.Equal(HttpStatusCode.BadRequest, invalidAccount.StatusCode);
 
@@ -258,6 +261,12 @@ public sealed class ApiFlowTests
         var badRegister = await client.PostAsJsonAsync("/auth/register", new RegisterRequest("", "", ""));
         Assert.Equal(HttpStatusCode.BadRequest, badRegister.StatusCode);
 
+        var invalidEmail = await client.PostAsJsonAsync("/auth/register", new RegisterRequest("Bernardo", "email-invalido", "Senha@123"));
+        Assert.Equal(HttpStatusCode.BadRequest, invalidEmail.StatusCode);
+
+        var shortPassword = await client.PostAsJsonAsync("/auth/register", new RegisterRequest("Bernardo", "curta@email.com", "123"));
+        Assert.Equal(HttpStatusCode.BadRequest, shortPassword.StatusCode);
+
         await RegisterAndAuthorize(client);
 
         var duplicate = await client.PostAsJsonAsync("/auth/register", new RegisterRequest("Bernardo", "bernardo@email.com", "Senha@123"));
@@ -268,6 +277,9 @@ public sealed class ApiFlowTests
 
         var missingPassword = await client.PostAsJsonAsync("/auth/login", new LoginRequest("bernardo@email.com", ""));
         Assert.Equal(HttpStatusCode.BadRequest, missingPassword.StatusCode);
+
+        var invalidLoginEmail = await client.PostAsJsonAsync("/auth/login", new LoginRequest("email-invalido", "Senha@123"));
+        Assert.Equal(HttpStatusCode.BadRequest, invalidLoginEmail.StatusCode);
 
         var missingUser = await client.PostAsJsonAsync("/auth/login", new LoginRequest("ninguem@email.com", "Senha@123"));
         Assert.Equal(HttpStatusCode.Unauthorized, missingUser.StatusCode);
@@ -302,6 +314,9 @@ public sealed class ApiFlowTests
         var invalidAccount = await client.PostAsJsonAsync("/accounts", new AccountRequest("", AccountType.Checking, 0));
         Assert.Equal(HttpStatusCode.BadRequest, invalidAccount.StatusCode);
 
+        var shortAccount = await client.PostAsJsonAsync("/accounts", new AccountRequest("A", AccountType.Checking, 0));
+        Assert.Equal(HttpStatusCode.BadRequest, shortAccount.StatusCode);
+
         var deleteAccount = await client.DeleteAsync($"/accounts/{Guid.NewGuid()}");
         Assert.Equal(HttpStatusCode.NotFound, deleteAccount.StatusCode);
 
@@ -316,6 +331,9 @@ public sealed class ApiFlowTests
 
         var invalidCategory = await client.PostAsJsonAsync("/categories", new CategoryRequest("", CategoryType.Expense));
         Assert.Equal(HttpStatusCode.BadRequest, invalidCategory.StatusCode);
+
+        var shortCategory = await client.PostAsJsonAsync("/categories", new CategoryRequest("A", CategoryType.Expense));
+        Assert.Equal(HttpStatusCode.BadRequest, shortCategory.StatusCode);
 
         var deleteCategory = await client.DeleteAsync($"/categories/{Guid.NewGuid()}");
         Assert.Equal(HttpStatusCode.NotFound, deleteCategory.StatusCode);

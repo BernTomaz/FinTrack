@@ -38,9 +38,10 @@ public static class AccountEndpoints
 
         group.MapPost("/", async (AccountRequest request, FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>
         {
-            if (string.IsNullOrWhiteSpace(request.Name))
+            var validation = ValidateRequest(request);
+            if (validation is not null)
             {
-                return Results.BadRequest("Name is required.");
+                return validation;
             }
 
             var account = new Account(user.GetUserId(), request.Name, request.Type, request.InitialBalance);
@@ -52,9 +53,10 @@ public static class AccountEndpoints
 
         group.MapPut("/{id:guid}", async (Guid id, AccountRequest request, FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>
         {
-            if (string.IsNullOrWhiteSpace(request.Name))
+            var validation = ValidateRequest(request);
+            if (validation is not null)
             {
-                return Results.BadRequest("Name is required.");
+                return validation;
             }
 
             var userId = user.GetUserId();
@@ -98,4 +100,20 @@ public static class AccountEndpoints
 
     private static AccountResponse ToResponse(Account account) =>
         new(account.Id, account.Name, account.Type, account.InitialBalance, account.CreatedAt);
+
+    private static IResult? ValidateRequest(AccountRequest request)
+    {
+        var name = request.Name.Trim();
+        if (name.Length == 0)
+        {
+            return Results.BadRequest("Name is required.");
+        }
+
+        if (name.Length < 2 || name.Length > 80)
+        {
+            return Results.BadRequest("Name must have between 2 and 80 characters.");
+        }
+
+        return null;
+    }
 }

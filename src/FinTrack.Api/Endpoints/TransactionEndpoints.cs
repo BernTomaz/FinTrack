@@ -177,6 +177,11 @@ public static class TransactionEndpoints
             return Results.BadRequest("Date is required.");
         }
 
+        if (request.Description?.Trim().Length > 160)
+        {
+            return Results.BadRequest("Description must have at most 160 characters.");
+        }
+
         return null;
     }
 
