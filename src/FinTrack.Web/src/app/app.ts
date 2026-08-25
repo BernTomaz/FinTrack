@@ -81,6 +81,7 @@ export class App {
   protected readonly transactions = signal<Transaction[]>([]);
   protected readonly dashboard = signal<Dashboard | null>(null);
   protected readonly userMenuOpen = signal(false);
+  protected readonly sidebarHidden = signal(false);
   protected readonly authMode = signal<AuthMode>('login');
   protected readonly activeView = signal<View>('dashboard');
   protected readonly theme = signal<Theme>((localStorage.getItem('fintrack.theme') as Theme | null) ?? 'light');
@@ -334,6 +335,10 @@ export class App {
 
   protected toggleUserMenu(): void {
     this.userMenuOpen.update((open) => !open);
+  }
+
+  protected toggleSidebar(): void {
+    this.sidebarHidden.update((hidden) => !hidden);
   }
 
   protected openView(view: View): void {

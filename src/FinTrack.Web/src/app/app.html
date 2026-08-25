@@ -72,15 +72,18 @@
     </section>
   </main>
 } @else {
-  <main class="app-shell" [class.dark-theme]="theme() === 'dark'">
+  <main class="app-shell" [class.dark-theme]="theme() === 'dark'" [class.sidebar-hidden]="sidebarHidden()">
     <aside class="sidebar">
-      <button type="button" class="brand-row brand-button" (click)="openView('dashboard')" title="Ir para o dashboard">
-        <span class="brand-mark" aria-hidden="true">FT</span>
-        <div class="brand-title sidebar-title">
-          <strong>FinTrack</strong>
-          <small>Controle Financeiro Pessoal</small>
-        </div>
-      </button>
+      <div class="top-actions">
+        <button type="button" class="brand-row brand-button" (click)="openView('dashboard')" title="Ir para o dashboard">
+          <span class="brand-mark" aria-hidden="true">FT</span>
+          <div class="brand-title sidebar-title">
+            <strong>FinTrack</strong>
+            <small>Controle Financeiro Pessoal</small>
+          </div>
+        </button>
+        <button type="button" class="icon" title="Ocultar menu lateral" (click)="toggleSidebar()">‹</button>
+      </div>
 
       <nav aria-label="Menu principal">
         <button type="button" [class.active]="activeView() === 'dashboard'" (click)="openView('dashboard')"><span>⌂</span> Dashboard</button>
@@ -103,7 +106,12 @@
 
     <section class="content">
       <header class="topbar">
-        <h1>{{ pageTitle() }}</h1>
+        <div class="brand-row">
+          @if (sidebarHidden()) {
+            <button type="button" class="icon" title="Mostrar menu lateral" (click)="toggleSidebar()">☰</button>
+          }
+          <h1>{{ pageTitle() }}</h1>
+        </div>
         <div class="top-actions">
           @if (activeView() === 'dashboard') {
             <button type="button" class="ghost" (click)="refreshData()">Atualizar</button>
@@ -351,7 +359,7 @@
             <div class="empty-state">
               <strong>Baixar lançamentos do mês</strong>
               <span>O arquivo CSV usa os lançamentos cadastrados no período atual.</span>
-              <button type="button" class="primary" (click)="exportCsv()">Baixar CSV</button>
+              <button type="button" class="primary" style="justify-self: center" (click)="exportCsv()">Baixar CSV</button>
             </div>
           </article>
         </section>

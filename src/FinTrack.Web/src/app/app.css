@@ -269,69 +269,52 @@ select {
 .app-shell {
   background: #fff;
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr);
   min-height: 100vh;
+  transition: 220ms ease;
 }
 
-.dark-theme {
-  background: #0f172a;
-  color: #e5e7eb;
+.app-shell.dark-theme {
+  background: #0b1220;
+  color: #dbe7f5;
 }
 
-.dark-theme .sidebar,
-.dark-theme .topbar {
-  border-color: #263247;
+.app-shell.dark-theme .sidebar {
+  background: #111b2d;
+  border-color: #273852;
 }
 
-.dark-theme .panel,
-.dark-theme .metric,
-.dark-theme .auth-card,
-.dark-theme .menu-popover {
-  background: #111c31;
-  border-color: #263247;
-  box-shadow: none;
+.app-shell.dark-theme :is(.panel, .metric, .menu-popover, .empty-state) {
+  background: #111b2d;
+  border-color: transparent;
+  color: #dbe7f5;
 }
 
-.dark-theme input,
-.dark-theme select,
-.dark-theme .ghost,
-.dark-theme .select-like,
-.dark-theme .icon {
-  background: #0f172a;
-  border-color: #334155;
-  color: #e5e7eb;
+.app-shell.dark-theme :is(input, select, .ghost, .select-like, .icon) {
+  background: #0c1526;
+  border-color: #3a4b67;
+  color: #e6edf7;
 }
 
-.dark-theme .profile-box,
-.dark-theme .about-box,
-.dark-theme .empty-state {
-  background: #172033;
-  border-color: #334155;
-}
-
-.dark-theme h1,
-.dark-theme h2,
-.dark-theme label,
-.dark-theme .metric p,
-.dark-theme .empty-state strong,
-.dark-theme .profile-box strong,
-.dark-theme .about-box strong,
-.dark-theme .menu-popover strong {
+.app-shell.dark-theme :is(.panel h2, .panel label, .metric p, .empty-state strong, .menu-popover strong) {
   color: #f8fafc;
 }
 
-.dark-theme small,
-.dark-theme .profile-box small,
-.dark-theme .about-box small,
-.dark-theme .sidebar-title small,
-.dark-theme .menu-popover button,
-.dark-theme nav button {
-  color: #cbd5e1;
+.app-shell.dark-theme :is(.panel small, .menu-popover button) {
+  color: #b8c6da;
 }
 
-.dark-theme nav .active {
-  background: rgba(22, 163, 74, 0.18);
-  color: #86efac;
+.app-shell.dark-theme :is(.sidebar-title small, nav button) {
+  color: #dbe7f5;
+}
+
+.app-shell.dark-theme nav .active {
+  background: rgba(45, 212, 120, 0.16);
+  color: #a7f3c7;
+}
+
+.app-shell.dark-theme .donut::after {
+  background: #111b2d;
 }
 
 .sidebar {
@@ -339,7 +322,11 @@ select {
   display: grid;
   grid-template-rows: auto 1fr auto;
   gap: 42px;
+  min-width: 0;
+  overflow: hidden;
   padding: 28px 24px;
+  transition: 220ms ease;
+  width: 300px;
 }
 
 nav {
@@ -801,6 +788,7 @@ nav .active {
   color: #475467;
   display: grid;
   gap: 6px;
+  justify-items: center;
   min-height: 180px;
   padding: 24px;
   text-align: center;
@@ -974,4 +962,17 @@ nav .active {
     gap: 10px;
     overflow-x: auto;
   }
+}
+
+.sidebar-hidden .sidebar {
+  border: 0;
+  opacity: 0;
+  padding-left: 0;
+  padding-right: 0;
+  pointer-events: none;
+  width: 0;
+}
+
+.sidebar-hidden .sidebar > * {
+  visibility: hidden;
 }
