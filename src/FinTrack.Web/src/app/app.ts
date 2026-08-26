@@ -8,6 +8,7 @@ type CategoryType = 'Income' | 'Expense';
 type TransactionType = 'Income' | 'Expense';
 type Theme = 'light' | 'dark';
 type AuthMode = 'login' | 'register';
+type PetColor = 'green' | 'blue' | 'orange' | 'purple';
 type View =
   | 'dashboard'
   | 'income'
@@ -82,11 +83,25 @@ export class App {
   protected readonly dashboard = signal<Dashboard | null>(null);
   protected readonly userMenuOpen = signal(false);
   protected readonly sidebarHidden = signal(false);
+  protected readonly petOpen = signal(false);
+  protected readonly petEnabled = signal(localStorage.getItem('fintrack.pet.enabled') !== 'false');
+  protected readonly petColor = signal<PetColor>((localStorage.getItem('fintrack.pet.color') as PetColor | null) ?? 'green');
+  protected readonly petQuestion = signal('');
+  protected readonly petAnswer = signal('Oi, sou o Fin. Pergunte sobre saldo, receitas, despesas ou categorias.');
   protected readonly authMode = signal<AuthMode>('login');
   protected readonly activeView = signal<View>('dashboard');
   protected readonly theme = signal<Theme>((localStorage.getItem('fintrack.theme') as Theme | null) ?? 'light');
 
   protected readonly isLoggedIn = computed(() => this.token().length > 0);
+  protected readonly petTip = computed(() => {
+    const dashboard = this.dashboard();
+
+    if (!dashboard) {
+      return 'Carregando seus dados...';
+    }
+
+    return dashboard.monthBalance >= 0 ? 'Seu mês está positivo.' : 'Seu mês está no vermelho.';
+  });
   protected readonly accountTypes: AccountType[] = ['Wallet', 'Checking', 'Savings', 'CreditCard'];
   protected readonly categoryTypes: CategoryType[] = ['Income', 'Expense'];
   protected readonly transactionTypes: TransactionType[] = ['Income', 'Expense'];
@@ -339,6 +354,74 @@ export class App {
 
   protected toggleSidebar(): void {
     this.sidebarHidden.update((hidden) => !hidden);
+  }
+
+  protected togglePet(): void {
+    this.petOpen.update((open) => !open);
+  }
+
+  protected setPetEnabled(enabled: boolean): void {
+    localStorage.setItem('fintrack.pet.enabled', String(enabled));
+    this.petEnabled.set(enabled);
+    this.petOpen.set(enabled && this.petOpen());
+  }
+
+  protected setPetColor(color: string): void {
+    const nextColor: PetColor = ['blue', 'orange', 'purple'].includes(color) ? (color as PetColor) : 'green';
+    localStorage.setItem('fintrack.pet.color', nextColor);
+    this.petColor.set(nextColor);
+  }
+
+  protected petColorValue(): string {
+    return {
+      green: '#10b981',
+      blue: '#3b82f6',
+      orange: '#f97316',
+      purple: '#8b5cf6',
+    }[this.petColor()];
+  }
+
+  protected petBorderColor(): string {
+    return {
+      green: '#047857',
+      blue: '#1d4ed8',
+      orange: '#c2410c',
+      purple: '#6d28d9',
+    }[this.petColor()];
+  }
+
+  protected updatePetQuestion(value: string): void {
+    this.petQuestion.set(value);
+  }
+
+  protected askPet(): void {
+    const question = this.petQuestion().trim().toLowerCase();
+    const dashboard = this.dashboard();
+
+    if (!question) {
+      this.petAnswer.set('Escreva uma pergunta curtinha para eu olhar seus dados.');
+      return;
+    }
+
+    if (!dashboard) {
+      this.petAnswer.set('Ainda estou carregando seus dados. Tente atualizar o dashboard.');
+      return;
+    }
+
+    if (question.includes('saldo')) {
+      this.petAnswer.set(`Seu saldo atual é ${this.money(dashboard.currentBalance)}.`);
+    } else if (question.includes('receita')) {
+      this.petAnswer.set(`Suas receitas do mês somam ${this.money(dashboard.totalIncome)}.`);
+    } else if (question.includes('despesa') || question.includes('gastei') || question.includes('gasto')) {
+      this.petAnswer.set(`Suas despesas do mês somam ${this.money(dashboard.totalExpense)}.`);
+    } else if (question.includes('categoria')) {
+      const topCategory = dashboard.expensesByCategory[0];
+      this.petAnswer.set(topCategory ? `A principal categoria é ${topCategory.categoryName}: ${this.money(topCategory.total)}.` : 'Ainda não há despesas por categoria.');
+    } else if (question.includes('lançamento') || question.includes('transa')) {
+      this.petAnswer.set(`Encontrei ${this.transactions().length} lançamentos neste mês.`);
+    } else {
+      this.petAnswer.set('Por enquanto eu respondo sobre saldo, receitas, despesas, categorias e lançamentos.');
+    }
   }
 
   protected openView(view: View): void {

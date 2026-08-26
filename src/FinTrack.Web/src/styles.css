@@ -6,3 +6,53 @@ body {
   background: #f6faf8;
   margin: 0;
 }
+
+button {
+  transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
+}
+
+button:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.pet-chat {
+  animation: pet-pop 180ms ease-out;
+}
+
+.pet-pig {
+  animation: pet-wiggle 3s ease-in-out infinite;
+}
+
+.pet-eye {
+  animation: pet-blink 4.5s steps(1) infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes pet-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+}
+
+@keyframes pet-wiggle {
+  50% {
+    transform: translateY(-5px) rotate(-2deg);
+  }
+}
+
+@keyframes pet-blink {
+  0%, 92%, 100% {
+    transform: scaleY(1);
+  }
+
+  94%, 96% {
+    transform: scaleY(0.15);
+  }
+}
