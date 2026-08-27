@@ -88,6 +88,9 @@ export class App {
   protected readonly petColor = signal<PetColor>((localStorage.getItem('fintrack.pet.color') as PetColor | null) ?? 'green');
   protected readonly petQuestion = signal('');
   protected readonly petAnswer = signal('Oi, sou o Fin. Pergunte sobre saldo, receitas, despesas ou categorias.');
+  protected readonly transactionSearch = signal('');
+  protected readonly transactionTypeFilter = signal('');
+  protected readonly transactionCategoryFilter = signal('');
   protected readonly authMode = signal<AuthMode>('login');
   protected readonly activeView = signal<View>('dashboard');
   protected readonly theme = signal<Theme>((localStorage.getItem('fintrack.theme') as Theme | null) ?? 'light');
@@ -96,6 +99,16 @@ export class App {
   protected readonly isLoggedIn = computed(() => this.token().length > 0);
   protected readonly selectedYear = computed(() => Number(this.selectedMonth().slice(0, 4)));
   protected readonly selectedMonthNumber = computed(() => Number(this.selectedMonth().slice(5, 7)));
+  protected readonly filteredTransactions = computed(() => {
+    const search = this.transactionSearch().trim().toLowerCase();
+    const type = this.transactionTypeFilter();
+    const categoryId = this.transactionCategoryFilter();
+
+    return this.transactions().filter((transaction) => {
+      const searchable = `${transaction.date} ${transaction.description ?? ''} ${this.categoryName(transaction.categoryId)} ${this.accountName(transaction.accountId)}`.toLowerCase();
+      return (!search || searchable.includes(search)) && (!type || transaction.type === type) && (!categoryId || transaction.categoryId === categoryId);
+    });
+  });
   protected readonly petTip = computed(() => {
     const dashboard = this.dashboard();
 
@@ -395,6 +408,18 @@ export class App {
 
   protected updatePetQuestion(value: string): void {
     this.petQuestion.set(value);
+  }
+
+  protected updateTransactionSearch(value: string): void {
+    this.transactionSearch.set(value);
+  }
+
+  protected updateTransactionTypeFilter(value: string): void {
+    this.transactionTypeFilter.set(value);
+  }
+
+  protected updateTransactionCategoryFilter(value: string): void {
+    this.transactionCategoryFilter.set(value);
   }
 
   protected askPet(): void {

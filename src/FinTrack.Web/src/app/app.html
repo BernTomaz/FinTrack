@@ -156,7 +156,7 @@
 
       @if (activeView() === 'password') {
         <section class="settings-page">
-          <article class="panel settings-card">
+          <article class="panel settings-card" style="max-width:920px">
             <div class="panel-head">
               <h2>Alterar senha</h2>
               <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
@@ -170,8 +170,8 @@
       }
 
       @if (activeView() === 'preferences') {
-        <section class="settings-page">
-          <article class="panel settings-card">
+        <section class="settings-page" style="place-items:start center">
+          <article class="panel settings-card" style="max-width:min(1180px, calc(100vw - 64px))">
             <div class="panel-head">
               <h2>Preferências</h2>
               <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
@@ -320,11 +320,30 @@
       }
 
       @if (activeView() === 'reports') {
-        <section class="settings-page">
-          <article class="panel settings-card">
+        <section class="settings-page" style="place-items:start center">
+          <article class="panel settings-card" style="max-width:min(1180px, calc(100vw - 64px))">
             <div class="panel-head">
               <h2>Relatórios</h2>
               <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
+            </div>
+            <div class="form-grid">
+              <label>Buscar<input type="search" [value]="transactionSearch()" (input)="updateTransactionSearch($any($event.target).value)" placeholder="Descrição, conta ou categoria" /></label>
+              <label>Tipo
+                <select [value]="transactionTypeFilter()" (change)="updateTransactionTypeFilter($any($event.target).value)">
+                  <option value="">Todos</option>
+                  @for (type of transactionTypes; track type) {
+                    <option [value]="type">{{ transactionTypeLabel(type) }}</option>
+                  }
+                </select>
+              </label>
+              <label>Categoria
+                <select [value]="transactionCategoryFilter()" (change)="updateTransactionCategoryFilter($any($event.target).value)">
+                  <option value="">Todas</option>
+                  @for (category of categories(); track category.id) {
+                    <option [value]="category.id">{{ category.name }}</option>
+                  }
+                </select>
+              </label>
             </div>
             <div class="table">
               <div class="table-row table-head">
@@ -336,7 +355,7 @@
                 <span>Conta</span>
                 <span>Ações</span>
               </div>
-              @for (transaction of transactions(); track transaction.id) {
+              @for (transaction of filteredTransactions(); track transaction.id) {
                 <div class="table-row">
                   <span>{{ transaction.date }}</span>
                   <span>{{ transaction.description || 'Lançamento' }}</span>
@@ -353,7 +372,7 @@
               } @empty {
                 <div class="empty-state">
                   <strong>Nenhum lançamento encontrado</strong>
-                  <span>Cadastre receitas e despesas para acompanhar seus relatórios.</span>
+                  <span>Ajuste os filtros ou cadastre receitas e despesas para acompanhar seus relatórios.</span>
                 </div>
               }
             </div>
