@@ -91,8 +91,11 @@ export class App {
   protected readonly authMode = signal<AuthMode>('login');
   protected readonly activeView = signal<View>('dashboard');
   protected readonly theme = signal<Theme>((localStorage.getItem('fintrack.theme') as Theme | null) ?? 'light');
+  protected readonly selectedMonth = signal(localStorage.getItem('fintrack.month') ?? new Date().toISOString().slice(0, 7));
 
   protected readonly isLoggedIn = computed(() => this.token().length > 0);
+  protected readonly selectedYear = computed(() => Number(this.selectedMonth().slice(0, 4)));
+  protected readonly selectedMonthNumber = computed(() => Number(this.selectedMonth().slice(5, 7)));
   protected readonly petTip = computed(() => {
     const dashboard = this.dashboard();
 
@@ -310,7 +313,7 @@ export class App {
   }
 
   protected exportCsv(): void {
-    window.open(`${this.apiUrl}/exports/transactions.csv?year=2026&month=8`, '_blank');
+    window.open(`${this.apiUrl}/exports/transactions.csv?year=${this.selectedYear()}&month=${this.selectedMonthNumber()}`, '_blank');
   }
 
   protected accountName(id: string): string {
@@ -434,12 +437,25 @@ export class App {
   }
 
   protected currentMonthValue(): string {
-    return new Date().toISOString().slice(0, 7);
+    return this.selectedMonth();
   }
 
   protected currentMonthLabel(): string {
-    const label = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(new Date());
+    const label = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(new Date(`${this.selectedMonth()}-01T00:00:00`));
     return label[0].toUpperCase() + label.slice(1);
+  }
+
+  protected setCurrentMonth(month: string): void {
+    if (!/^\d{4}-\d{2}$/.test(month)) {
+      return;
+    }
+
+    localStorage.setItem('fintrack.month', month);
+    this.selectedMonth.set(month);
+
+    if (this.isLoggedIn()) {
+      this.loadAll();
+    }
   }
 
   protected chartRangeLabel(): string {
@@ -476,10 +492,10 @@ export class App {
     this.http.get<Account[]>(`${this.apiUrl}/accounts`, options).subscribe((accounts) => this.accounts.set(accounts));
     this.http.get<Category[]>(`${this.apiUrl}/categories`, options).subscribe((categories) => this.categories.set(categories));
     this.http
-      .get<Transaction[]>(`${this.apiUrl}/transactions?year=2026&month=8`, options)
+      .get<Transaction[]>(`${this.apiUrl}/transactions?year=${this.selectedYear()}&month=${this.selectedMonthNumber()}`, options)
       .subscribe((transactions) => this.transactions.set(transactions));
     this.http
-      .get<Dashboard>(`${this.apiUrl}/dashboard/monthly?year=2026&month=8`, options)
+      .get<Dashboard>(`${this.apiUrl}/dashboard/monthly?year=${this.selectedYear()}&month=${this.selectedMonthNumber()}`, options)
       .subscribe((dashboard) => this.dashboard.set(dashboard));
   }
 

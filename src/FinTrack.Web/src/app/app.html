@@ -183,7 +183,7 @@
                 <option value="dark">Escuro</option>
               </select>
             </label>
-            <label>Mês atual<input type="month" [value]="currentMonthValue()" /></label>
+            <label>Mês atual<input type="month" [value]="currentMonthValue()" (change)="setCurrentMonth($any($event.target).value)" /></label>
             <label class="check">
               <input type="checkbox" checked />
               Exibir resumo mensal no dashboard
@@ -379,7 +379,7 @@
 
       @if (activeView() === 'dashboard') {
       <section class="toolbar">
-        <button type="button" class="select-like">▣ {{ currentMonthLabel() }}</button>
+        <input class="select-like" type="month" [value]="currentMonthValue()" (change)="setCurrentMonth($any($event.target).value)" title="Selecionar mês" />
       </section>
 
       <section id="dashboard" class="summary" aria-label="Resumo mensal">
@@ -388,7 +388,7 @@
           <div>
             <p>Receitas</p>
             <strong>{{ money(dashboard()?.totalIncome ?? 0) }}</strong>
-            <small>↑ 8,5% em relação a Jul/2026</small>
+            <small>Mês selecionado</small>
           </div>
         </article>
         <article class="metric expense">
@@ -396,7 +396,7 @@
           <div>
             <p>Despesas</p>
             <strong>{{ money(dashboard()?.totalExpense ?? 0) }}</strong>
-            <small>↑ 5,2% em relação a Jul/2026</small>
+            <small>Mês selecionado</small>
           </div>
         </article>
         <article class="metric balance">
@@ -404,7 +404,7 @@
           <div>
             <p>Saldo</p>
             <strong>{{ money(dashboard()?.monthBalance ?? 0) }}</strong>
-            <small>↑ 17,8% em relação a Jul/2026</small>
+            <small>Mês selecionado</small>
           </div>
         </article>
         <article class="metric bills">
