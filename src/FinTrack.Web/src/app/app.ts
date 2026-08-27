@@ -535,6 +535,24 @@ export class App {
 
   protected showAllTransactions(): void {
     this.loadAll();
+    this.transactionSearch.set('');
+    this.transactionTypeFilter.set('');
+    this.transactionCategoryFilter.set('');
+    this.openView('reports');
+  }
+
+  protected showTransactionsByType(type: TransactionType): void {
+    this.transactionSearch.set('');
+    this.transactionTypeFilter.set(type);
+    this.transactionCategoryFilter.set('');
+    this.openView('reports');
+  }
+
+  protected showTransactionsByCategory(categoryName: string): void {
+    const categoryId = this.categories().find((category) => category.name === categoryName)?.id ?? '';
+    this.transactionSearch.set('');
+    this.transactionTypeFilter.set('Expense');
+    this.transactionCategoryFilter.set(categoryId);
     this.openView('reports');
   }
 

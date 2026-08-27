@@ -402,38 +402,38 @@
       </section>
 
       <section id="dashboard" class="summary" aria-label="Resumo mensal">
-        <article class="metric income">
+        <button type="button" class="metric income" style="text-align:left" (click)="showTransactionsByType('Income')" title="Ver receitas do mês">
           <span>↗</span>
           <div>
             <p>Receitas</p>
             <strong>{{ money(dashboard()?.totalIncome ?? 0) }}</strong>
             <small>Mês selecionado</small>
           </div>
-        </article>
-        <article class="metric expense">
+        </button>
+        <button type="button" class="metric expense" style="text-align:left" (click)="showTransactionsByType('Expense')" title="Ver despesas do mês">
           <span>↘</span>
           <div>
             <p>Despesas</p>
             <strong>{{ money(dashboard()?.totalExpense ?? 0) }}</strong>
             <small>Mês selecionado</small>
           </div>
-        </article>
-        <article class="metric balance">
+        </button>
+        <button type="button" class="metric balance" style="text-align:left" (click)="showAllTransactions()" title="Ver lançamentos do mês">
           <span>▣</span>
           <div>
             <p>Saldo</p>
             <strong>{{ money(dashboard()?.monthBalance ?? 0) }}</strong>
             <small>Mês selecionado</small>
           </div>
-        </article>
-        <article class="metric bills">
+        </button>
+        <button type="button" class="metric bills" style="text-align:left" (click)="showAllAccounts()" title="Ver contas">
           <span>▤</span>
           <div>
             <p>Saldo atual</p>
             <strong>{{ money(dashboard()?.currentBalance ?? 0) }}</strong>
             <small>Contas e lançamentos atualizados</small>
           </div>
-        </article>
+        </button>
       </section>
 
       <section class="grid">
@@ -470,10 +470,10 @@
               <div class="donut"><span>Total<br />{{ money(dashboard()?.totalExpense ?? 0) }}</span></div>
               <div class="list compact">
                 @for (item of dashboard()?.expensesByCategory ?? []; track item.categoryName) {
-                  <div class="line">
+                  <button type="button" class="line" style="background:transparent;color:inherit;text-align:left;width:100%" (click)="showTransactionsByCategory(item.categoryName)" title="Ver despesas desta categoria">
                     <span>{{ item.categoryName }}</span>
                     <strong>{{ money(item.total) }}</strong>
-                  </div>
+                  </button>
                 }
               </div>
             </div>
