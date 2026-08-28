@@ -92,6 +92,7 @@
         <button type="button" [class.active]="activeView() === 'accounts'" (click)="openView('accounts')"><span>▣</span> Contas</button>
         <button type="button" [class.active]="activeView() === 'categories'" (click)="openView('categories')"><span>◇</span> Categorias</button>
         <button type="button" [class.active]="activeView() === 'reports'" (click)="openView('reports')"><span>▥</span> Relatórios</button>
+        <button type="button" [class.active]="activeView() === 'categorySummary'" (click)="openCategorySummary()"><span>▤</span> Resumo por categoria</button>
         <button type="button" [class.active]="activeView() === 'export'" (click)="openView('export')"><span>⇩</span> Exportação CSV</button>
       </nav>
 
@@ -183,7 +184,7 @@
                 <option value="dark">Escuro</option>
               </select>
             </label>
-            <label>Mês atual<input type="month" [value]="currentMonthValue()" (change)="setCurrentMonth($any($event.target).value)" /></label>
+            <label>Mês de referência<input type="month" [value]="currentMonthValue()" (change)="setCurrentMonth($any($event.target).value)" /></label>
             <label class="check">
               <input type="checkbox" checked />
               Exibir resumo mensal no dashboard
@@ -230,7 +231,7 @@
         <section class="settings-page">
           <form class="panel settings-card" [formGroup]="transactionForm" (ngSubmit)="createTransaction()">
             <div class="panel-head">
-              <h2>{{ activeView() === 'income' ? 'Nova receita' : 'Nova despesa' }}</h2>
+              <h2>{{ editingTransactionId() ? 'Editar lançamento' : activeView() === 'income' ? 'Nova receita' : 'Nova despesa' }}</h2>
               <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
             </div>
             <label>Conta
@@ -252,7 +253,12 @@
             <label>Valor<input type="number" formControlName="amount" min="0.01" step="0.01" /></label>
             <label>Data<input type="date" formControlName="date" /></label>
             <label>Descrição<input type="text" formControlName="description" /></label>
-            <button type="submit" class="primary">Salvar lançamento</button>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button type="submit" class="primary">{{ editingTransactionId() ? 'Atualizar lançamento' : 'Salvar lançamento' }}</button>
+              @if (editingTransactionId()) {
+                <button type="button" class="ghost" (click)="cancelTransactionEdit()">Cancelar edição</button>
+              }
+            </div>
           </form>
         </section>
       }
@@ -347,11 +353,11 @@
             </div>
             <div class="table">
               <div class="table-row table-head">
-                <span>Data</span>
-                <span>Descrição</span>
-                <span>Categoria</span>
-                <span>Tipo</span>
-                <span>Valor</span>
+                <button type="button" style="background:transparent;color:inherit;text-align:left" (click)="sortTransactions('date')">Data{{ sortLabel('date') }}</button>
+                <button type="button" style="background:transparent;color:inherit;text-align:left" (click)="sortTransactions('description')">Descrição{{ sortLabel('description') }}</button>
+                <button type="button" style="background:transparent;color:inherit;text-align:left" (click)="sortTransactions('category')">Categoria{{ sortLabel('category') }}</button>
+                <button type="button" style="background:transparent;color:inherit;text-align:left" (click)="sortTransactions('type')">Tipo{{ sortLabel('type') }}</button>
+                <button type="button" style="background:transparent;color:inherit;text-align:left" (click)="sortTransactions('amount')">Valor{{ sortLabel('amount') }}</button>
                 <span>Conta</span>
                 <span>Ações</span>
               </div>
@@ -367,12 +373,42 @@
                     {{ money(transaction.amount) }}
                   </strong>
                   <span>{{ accountName(transaction.accountId) }}</span>
-                  <button type="button" class="icon danger-icon" title="Excluir lançamento" (click)="deleteTransaction(transaction.id)">×</button>
+                  <span style="display:flex;gap:8px">
+                    <button type="button" class="icon" title="Editar lançamento" (click)="editTransaction(transaction)">✎</button>
+                    <button type="button" class="icon danger-icon" title="Excluir lançamento" (click)="deleteTransaction(transaction.id)">×</button>
+                  </span>
                 </div>
               } @empty {
                 <div class="empty-state">
                   <strong>Nenhum lançamento encontrado</strong>
                   <span>Ajuste os filtros ou cadastre receitas e despesas para acompanhar seus relatórios.</span>
+                </div>
+              }
+            </div>
+          </article>
+        </section>
+      }
+
+      @if (activeView() === 'categorySummary') {
+        <section class="settings-page" style="place-items:start center">
+          <article class="panel settings-card" style="max-width:min(920px, calc(100vw - 64px))">
+            <div class="panel-head">
+              <h2>Resumo por categoria</h2>
+              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
+            </div>
+            <div class="list">
+              @for (item of categorySummary(); track item.categoryName) {
+                <button type="button" class="line" style="background:transparent;color:inherit;text-align:left;width:100%" (click)="showTransactionsByCategory(item.categoryName)" [title]="categoryExpenseTooltip(item)">
+                  <span>
+                    <strong>{{ item.categoryName }}</strong>
+                    <small>{{ item.percent.toFixed(1).replace('.', ',') }}% das despesas do mês</small>
+                  </span>
+                  <strong>{{ money(item.total) }}</strong>
+                </button>
+              } @empty {
+                <div class="empty-state">
+                  <strong>Sem despesas por categoria</strong>
+                  <span>Cadastre despesas para ver o resumo do mês.</span>
                 </div>
               }
             </div>
@@ -407,7 +443,7 @@
           <div>
             <p>Receitas</p>
             <strong>{{ money(dashboard()?.totalIncome ?? 0) }}</strong>
-            <small>Mês selecionado</small>
+            <small>{{ currentMonthLabel() }}</small>
           </div>
         </button>
         <button type="button" class="metric expense" style="text-align:left" (click)="showTransactionsByType('Expense')" title="Ver despesas do mês">
@@ -415,7 +451,7 @@
           <div>
             <p>Despesas</p>
             <strong>{{ money(dashboard()?.totalExpense ?? 0) }}</strong>
-            <small>Mês selecionado</small>
+            <small>{{ currentMonthLabel() }}</small>
           </div>
         </button>
         <button type="button" class="metric balance" style="text-align:left" (click)="showAllTransactions()" title="Ver lançamentos do mês">
@@ -423,7 +459,7 @@
           <div>
             <p>Saldo</p>
             <strong>{{ money(dashboard()?.monthBalance ?? 0) }}</strong>
-            <small>Mês selecionado</small>
+            <small>{{ currentMonthLabel() }}</small>
           </div>
         </button>
         <button type="button" class="metric bills" style="text-align:left" (click)="showAllAccounts()" title="Ver contas">
@@ -445,9 +481,9 @@
           @if (transactions().length > 0) {
             <div class="bar-chart" aria-label="Gráfico de fluxo de caixa mensal">
               @for (month of chartMonths(); track month.label) {
-                <div class="bar-group">
-                  <span class="income-bar" [style.height.%]="month.income" [title]="'Receitas: ' + money(month.incomeAmount)"></span>
-                  <span class="expense-bar" [style.height.%]="month.expense" [title]="'Despesas: ' + money(month.expenseAmount)"></span>
+                <div class="bar-group" [title]="cashFlowTooltip(month)">
+                  <span class="income-bar" [style.height.%]="month.income"></span>
+                  <span class="expense-bar" [style.height.%]="month.expense"></span>
                   <small>{{ month.label }}</small>
                 </div>
               }
@@ -464,13 +500,13 @@
           <article id="categorias" class="panel">
             <div class="panel-head">
               <h2>Despesas por categoria</h2>
-              <button type="button" class="select-like">Este mês</button>
+              <button type="button" class="select-like">{{ currentMonthLabel() }}</button>
             </div>
             <div class="category-card">
-              <div class="donut"><span>Total<br />{{ money(dashboard()?.totalExpense ?? 0) }}</span></div>
+              <div class="donut" [title]="expenseDonutTooltip()"><span>Total<br />{{ money(dashboard()?.totalExpense ?? 0) }}</span></div>
               <div class="list compact">
                 @for (item of dashboard()?.expensesByCategory ?? []; track item.categoryName) {
-                  <button type="button" class="line" style="background:transparent;color:inherit;text-align:left;width:100%" (click)="showTransactionsByCategory(item.categoryName)" title="Ver despesas desta categoria">
+                  <button type="button" class="line" style="background:transparent;color:inherit;text-align:left;width:100%" (click)="showTransactionsByCategory(item.categoryName)" [title]="categoryExpenseTooltip(item)">
                     <span>{{ item.categoryName }}</span>
                     <strong>{{ money(item.total) }}</strong>
                   </button>
@@ -517,7 +553,10 @@
                   {{ money(transaction.amount) }}
                 </strong>
                 <span>{{ accountName(transaction.accountId) }}</span>
-                <button type="button" class="icon danger-icon" title="Excluir lançamento" (click)="deleteTransaction(transaction.id)">×</button>
+                <span style="display:flex;gap:8px">
+                  <button type="button" class="icon" title="Editar lançamento" (click)="editTransaction(transaction)">✎</button>
+                  <button type="button" class="icon danger-icon" title="Excluir lançamento" (click)="deleteTransaction(transaction.id)">×</button>
+                </span>
               </div>
             }
           </div>
@@ -572,7 +611,7 @@
         </form>
 
         <form id="receitas" class="panel transaction-form" [formGroup]="transactionForm" (ngSubmit)="createTransaction()">
-          <h2>Novo lançamento</h2>
+          <h2>{{ editingTransactionId() ? 'Editar lançamento' : 'Novo lançamento' }}</h2>
           <div class="form-grid">
             <label>Conta
               <select formControlName="accountId">
@@ -601,7 +640,12 @@
             <label>Data<input type="date" formControlName="date" /></label>
             <label>Descrição<input type="text" formControlName="description" /></label>
           </div>
-          <button type="submit" class="primary">Salvar lançamento</button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button type="submit" class="primary">{{ editingTransactionId() ? 'Atualizar lançamento' : 'Salvar lançamento' }}</button>
+            @if (editingTransactionId()) {
+              <button type="button" class="ghost" (click)="cancelTransactionEdit()">Cancelar edição</button>
+            }
+          </div>
         </form>
       </section>
       }
@@ -647,7 +691,11 @@
     }
 
     @if (message()) {
-      <p class="message" [class.leaving]="isMessageLeaving()">{{ message() }}</p>
+      <div class="message" [class.leaving]="isMessageLeaving()" [attr.style]="messageStyle()">
+        <strong>{{ messageIcon() }}</strong>
+        <span>{{ message() }}</span>
+        <button type="button" style="background:transparent;color:inherit;padding:0 0 0 8px" (click)="closeMessage()">×</button>
+      </div>
     }
   </main>
 }

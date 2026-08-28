@@ -9,6 +9,7 @@ type TransactionType = 'Income' | 'Expense';
 type Theme = 'light' | 'dark';
 type AuthMode = 'login' | 'register';
 type PetColor = 'green' | 'blue' | 'orange' | 'purple';
+type TransactionSortField = 'date' | 'description' | 'category' | 'type' | 'amount';
 type View =
   | 'dashboard'
   | 'income'
@@ -16,6 +17,7 @@ type View =
   | 'accounts'
   | 'categories'
   | 'reports'
+  | 'categorySummary'
   | 'export'
   | 'profile'
   | 'password'
@@ -76,6 +78,7 @@ export class App {
   protected readonly userName = signal(sessionStorage.getItem('fintrack.name') ?? '');
   protected readonly userEmail = signal(sessionStorage.getItem('fintrack.email') ?? '');
   protected readonly message = signal('');
+  protected readonly messageKind = signal<'success' | 'error' | 'info'>('info');
   protected readonly isMessageLeaving = signal(false);
   protected readonly accounts = signal<Account[]>([]);
   protected readonly categories = signal<Category[]>([]);
@@ -91,6 +94,9 @@ export class App {
   protected readonly transactionSearch = signal('');
   protected readonly transactionTypeFilter = signal('');
   protected readonly transactionCategoryFilter = signal('');
+  protected readonly transactionSortField = signal<TransactionSortField>('date');
+  protected readonly transactionSortDirection = signal<'asc' | 'desc'>('desc');
+  protected readonly editingTransactionId = signal('');
   protected readonly authMode = signal<AuthMode>('login');
   protected readonly activeView = signal<View>('dashboard');
   protected readonly theme = signal<Theme>((localStorage.getItem('fintrack.theme') as Theme | null) ?? 'light');
@@ -107,7 +113,15 @@ export class App {
     return this.transactions().filter((transaction) => {
       const searchable = `${transaction.date} ${transaction.description ?? ''} ${this.categoryName(transaction.categoryId)} ${this.accountName(transaction.accountId)}`.toLowerCase();
       return (!search || searchable.includes(search)) && (!type || transaction.type === type) && (!categoryId || transaction.categoryId === categoryId);
-    });
+    }).sort((left, right) => this.compareTransactions(left, right));
+  });
+  protected readonly categorySummary = computed(() => {
+    const total = this.dashboard()?.totalExpense ?? 0;
+
+    return (this.dashboard()?.expensesByCategory ?? []).map((item) => ({
+      ...item,
+      percent: total > 0 ? (item.total / total) * 100 : 0,
+    }));
   });
   protected readonly petTip = computed(() => {
     const dashboard = this.dashboard();
@@ -267,9 +281,16 @@ export class App {
   }
 
   protected deleteAccount(id: string): void {
+    if (!confirm('Excluir esta conta?')) {
+      return;
+    }
+
     this.http.delete(`${this.apiUrl}/accounts/${id}`, this.options()).subscribe({
-      next: () => this.loadAll(),
-      error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível excluir a conta.')),
+      next: () => {
+        this.loadAll();
+        this.showMessage('Conta excluída.', 'success');
+      },
+      error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível excluir a conta.'), 'error'),
     });
   }
 
@@ -306,22 +327,33 @@ export class App {
       return;
     }
 
-    this.http
-      .post<Transaction>(`${this.apiUrl}/transactions`, this.transactionForm.getRawValue(), this.options())
-      .subscribe({
-        next: () => {
-          this.transactionForm.patchValue({ amount: 0, description: '' });
-          this.loadAll();
-          this.showMessage('Lançamento salvo com sucesso.');
-        },
-        error: () => this.showMessage('Não foi possível salvar o lançamento.'),
-      });
+    const id = this.editingTransactionId();
+    const request = id
+      ? this.http.put<Transaction>(`${this.apiUrl}/transactions/${id}`, this.transactionForm.getRawValue(), this.options())
+      : this.http.post<Transaction>(`${this.apiUrl}/transactions`, this.transactionForm.getRawValue(), this.options());
+
+    request.subscribe({
+      next: () => {
+        this.editingTransactionId.set('');
+        this.transactionForm.patchValue({ amount: 0, description: '' });
+        this.loadAll();
+        this.showMessage(id ? 'Lançamento atualizado com sucesso.' : 'Lançamento salvo com sucesso.', 'success');
+      },
+      error: () => this.showMessage('Não foi possível salvar o lançamento.', 'error'),
+    });
   }
 
   protected deleteTransaction(id: string): void {
+    if (!confirm('Excluir este lançamento?')) {
+      return;
+    }
+
     this.http.delete(`${this.apiUrl}/transactions/${id}`, this.options()).subscribe({
-      next: () => this.loadAll(),
-      error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível excluir o lançamento.')),
+      next: () => {
+        this.loadAll();
+        this.showMessage('Lançamento excluído.', 'success');
+      },
+      error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível excluir o lançamento.'), 'error'),
     });
   }
 
@@ -358,6 +390,37 @@ export class App {
 
   protected money(value: number): string {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  }
+
+  protected cashFlowTooltip(month: { label: string; incomeAmount: number; expenseAmount: number }): string {
+    return `${month.label}\nReceitas: ${this.money(month.incomeAmount)}\nDespesas: ${this.money(month.expenseAmount)}\nSaldo: ${this.money(month.incomeAmount - month.expenseAmount)}`;
+  }
+
+  protected expenseDonutTooltip(): string {
+    const total = this.dashboard()?.totalExpense ?? 0;
+
+    return total > 0 ? `Total de despesas do mês: ${this.money(total)}` : 'Sem despesas neste mês';
+  }
+
+  protected categoryExpenseTooltip(item: { categoryName: string; total: number }): string {
+    const total = this.dashboard()?.totalExpense ?? 0;
+    const percent = total > 0 ? ` (${((item.total / total) * 100).toFixed(1).replace('.', ',')}%)` : '';
+
+    return `${item.categoryName}: ${this.money(item.total)}${percent}\nClique para ver os lançamentos`;
+  }
+
+  protected sortTransactions(field: TransactionSortField): void {
+    if (this.transactionSortField() === field) {
+      this.transactionSortDirection.update((direction) => direction === 'asc' ? 'desc' : 'asc');
+      return;
+    }
+
+    this.transactionSortField.set(field);
+    this.transactionSortDirection.set(field === 'amount' ? 'desc' : 'asc');
+  }
+
+  protected sortLabel(field: TransactionSortField): string {
+    return this.transactionSortField() === field ? (this.transactionSortDirection() === 'asc' ? ' ↑' : ' ↓') : '';
   }
 
   protected initial(): string {
@@ -422,6 +485,24 @@ export class App {
     this.transactionCategoryFilter.set(value);
   }
 
+  protected editTransaction(transaction: Transaction): void {
+    this.openView(transaction.type === 'Income' ? 'income' : 'expense');
+    this.editingTransactionId.set(transaction.id);
+    this.transactionForm.setValue({
+      accountId: transaction.accountId,
+      categoryId: transaction.categoryId,
+      type: transaction.type,
+      amount: transaction.amount,
+      date: transaction.date,
+      description: transaction.description ?? '',
+    });
+  }
+
+  protected cancelTransactionEdit(): void {
+    this.editingTransactionId.set('');
+    this.transactionForm.patchValue({ amount: 0, description: '' });
+  }
+
   protected askPet(): void {
     const question = this.petQuestion().trim().toLowerCase();
     const dashboard = this.dashboard();
@@ -457,6 +538,7 @@ export class App {
     this.userMenuOpen.set(false);
 
     if (view === 'income' || view === 'expense') {
+      this.editingTransactionId.set('');
       this.transactionForm.patchValue({ type: view === 'income' ? 'Income' : 'Expense' });
     }
   }
@@ -485,7 +567,7 @@ export class App {
 
   protected chartRangeLabel(): string {
     const total = this.chartMonths().length;
-    return total === 1 ? 'Mês atual' : `${total} meses`;
+    return total === 1 ? this.currentMonthLabel() : `${total} meses`;
   }
 
   protected pageTitle(): string {
@@ -496,6 +578,7 @@ export class App {
       accounts: 'Contas',
       categories: 'Categorias',
       reports: 'Relatórios',
+      categorySummary: 'Resumo por categoria',
       export: 'Exportação CSV',
       profile: 'Meu perfil',
       password: 'Alterar senha',
@@ -526,7 +609,7 @@ export class App {
 
   protected refreshData(): void {
     this.loadAll();
-    this.showMessage('Dados atualizados.');
+    this.showMessage('Dados atualizados.', 'success');
   }
 
   protected showUnavailableFeature(feature: string): void {
@@ -556,6 +639,10 @@ export class App {
     this.openView('reports');
   }
 
+  protected openCategorySummary(): void {
+    this.openView('categorySummary');
+  }
+
   protected showAllAccounts(): void {
     this.loadAll();
     this.openView('accounts');
@@ -573,7 +660,25 @@ export class App {
     this.loadAll();
   }
 
-  private showMessage(text: string): void {
+  protected closeMessage(): void {
+    this.message.set('');
+    this.isMessageLeaving.set(false);
+  }
+
+  protected messageIcon(): string {
+    return { success: '✓', error: '!', info: 'i' }[this.messageKind()];
+  }
+
+  protected messageStyle(): string {
+    return {
+      success: 'background:#ecfdf3;border-color:#bbf7d0;color:#047857',
+      error: 'background:#fef2f2;border-color:#fecaca;color:#b91c1c',
+      info: 'background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8',
+    }[this.messageKind()];
+  }
+
+  private showMessage(text: string, kind: 'success' | 'error' | 'info' = 'info'): void {
+    this.messageKind.set(kind);
     if (this.messageTimeoutId) {
       clearTimeout(this.messageTimeoutId);
     }
@@ -724,5 +829,16 @@ export class App {
     return {
       headers: new HttpHeaders({ Authorization: `Bearer ${this.token()}` }),
     };
+  }
+
+  private compareTransactions(left: Transaction, right: Transaction): number {
+    const field = this.transactionSortField();
+    const direction = this.transactionSortDirection() === 'asc' ? 1 : -1;
+    const leftValue = field === 'category' ? this.categoryName(left.categoryId) : field === 'amount' ? left.amount : left[field] ?? '';
+    const rightValue = field === 'category' ? this.categoryName(right.categoryId) : field === 'amount' ? right.amount : right[field] ?? '';
+
+    return (typeof leftValue === 'number' && typeof rightValue === 'number'
+      ? leftValue - rightValue
+      : String(leftValue).localeCompare(String(rightValue), 'pt-BR')) * direction;
   }
 }

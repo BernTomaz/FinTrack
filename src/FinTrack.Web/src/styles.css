@@ -7,6 +7,15 @@ body {
   margin: 0;
 }
 
+.login-page.dark-theme {
+  background: #0b1220;
+  color: #dbe7f5;
+}
+
+.dark-theme :is(small, .table-head, .login-brand .brand-title small, .profile-box small, .about-box small) {
+  color: #9fb0c8;
+}
+
 button {
   transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
 }

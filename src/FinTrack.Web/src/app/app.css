@@ -273,19 +273,16 @@ select {
   transition: 220ms ease;
 }
 
-.app-shell.dark-theme {
-  background: #0b1220;
-  color: #dbe7f5;
-}
-
-.app-shell.dark-theme .sidebar {
+.app-shell.dark-theme,
+.app-shell.dark-theme .sidebar,
+.dark-theme .auth-card {
   background: #111b2d;
   border-color: #273852;
 }
 
 .app-shell.dark-theme :is(.panel, .metric, .menu-popover, .empty-state, .profile-box, .about-box) {
   background: #111b2d;
-  border-color: transparent;
+  border-color: #22314a;
   color: #dbe7f5;
 }
 
@@ -697,8 +694,8 @@ nav .active {
   border-top: 1px solid #edf2f7;
   display: grid;
   gap: 12px;
-  grid-template-columns: 92px minmax(150px, 1.2fr) minmax(130px, 1fr) 78px 110px minmax(120px, 1fr) 54px;
-  min-width: 850px;
+  grid-template-columns: 92px minmax(150px, 1.2fr) minmax(130px, 1fr) 78px 110px minmax(120px, 1fr) 84px;
+  min-width: 890px;
   padding: 13px 0;
 }
 
@@ -796,11 +793,12 @@ nav .active {
 
 .message {
   animation: message-enter 220ms ease-out;
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
+  align-items: center;
+  border: 1px solid;
   border-radius: 8px;
   bottom: 16px;
-  color: #7c2d12;
+  display: flex;
+  gap: 10px;
   left: 50%;
   padding: 12px 16px;
   position: fixed;
