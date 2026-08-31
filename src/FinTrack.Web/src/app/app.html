@@ -1,5 +1,5 @@
 @if (!isLoggedIn()) {
-  <main class="login-page" [class.dark-theme]="theme() === 'dark'">
+  <main class="login-page">
     <section class="login-brand" aria-labelledby="login-title">
       <div class="brand-row">
         <span class="brand-mark" aria-hidden="true">FT</span>
@@ -284,6 +284,7 @@
                 <div class="empty-state">
                   <strong>Nenhuma conta cadastrada</strong>
                   <span>Cadastre uma conta para começar a organizar seus lançamentos.</span>
+                  <button type="button" class="primary" style="justify-self:center" (click)="openView('accounts')">Criar primeira conta</button>
                 </div>
               }
             </div>
@@ -350,6 +351,14 @@
                   }
                 </select>
               </label>
+              <label>Conta
+                <select [value]="transactionAccountFilter()" (change)="updateTransactionAccountFilter($any($event.target).value)">
+                  <option value="">Todas</option>
+                  @for (account of accounts(); track account.id) {
+                    <option [value]="account.id">{{ account.name }}</option>
+                  }
+                </select>
+              </label>
             </div>
             <div class="table">
               <div class="table-row table-head">
@@ -382,6 +391,7 @@
                 <div class="empty-state">
                   <strong>Nenhum lançamento encontrado</strong>
                   <span>Ajuste os filtros ou cadastre receitas e despesas para acompanhar seus relatórios.</span>
+                  <button type="button" class="primary" style="justify-self:center" (click)="openView('expense')">Adicionar lançamento</button>
                 </div>
               }
             </div>
@@ -409,6 +419,7 @@
                 <div class="empty-state">
                   <strong>Sem despesas por categoria</strong>
                   <span>Cadastre despesas para ver o resumo do mês.</span>
+                  <button type="button" class="primary" style="justify-self:center" (click)="openView('expense')">Adicionar despesa</button>
                 </div>
               }
             </div>
@@ -424,8 +435,8 @@
               <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
             </div>
             <div class="empty-state">
-              <strong>Baixar lançamentos do mês</strong>
-              <span>O arquivo CSV usa os lançamentos cadastrados no período atual.</span>
+              <strong>Baixar lançamentos filtrados</strong>
+              <span>Usa o mês selecionado e os filtros atuais de tipo, categoria e conta.</span>
               <button type="button" class="primary" style="justify-self: center" (click)="exportCsv()">Baixar CSV</button>
             </div>
           </article>
@@ -492,6 +503,7 @@
             <div class="empty-state">
               <strong>Nenhum lançamento cadastrado</strong>
               <span>Cadastre receitas e despesas para visualizar o fluxo de caixa.</span>
+              <button type="button" class="primary" style="justify-self:center" (click)="openView('expense')">Adicionar lançamento</button>
             </div>
           }
         </article>
@@ -522,6 +534,7 @@
             <div class="empty-state">
               <strong>Sem despesas por enquanto</strong>
               <span>As categorias aparecem aqui depois dos primeiros lançamentos.</span>
+              <button type="button" class="primary" style="justify-self:center" (click)="openView('expense')">Adicionar despesa</button>
             </div>
           </article>
         }
@@ -541,7 +554,7 @@
               <span>Conta</span>
               <span>Ações</span>
             </div>
-            @for (transaction of transactions(); track transaction.id) {
+            @for (transaction of recentTransactions(); track transaction.id) {
               <div class="table-row">
                 <span>{{ transaction.date }}</span>
                 <span>{{ transaction.description || 'Lançamento' }}</span>
@@ -558,8 +571,17 @@
                   <button type="button" class="icon danger-icon" title="Excluir lançamento" (click)="deleteTransaction(transaction.id)">×</button>
                 </span>
               </div>
+            } @empty {
+              <div class="empty-state">
+                <strong>Nenhum lançamento ainda</strong>
+                <span>Comece adicionando uma receita ou despesa.</span>
+                <button type="button" class="primary" style="justify-self:center" (click)="openView('expense')">Adicionar lançamento</button>
+              </div>
             }
           </div>
+          @if (hasMoreTransactions()) {
+            <button type="button" class="ghost" style="justify-self:center" (click)="showMoreTransactions()">Ver mais</button>
+          }
         </article>
 
         <article id="contas" class="panel accounts-panel">
@@ -576,6 +598,12 @@
                   <small>{{ accountTypeLabel(account.type) }}</small>
                 </div>
                 <button type="button" class="icon" title="Excluir conta" (click)="deleteAccount(account.id)">×</button>
+              </div>
+            } @empty {
+              <div class="empty-state">
+                <strong>Nenhuma conta cadastrada</strong>
+                <span>Cadastre uma conta para começar a organizar seus lançamentos.</span>
+                <button type="button" class="primary" style="justify-self:center" (click)="openView('accounts')">Criar primeira conta</button>
               </div>
             }
           </div>

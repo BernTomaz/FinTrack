@@ -94,8 +94,10 @@ export class App {
   protected readonly transactionSearch = signal('');
   protected readonly transactionTypeFilter = signal('');
   protected readonly transactionCategoryFilter = signal('');
+  protected readonly transactionAccountFilter = signal('');
   protected readonly transactionSortField = signal<TransactionSortField>('date');
   protected readonly transactionSortDirection = signal<'asc' | 'desc'>('desc');
+  protected readonly recentLimit = signal(5);
   protected readonly editingTransactionId = signal('');
   protected readonly authMode = signal<AuthMode>('login');
   protected readonly activeView = signal<View>('dashboard');
@@ -109,12 +111,15 @@ export class App {
     const search = this.transactionSearch().trim().toLowerCase();
     const type = this.transactionTypeFilter();
     const categoryId = this.transactionCategoryFilter();
+    const accountId = this.transactionAccountFilter();
 
     return this.transactions().filter((transaction) => {
       const searchable = `${transaction.date} ${transaction.description ?? ''} ${this.categoryName(transaction.categoryId)} ${this.accountName(transaction.accountId)}`.toLowerCase();
-      return (!search || searchable.includes(search)) && (!type || transaction.type === type) && (!categoryId || transaction.categoryId === categoryId);
+      return (!search || searchable.includes(search)) && (!type || transaction.type === type) && (!categoryId || transaction.categoryId === categoryId) && (!accountId || transaction.accountId === accountId);
     }).sort((left, right) => this.compareTransactions(left, right));
   });
+  protected readonly recentTransactions = computed(() => this.transactions().slice(0, this.recentLimit()));
+  protected readonly hasMoreTransactions = computed(() => this.transactions().length > this.recentLimit());
   protected readonly categorySummary = computed(() => {
     const total = this.dashboard()?.totalExpense ?? 0;
 
@@ -358,7 +363,11 @@ export class App {
   }
 
   protected exportCsv(): void {
-    window.open(`${this.apiUrl}/exports/transactions.csv?year=${this.selectedYear()}&month=${this.selectedMonthNumber()}`, '_blank');
+    const params = new URLSearchParams({ year: String(this.selectedYear()), month: String(this.selectedMonthNumber()) });
+    if (this.transactionTypeFilter()) params.set('type', this.transactionTypeFilter());
+    if (this.transactionCategoryFilter()) params.set('categoryId', this.transactionCategoryFilter());
+    if (this.transactionAccountFilter()) params.set('accountId', this.transactionAccountFilter());
+    window.open(`${this.apiUrl}/exports/transactions.csv?${params}`, '_blank');
   }
 
   protected accountName(id: string): string {
@@ -485,6 +494,14 @@ export class App {
     this.transactionCategoryFilter.set(value);
   }
 
+  protected updateTransactionAccountFilter(value: string): void {
+    this.transactionAccountFilter.set(value);
+  }
+
+  protected showMoreTransactions(): void {
+    this.recentLimit.update((limit) => limit + 5);
+  }
+
   protected editTransaction(transaction: Transaction): void {
     this.openView(transaction.type === 'Income' ? 'income' : 'expense');
     this.editingTransactionId.set(transaction.id);
@@ -559,6 +576,7 @@ export class App {
 
     localStorage.setItem('fintrack.month', month);
     this.selectedMonth.set(month);
+    this.recentLimit.set(5);
 
     if (this.isLoggedIn()) {
       this.loadAll();
@@ -621,6 +639,7 @@ export class App {
     this.transactionSearch.set('');
     this.transactionTypeFilter.set('');
     this.transactionCategoryFilter.set('');
+    this.transactionAccountFilter.set('');
     this.openView('reports');
   }
 
@@ -628,6 +647,7 @@ export class App {
     this.transactionSearch.set('');
     this.transactionTypeFilter.set(type);
     this.transactionCategoryFilter.set('');
+    this.transactionAccountFilter.set('');
     this.openView('reports');
   }
 
@@ -636,6 +656,7 @@ export class App {
     this.transactionSearch.set('');
     this.transactionTypeFilter.set('Expense');
     this.transactionCategoryFilter.set(categoryId);
+    this.transactionAccountFilter.set('');
     this.openView('reports');
   }
 
