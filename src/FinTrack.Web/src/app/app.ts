@@ -75,6 +75,7 @@ export class App {
   private messageClearTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly token = signal(sessionStorage.getItem('fintrack.token') ?? '');
+  protected readonly isEntering = signal((sessionStorage.getItem('fintrack.token') ?? '').length > 0);
   protected readonly userName = signal(sessionStorage.getItem('fintrack.name') ?? '');
   protected readonly userEmail = signal(sessionStorage.getItem('fintrack.email') ?? '');
   protected readonly message = signal('');
@@ -98,11 +99,14 @@ export class App {
   protected readonly transactionSortField = signal<TransactionSortField>('date');
   protected readonly transactionSortDirection = signal<'asc' | 'desc'>('desc');
   protected readonly recentLimit = signal(5);
+  protected readonly reportLimit = signal(10);
+  protected readonly exportStartDate = signal('');
+  protected readonly exportEndDate = signal('');
   protected readonly editingTransactionId = signal('');
   protected readonly authMode = signal<AuthMode>('login');
   protected readonly activeView = signal<View>('dashboard');
   protected readonly theme = signal<Theme>((localStorage.getItem('fintrack.theme') as Theme | null) ?? 'light');
-  protected readonly selectedMonth = signal(localStorage.getItem('fintrack.month') ?? new Date().toISOString().slice(0, 7));
+  protected readonly selectedMonth = signal(this.currentMonthKey());
 
   protected readonly isLoggedIn = computed(() => this.token().length > 0);
   protected readonly selectedYear = computed(() => Number(this.selectedMonth().slice(0, 4)));
@@ -120,6 +124,8 @@ export class App {
   });
   protected readonly recentTransactions = computed(() => this.transactions().slice(0, this.recentLimit()));
   protected readonly hasMoreTransactions = computed(() => this.transactions().length > this.recentLimit());
+  protected readonly reportTransactions = computed(() => this.filteredTransactions().slice(0, this.reportLimit()));
+  protected readonly hasMoreReportTransactions = computed(() => this.filteredTransactions().length > this.reportLimit());
   protected readonly categorySummary = computed(() => {
     const total = this.dashboard()?.totalExpense ?? 0;
 
@@ -209,6 +215,7 @@ export class App {
   constructor() {
     if (this.isLoggedIn()) {
       this.loadAll();
+      setTimeout(() => this.isEntering.set(false), 1400);
     }
   }
 
@@ -363,7 +370,14 @@ export class App {
   }
 
   protected exportCsv(): void {
-    const params = new URLSearchParams({ year: String(this.selectedYear()), month: String(this.selectedMonthNumber()) });
+    const params = new URLSearchParams();
+    if (this.exportStartDate() || this.exportEndDate()) {
+      if (this.exportStartDate()) params.set('startDate', this.exportStartDate());
+      if (this.exportEndDate()) params.set('endDate', this.exportEndDate());
+    } else {
+      params.set('year', String(this.selectedYear()));
+      params.set('month', String(this.selectedMonthNumber()));
+    }
     if (this.transactionTypeFilter()) params.set('type', this.transactionTypeFilter());
     if (this.transactionCategoryFilter()) params.set('categoryId', this.transactionCategoryFilter());
     if (this.transactionAccountFilter()) params.set('accountId', this.transactionAccountFilter());
@@ -484,22 +498,38 @@ export class App {
 
   protected updateTransactionSearch(value: string): void {
     this.transactionSearch.set(value);
+    this.reportLimit.set(10);
   }
 
   protected updateTransactionTypeFilter(value: string): void {
     this.transactionTypeFilter.set(value);
+    this.reportLimit.set(10);
   }
 
   protected updateTransactionCategoryFilter(value: string): void {
     this.transactionCategoryFilter.set(value);
+    this.reportLimit.set(10);
   }
 
   protected updateTransactionAccountFilter(value: string): void {
     this.transactionAccountFilter.set(value);
+    this.reportLimit.set(10);
   }
 
   protected showMoreTransactions(): void {
     this.recentLimit.update((limit) => limit + 5);
+  }
+
+  protected showMoreReportTransactions(): void {
+    this.reportLimit.update((limit) => limit + 10);
+  }
+
+  protected updateExportStartDate(value: string): void {
+    this.exportStartDate.set(value);
+  }
+
+  protected updateExportEndDate(value: string): void {
+    this.exportEndDate.set(value);
   }
 
   protected editTransaction(transaction: Transaction): void {
@@ -574,7 +604,6 @@ export class App {
       return;
     }
 
-    localStorage.setItem('fintrack.month', month);
     this.selectedMonth.set(month);
     this.recentLimit.set(5);
 
@@ -670,6 +699,7 @@ export class App {
   }
 
   private startSession(auth: AuthResponse): void {
+    this.isEntering.set(true);
     sessionStorage.setItem('fintrack.token', auth.token);
     sessionStorage.setItem('fintrack.name', auth.name);
     sessionStorage.setItem('fintrack.email', auth.email);
@@ -679,6 +709,7 @@ export class App {
     this.message.set('');
     this.isMessageLeaving.set(false);
     this.loadAll();
+    setTimeout(() => this.isEntering.set(false), 1400);
   }
 
   protected closeMessage(): void {
@@ -844,6 +875,11 @@ export class App {
   private shortMonthLabel(date: Date): string {
     const month = new Intl.DateTimeFormat('pt-BR', { month: 'short' }).format(date).replace('.', '');
     return `${month[0].toUpperCase()}${month.slice(1)}/${String(date.getFullYear()).slice(2)}`;
+  }
+
+  private currentMonthKey(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   }
 
   private options(): { headers: HttpHeaders } {

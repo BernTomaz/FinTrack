@@ -41,6 +41,12 @@ button:active {
   }
 }
 
+@keyframes loading-bar {
+  50% {
+    transform: translateX(125%);
+  }
+}
+
 @keyframes pet-wiggle {
   50% {
     transform: translateY(-5px) rotate(-2deg);

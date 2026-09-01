@@ -1,4 +1,15 @@
-@if (!isLoggedIn()) {
+@if (isEntering()) {
+  <main style="align-items:center;background:#0b1220;color:#f8fafc;display:grid;min-height:100vh;place-items:center">
+    <section style="display:grid;gap:18px;justify-items:center;text-align:center">
+      <span class="brand-mark" aria-hidden="true">FT</span>
+      <h1 style="font-size:2rem;margin:0">FinTrack</h1>
+      <p style="margin:0;color:#cbd5e1">Carregando seu painel financeiro...</p>
+      <span style="background:#1e293b;border-radius:999px;height:8px;overflow:hidden;width:220px">
+        <i style="animation:loading-bar 900ms ease-in-out infinite;background:#10b981;display:block;height:100%;width:45%"></i>
+      </span>
+    </section>
+  </main>
+} @else if (!isLoggedIn()) {
   <main class="login-page">
     <section class="login-brand" aria-labelledby="login-title">
       <div class="brand-row">
@@ -334,6 +345,7 @@
               <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
             </div>
             <div class="form-grid">
+              <label>Mês<input type="month" [value]="currentMonthValue()" (change)="setCurrentMonth($any($event.target).value)" /></label>
               <label>Buscar<input type="search" [value]="transactionSearch()" (input)="updateTransactionSearch($any($event.target).value)" placeholder="Descrição, conta ou categoria" /></label>
               <label>Tipo
                 <select [value]="transactionTypeFilter()" (change)="updateTransactionTypeFilter($any($event.target).value)">
@@ -370,7 +382,7 @@
                 <span>Conta</span>
                 <span>Ações</span>
               </div>
-              @for (transaction of filteredTransactions(); track transaction.id) {
+              @for (transaction of reportTransactions(); track transaction.id) {
                 <div class="table-row">
                   <span>{{ transaction.date }}</span>
                   <span>{{ transaction.description || 'Lançamento' }}</span>
@@ -395,6 +407,9 @@
                 </div>
               }
             </div>
+            @if (hasMoreReportTransactions()) {
+              <button type="button" class="ghost" style="justify-self:center" (click)="showMoreReportTransactions()">Ver mais</button>
+            }
           </article>
         </section>
       }
@@ -434,9 +449,13 @@
               <h2>Exportação CSV</h2>
               <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
             </div>
+            <div class="form-grid">
+              <label>De<input type="date" [value]="exportStartDate()" (change)="updateExportStartDate($any($event.target).value)" /></label>
+              <label>Até<input type="date" [value]="exportEndDate()" (change)="updateExportEndDate($any($event.target).value)" /></label>
+            </div>
             <div class="empty-state">
               <strong>Baixar lançamentos filtrados</strong>
-              <span>Usa o mês selecionado e os filtros atuais de tipo, categoria e conta.</span>
+              <span>Sem período livre, usa o mês selecionado. Com datas, exporta o intervalo escolhido.</span>
               <button type="button" class="primary" style="justify-self: center" (click)="exportCsv()">Baixar CSV</button>
             </div>
           </article>

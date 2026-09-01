@@ -16,6 +16,8 @@ public static class ExportEndpoints
         group.MapGet("/transactions.csv", async (
             int? year,
             int? month,
+            DateOnly? startDate,
+            DateOnly? endDate,
             TransactionType? type,
             Guid? accountId,
             Guid? categoryId,
@@ -26,6 +28,11 @@ public static class ExportEndpoints
             if (month is < 1 or > 12)
             {
                 return Results.BadRequest("Month must be between 1 and 12.");
+            }
+
+            if (startDate > endDate)
+            {
+                return Results.BadRequest("Start date must be before end date.");
             }
 
             var userId = user.GetUserId();
@@ -39,6 +46,16 @@ public static class ExportEndpoints
             if (month is not null)
             {
                 query = query.Where(transaction => transaction.Date.Month == month);
+            }
+
+            if (startDate is not null)
+            {
+                query = query.Where(transaction => transaction.Date >= startDate);
+            }
+
+            if (endDate is not null)
+            {
+                query = query.Where(transaction => transaction.Date <= endDate);
             }
 
             if (type is not null)
