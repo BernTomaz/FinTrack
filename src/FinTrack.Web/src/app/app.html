@@ -93,7 +93,7 @@
             <small>Controle Financeiro Pessoal</small>
           </div>
         </button>
-        <button type="button" class="icon" title="Ocultar menu lateral" (click)="toggleSidebar()">‹</button>
+        <button type="button" class="icon" title="Ocultar menu lateral" (click)="toggleSidebar()">⌄</button>
       </div>
 
       <nav aria-label="Menu principal">
@@ -126,9 +126,9 @@
         </div>
         <div class="top-actions">
           @if (activeView() === 'dashboard') {
-            <button type="button" class="ghost" (click)="refreshData()">Atualizar</button>
-            <button type="button" class="primary" (click)="openView('income')">+ Nova receita</button>
-            <button type="button" class="blue" (click)="openView('expense')">+ Nova despesa</button>
+            <button type="button" class="ghost" (click)="refreshData()"><span class="label-full">Atualizar</span><span class="label-short">Atualizar</span></button>
+            <button type="button" class="primary" (click)="openView('income')"><span class="label-full">+ Nova receita</span><span class="label-short">+ Receita</span></button>
+            <button type="button" class="blue" (click)="openView('expense')"><span class="label-full">+ Nova despesa</span><span class="label-short">+ Despesa</span></button>
           }
           <div class="user-menu">
             <button type="button" class="avatar" (click)="toggleUserMenu()" title="Menu do usuário">{{ initial() }}</button>

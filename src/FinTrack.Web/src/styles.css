@@ -26,6 +26,15 @@ button:active {
 
 .pet-pig {
   animation: pet-wiggle 3s ease-in-out infinite;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pet-pig:focus,
+.pet-pig:focus-visible,
+.pet-pig:active {
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: 0 !important;
 }
 
 .pet-eye {
@@ -60,5 +69,58 @@ button:active {
 
   94%, 96% {
     transform: scaleY(0.15);
+  }
+}
+
+@media (max-width: 760px) {
+  .content {
+    padding: 0 12px 90px !important;
+  }
+
+  .sidebar {
+    padding: 14px !important;
+  }
+
+  .top-actions {
+    gap: 8px !important;
+  }
+
+  .metric {
+    gap: 14px !important;
+    padding: 16px !important;
+  }
+
+  .metric > span {
+    height: 54px !important;
+    width: 54px !important;
+    flex-basis: 54px !important;
+  }
+
+  .table-row {
+    font-size: 0.9rem !important;
+    min-width: 0 !important;
+  }
+
+  .settings-card {
+    max-width: calc(100vw - 24px) !important;
+  }
+
+  .pet {
+    bottom: 8px !important;
+    right: 8px !important;
+  }
+
+  .pet-pig {
+    height: 56px !important;
+    width: 56px !important;
+  }
+
+  .pet-pig svg {
+    height: 56px;
+    width: 56px;
+  }
+
+  .pet-chat {
+    max-width: calc(100vw - 24px) !important;
   }
 }
