@@ -989,10 +989,14 @@ nav .active {
   .sidebar-hidden .topbar {
     align-items: center;
     display: grid;
-    gap: 4px;
-    grid-template-columns: 26px minmax(0, 1fr);
+    column-gap: 8px;
+    grid-template-columns: 30px repeat(3, minmax(0, 1fr)) 30px;
+    min-height: 44px;
+    margin-bottom: -8px;
     padding-left: 0;
     padding-right: 0;
+    padding-top: 0;
+    transform: translateY(-8px);
     width: 100%;
   }
 
@@ -1005,27 +1009,29 @@ nav .active {
   }
 
   .sidebar-hidden .topbar .top-actions {
-    align-items: center;
-    display: flex;
-    flex: 1;
-    gap: 4px;
-    min-width: 0;
-    width: 100%;
+    display: contents;
+  }
+
+  .sidebar-hidden:not(.dashboard-view) .topbar {
+    grid-template-columns: 32px 32px;
+    justify-content: space-between;
   }
 
   .sidebar-hidden .topbar .top-actions > button {
-    flex: 0 0 80px;
-    font-size: 0.92rem;
-    min-height: 32px;
-    min-width: 72px;
-    padding: 0 8px;
+    font-size: 0.82rem;
+    line-height: 1.05;
+    min-height: 38px;
+    min-width: 0;
+    padding: 2px 4px;
+    white-space: normal;
+    width: 100%;
   }
 
   .sidebar-hidden .topbar .top-actions > button:first-child {
-    flex-basis: 80px;
     font-size: 0.86rem;
-    min-width: 74px;
-    padding: 0 8px;
+    min-width: 0;
+    padding: 0 4px;
+    white-space: nowrap;
   }
 
   .sidebar-hidden .topbar .brand-row > .icon,
@@ -1034,20 +1040,18 @@ nav .active {
   }
 
   .sidebar-hidden .topbar .user-menu {
-    flex: 0 0 auto;
-    margin-left: auto;
     justify-self: end;
   }
 
   .sidebar-hidden .topbar .avatar,
   .sidebar-hidden .topbar .brand-row > .icon {
-    height: 26px;
-    width: 26px;
+    height: 30px;
+    width: 30px;
   }
 
   .sidebar-hidden .content {
-    padding-left: 6px;
-    padding-right: 6px;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 
   .sidebar-hidden .label-full {

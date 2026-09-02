@@ -83,7 +83,7 @@
     </section>
   </main>
 } @else {
-  <main class="app-shell" [class.dark-theme]="theme() === 'dark'" [class.sidebar-hidden]="sidebarHidden()">
+  <main class="app-shell" [class.dark-theme]="theme() === 'dark'" [class.sidebar-hidden]="sidebarHidden()" [class.dashboard-view]="activeView() === 'dashboard'">
     <aside class="sidebar">
       <div class="top-actions">
         <button type="button" class="brand-row brand-button" (click)="openView('dashboard')" title="Ir para o dashboard">
@@ -127,8 +127,8 @@
         <div class="top-actions">
           @if (activeView() === 'dashboard') {
             <button type="button" class="ghost" (click)="refreshData()"><span class="label-full">Atualizar</span><span class="label-short">Atualizar</span></button>
-            <button type="button" class="primary" (click)="openView('income')"><span class="label-full">+ Nova receita</span><span class="label-short">+ Receita</span></button>
-            <button type="button" class="blue" (click)="openView('expense')"><span class="label-full">+ Nova despesa</span><span class="label-short">+ Despesa</span></button>
+            <button type="button" class="primary" (click)="openView('income')"><span class="label-full">+ Nova receita</span><span class="label-short">+ Nova receita</span></button>
+            <button type="button" class="blue" (click)="openView('expense')"><span class="label-full">+ Nova despesa</span><span class="label-short">+ Nova despesa</span></button>
           }
           <div class="user-menu">
             <button type="button" class="avatar" (click)="toggleUserMenu()" title="Menu do usuário">{{ initial() }}</button>
