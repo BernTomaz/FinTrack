@@ -4,8 +4,6 @@
 
 Sistema web para controle financeiro pessoal, com cadastro de receitas, despesas, contas, categorias, dashboard mensal e exportação CSV.
 
-## Screenshot
-
 ![Tela inicial do FinTrack](docs/assets/fintrack-home.png)
 
 ## Documentação
