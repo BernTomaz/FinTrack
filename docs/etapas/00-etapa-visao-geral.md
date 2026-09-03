@@ -1,6 +1,6 @@
 # 00 - Visão Geral
 
-O FinTrack será um sistema web de controle financeiro pessoal.
+O FinTrack é um sistema web de controle financeiro pessoal.
 
 ## Objetivo
 

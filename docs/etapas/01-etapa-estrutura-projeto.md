@@ -6,7 +6,7 @@ Criar a base técnica do projeto sem implementar regra de negócio ainda.
 
 ## Tarefas
 
-- Criar solution `FinTrack.slnx`
+- Criar solução `FinTrack.slnx`
 - Criar projetos backend
 - Criar projeto Angular
 - Referenciar projetos .NET
@@ -29,4 +29,4 @@ tests/
 
 ## Decisão
 
-Usar `.slnx` como arquivo de solution do .NET.
+Usar `.slnx` como arquivo de solução do .NET.

@@ -18,5 +18,5 @@ Concluída: DbContext, mapeamentos, migration inicial, script SQL e suporte para
 
 ## Banco
 
-Banco padrão planejado: `FinTrackDb`.
+Banco padrão: `FinTrackDb`.
 

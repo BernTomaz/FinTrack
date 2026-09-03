@@ -2,7 +2,7 @@
 
 ## 1. Base
 
-- Criar solution `FinTrack.slnx`
+- Criar solução `FinTrack.slnx`
 - Criar projetos
 - Configurar referências
 - Configurar Swagger
@@ -45,6 +45,8 @@
 
 - Testes principais
 - README final
+- README do frontend
+- CI de backend e frontend
 - Docker Compose validado
 
 ## 8. Ajustes de Validação do MVP

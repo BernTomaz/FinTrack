@@ -17,11 +17,11 @@ Criar a interface web do MVP.
 
 Usuário entra, faz login, acessa dashboard e gerencia suas informacoes financeiras.
 
-## Decisão Inicial
+## Decisão de Interface
 
 Começar com Angular simples, Reactive Forms e HttpClient. Biblioteca visual só entra se realmente acelerar o MVP.
 
-O layout deve nascer responsivo, com telas principais confortáveis no mobile.
+O layout é responsivo, com telas principais confortáveis no mobile.
 
 ## Status
 

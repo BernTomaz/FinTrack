@@ -1,6 +1,6 @@
 # Configuração Local
 
-Este arquivo será atualizado quando o código for criado.
+Instruções para executar o FinTrack localmente.
 
 ## Pré-requisitos
 
@@ -12,7 +12,7 @@ Este arquivo será atualizado quando o código for criado.
 
 ## Backend
 
-Solution: `FinTrack.slnx`.
+Solução: `FinTrack.slnx`.
 
 Comandos:
 
@@ -31,7 +31,7 @@ Endereços locais:
 
 ## Frontend
 
-O layout deve ser responsivo desde o inicio, com prioridade para boa experiência mobile.
+O layout é responsivo, com prioridade para boa experiência mobile.
 
 Comandos:
 
@@ -106,3 +106,12 @@ Para rodar a API com outro banco sem editar `appsettings.json`, defina `Connecti
 ## Segredos Locais
 
 A chave JWT e senhas locais não devem ser versionadas. Usar user-secrets no backend e `.env` local para Docker.
+
+## CI
+
+O repositório possui GitHub Actions em `.github/workflows/ci.yml`.
+
+O workflow executa:
+
+- Restore, build e testes do backend.
+- Instalação e build de produção do frontend.

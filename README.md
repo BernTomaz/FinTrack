@@ -1,13 +1,19 @@
 # FinTrack
 
+[![CI](https://github.com/BernTomaz/FinTrack/actions/workflows/ci.yml/badge.svg)](https://github.com/BernTomaz/FinTrack/actions/workflows/ci.yml)
+
 Sistema web para controle financeiro pessoal, com cadastro de receitas, despesas, contas, categorias, dashboard mensal e exportação CSV.
+
+## Screenshot
+
+![Tela inicial do FinTrack](docs/assets/fintrack-home.png)
 
 ## Documentação
 
 - [Visão geral](docs/etapas/00-etapa-visao-geral.md)
 - [Arquitetura](docs/arquitetura.md)
 - [Configuração local](docs/configuracao.md)
-- [Endpoints planejados](docs/endpoints.md)
+- [Endpoints](docs/endpoints.md)
 - [Testes](docs/testes.md)
 - [Roadmap](docs/roadmap.md)
 - [Status do projeto](docs/status-projeto.md)
@@ -80,9 +86,9 @@ FinTrack/
 
 ## Modo de Desenvolvimento
 
-O projeto deve seguir uma abordagem simples: menos abstração, menos dependência e mais fluxo direto. Recursos fora do MVP ficam documentados para depois.
+O projeto segue uma abordagem simples: menos abstração, menos dependência e mais fluxo direto. Recursos fora do MVP ficam documentados para depois.
 
-A solution .NET deve usar o formato `.slnx`.
+A solução .NET usa o formato `.slnx`.
 
 ## Status
 

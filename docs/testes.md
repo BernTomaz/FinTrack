@@ -5,7 +5,7 @@
 - xUnit
 - FluentAssertions
 
-## Testes Mínimos do MVP
+## Testes do MVP
 
 - Criar conta com dados válidos
 - Impedir transação com valor menor ou igual a zero
@@ -24,5 +24,5 @@
 
 ## Estratégia
 
-Começar por testes de regra de negócio e fluxos principais da API. Os testes de endpoints devem cobrir autenticação, isolamento por usuário, validações, dashboard, exportação CSV e regras de exclusão.
+Os testes cobrem regras de negócio e fluxos principais da API, incluindo autenticação, isolamento por usuário, validações, dashboard, exportação CSV e regras de exclusão.
 

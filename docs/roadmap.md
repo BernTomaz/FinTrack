@@ -4,6 +4,7 @@
 
 - Preparar o commit final do MVP.
 - Revisar o histórico de alterações antes do commit.
+- Preencher manualmente o painel About do GitHub.
 - Decidir entre deploy público ou início das melhorias pós-MVP.
 
 ## MVP
@@ -19,6 +20,7 @@
 - Exclusão de lançamentos.
 - Bloqueio de exclusão de contas e categorias com lançamentos vinculados.
 - Testes principais.
+- CI de backend e frontend.
 
 ## Depois do MVP
 

@@ -10,7 +10,7 @@ Entrada HTTP da aplicação.
 
 Responsabilidades:
 
-- Controllers
+- Endpoints HTTP minimalistas
 - Autenticação JWT
 - Swagger
 - Configuração da API
@@ -70,8 +70,8 @@ Api -> Infrastructure
 Web -> Api
 ```
 
-## Decisão Inicial
+## Decisão Arquitetural
 
 Começar com services diretos e DTOs simples. Repositórios só entram se o acesso a dados começar a repetir lógica real.
 
-A solution .NET será criada como `FinTrack.slnx`, não `.sln`.
+A solução .NET usa `FinTrack.slnx`, não `.sln`.

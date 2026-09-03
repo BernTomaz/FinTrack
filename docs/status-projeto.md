@@ -10,11 +10,11 @@ MVP funcional validado localmente.
 - Estrutura de pastas
 - README inicial
 - Documentação inicial de arquitetura, fluxos, etapas, endpoints, testes e roadmap
-- Solution `FinTrack.slnx`
+- Solução `FinTrack.slnx`
 - Projetos .NET iniciais
 - Referências entre projetos
 - Endpoint `/health`
-- Swagger UI em desenvolvimento
+- Swagger UI em ambiente de desenvolvimento
 - Docker Compose inicial para SQL Server
 - Projeto Angular 20 inicial
 - Tela inicial responsiva do FinTrack
@@ -47,13 +47,24 @@ MVP funcional validado localmente.
 - Gráfico de fluxo de caixa baseado em lançamentos reais
 - Validações de cadastro, login, contas, categorias e lançamentos na interface e na API
 - Checklist final de entrega
+- README específico do frontend
+- Workflow de CI com validação de backend e frontend
 
 ## Em Aberto
 
 - Preparar commit final do MVP.
 - Decidir se o próximo passo será deploy público ou melhorias pós-MVP.
+- Preencher manualmente o painel About do GitHub.
 
-## Última Validação
+## Última Validação Automatizada
+
+- Data: 03/09/2026.
+- Backend: `dotnet test FinTrack.slnx -m:1`.
+- Resultado backend: 34 testes aprovados.
+- Frontend: `npm run build`.
+- Resultado frontend: build de produção aprovado.
+
+## Última Validação Ponta a Ponta
 
 - Data: 21/08/2026.
 - Ambiente: Docker Compose com SQL Server, API e frontend.
