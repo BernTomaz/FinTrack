@@ -14,7 +14,7 @@ Sistema web para controle financeiro pessoal, com cadastro de receitas, despesas
 - [Fluxo geral](docs/fluxos/00-fluxo-geral.md)
 - [Roadmap de implementação](docs/fluxos/10-roadmap-implementacao.md)
 
-## Stack Prevista
+## Stack
 
 Backend:
 
@@ -42,7 +42,7 @@ Infra:
 - Docker
 - Docker Compose
 
-## Estrutura Inicial
+## Estrutura
 
 ```text
 FinTrack/
