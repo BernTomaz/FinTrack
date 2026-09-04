@@ -93,7 +93,10 @@
             <small>Controle Financeiro Pessoal</small>
           </div>
         </button>
-        <button type="button" class="icon" title="Ocultar menu lateral" (click)="toggleSidebar()">⌄</button>
+        <button type="button" class="icon sidebar-toggle" title="Ocultar menu lateral" (click)="toggleSidebar()">
+          <span class="toggle-desktop">&lt;</span>
+          <span class="toggle-mobile">⌄</span>
+        </button>
       </div>
 
       <nav aria-label="Menu principal">
@@ -319,10 +322,33 @@
 
       @if (activeView() === 'categories') {
         <section class="settings-page">
+          <div class="panel settings-card">
+            <div class="panel-head">
+              <h2>Categorias</h2>
+              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
+            </div>
+            <div class="list">
+              @for (category of categories(); track category.id) {
+                <div class="account-line">
+                  <span class="coin">◇</span>
+                  <div>
+                    <strong>{{ category.name }}</strong>
+                    <small>{{ categoryTypeLabel(category.type) }}</small>
+                  </div>
+                  <button type="button" class="icon" title="Excluir categoria" (click)="deleteCategory(category.id)">×</button>
+                </div>
+              } @empty {
+                <div class="empty-state">
+                  <strong>Nenhuma categoria cadastrada</strong>
+                  <span>Cadastre categorias para organizar receitas e despesas.</span>
+                </div>
+              }
+            </div>
+          </div>
+
           <form class="panel settings-card" [formGroup]="categoryForm" (ngSubmit)="createCategory()">
             <div class="panel-head">
               <h2>Nova categoria</h2>
-              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
             </div>
             <label>Nome<input type="text" formControlName="name" /></label>
             <label>Tipo
@@ -735,6 +761,19 @@
         </svg>
       </button>
     </section>
+    }
+
+    @if (deleteTarget(); as target) {
+      <section class="confirm-backdrop" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+        <div class="confirm-card">
+          <strong id="delete-title">{{ target.title }}</strong>
+          <p>{{ target.description }}</p>
+          <div>
+            <button type="button" class="ghost" (click)="cancelDelete()">Cancelar</button>
+            <button type="button" class="danger-button" (click)="confirmDelete()">Excluir</button>
+          </div>
+        </div>
+      </section>
     }
 
     @if (message()) {

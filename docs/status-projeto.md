@@ -49,12 +49,23 @@ MVP funcional validado localmente.
 - Checklist final de entrega
 - README específico do frontend
 - Workflow de CI com validação de backend e frontend
+- Confirmação visual antes de excluir contas, categorias e lançamentos
 
 ## Em Aberto
 
 - Preparar commit final do MVP.
 - Decidir se o próximo passo será deploy público ou melhorias pós-MVP.
 - Preencher manualmente o painel About do GitHub.
+
+## Última Validação Docker
+
+- Data: 04/09/2026.
+- Comando: `docker compose up --build`.
+- Serviços validados: SQL Server, API e frontend.
+- API: health check em `/health` retornou `Healthy`.
+- Frontend: `http://localhost:4200` retornou `200`.
+- Swagger UI: `http://localhost:5080/swagger` retornou `200`.
+- Resultado: aprovado.
 
 ## Última Validação Automatizada
 

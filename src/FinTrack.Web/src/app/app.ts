@@ -9,6 +9,7 @@ type TransactionType = 'Income' | 'Expense';
 type Theme = 'light' | 'dark';
 type AuthMode = 'login' | 'register';
 type PetColor = 'green' | 'blue' | 'orange' | 'purple';
+type DeleteTarget = { type: 'account' | 'category' | 'transaction'; id: string; title: string; description: string };
 type TransactionSortField = 'date' | 'description' | 'category' | 'type' | 'amount';
 type View =
   | 'dashboard'
@@ -81,6 +82,7 @@ export class App {
   protected readonly message = signal('');
   protected readonly messageKind = signal<'success' | 'error' | 'info'>('info');
   protected readonly isMessageLeaving = signal(false);
+  protected readonly deleteTarget = signal<DeleteTarget | null>(null);
   protected readonly accounts = signal<Account[]>([]);
   protected readonly categories = signal<Category[]>([]);
   protected readonly transactions = signal<Transaction[]>([]);
@@ -293,16 +295,47 @@ export class App {
   }
 
   protected deleteAccount(id: string): void {
-    if (!confirm('Excluir esta conta?')) {
-      return;
-    }
+    this.requestDelete('account', id, 'Excluir conta', 'Esta conta será removida se não tiver lançamentos vinculados.');
+  }
 
-    this.http.delete(`${this.apiUrl}/accounts/${id}`, this.options()).subscribe({
+  protected deleteCategory(id: string): void {
+    this.requestDelete('category', id, 'Excluir categoria', 'Esta categoria será removida se não tiver lançamentos vinculados.');
+  }
+
+  protected deleteTransaction(id: string): void {
+    this.requestDelete('transaction', id, 'Excluir lançamento', 'Este lançamento será removido do seu mês.');
+  }
+
+  protected cancelDelete(): void {
+    this.deleteTarget.set(null);
+  }
+
+  protected confirmDelete(): void {
+    const target = this.deleteTarget();
+    if (!target) return;
+
+    const requests = {
+      account: this.http.delete(`${this.apiUrl}/accounts/${target.id}`, this.options()),
+      category: this.http.delete(`${this.apiUrl}/categories/${target.id}`, this.options()),
+      transaction: this.http.delete(`${this.apiUrl}/transactions/${target.id}`, this.options()),
+    };
+
+    const labels = {
+      account: 'Conta excluída.',
+      category: 'Categoria excluída.',
+      transaction: 'Lançamento excluído.',
+    };
+
+    requests[target.type].subscribe({
       next: () => {
+        this.deleteTarget.set(null);
         this.loadAll();
-        this.showMessage('Conta excluída.', 'success');
+        this.showMessage(labels[target.type], 'success');
       },
-      error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível excluir a conta.'), 'error'),
+      error: (error) => {
+        this.deleteTarget.set(null);
+        this.showMessage(this.errorMessage(error, 'Não foi possível excluir.'), 'error');
+      },
     });
   }
 
@@ -321,13 +354,6 @@ export class App {
         this.showMessage('Categoria salva com sucesso.');
       },
       error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível salvar a categoria.')),
-    });
-  }
-
-  protected deleteCategory(id: string): void {
-    this.http.delete(`${this.apiUrl}/categories/${id}`, this.options()).subscribe({
-      next: () => this.loadAll(),
-      error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível excluir a categoria.')),
     });
   }
 
@@ -352,20 +378,6 @@ export class App {
         this.showMessage(id ? 'Lançamento atualizado com sucesso.' : 'Lançamento salvo com sucesso.', 'success');
       },
       error: () => this.showMessage('Não foi possível salvar o lançamento.', 'error'),
-    });
-  }
-
-  protected deleteTransaction(id: string): void {
-    if (!confirm('Excluir este lançamento?')) {
-      return;
-    }
-
-    this.http.delete(`${this.apiUrl}/transactions/${id}`, this.options()).subscribe({
-      next: () => {
-        this.loadAll();
-        this.showMessage('Lançamento excluído.', 'success');
-      },
-      error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível excluir o lançamento.'), 'error'),
     });
   }
 
@@ -897,5 +909,9 @@ export class App {
     return (typeof leftValue === 'number' && typeof rightValue === 'number'
       ? leftValue - rightValue
       : String(leftValue).localeCompare(String(rightValue), 'pt-BR')) * direction;
+  }
+
+  private requestDelete(type: DeleteTarget['type'], id: string, title: string, description: string): void {
+    this.deleteTarget.set({ type, id, title, description });
   }
 }
