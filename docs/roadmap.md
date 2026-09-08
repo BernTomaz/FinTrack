@@ -26,7 +26,6 @@
 
 - Deploy público.
 - Melhorias visuais.
-- Confirmação visual de exclusão.
 - Relatórios adicionais.
 - Backup e restauração.
 

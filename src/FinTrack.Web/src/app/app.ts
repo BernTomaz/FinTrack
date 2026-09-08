@@ -262,9 +262,6 @@ export class App {
   }
 
   protected logout(): void {
-    localStorage.removeItem('fintrack.token');
-    localStorage.removeItem('fintrack.name');
-    localStorage.removeItem('fintrack.email');
     sessionStorage.removeItem('fintrack.token');
     sessionStorage.removeItem('fintrack.name');
     sessionStorage.removeItem('fintrack.email');
@@ -393,7 +390,32 @@ export class App {
     if (this.transactionTypeFilter()) params.set('type', this.transactionTypeFilter());
     if (this.transactionCategoryFilter()) params.set('categoryId', this.transactionCategoryFilter());
     if (this.transactionAccountFilter()) params.set('accountId', this.transactionAccountFilter());
-    window.open(`${this.apiUrl}/exports/transactions.csv?${params}`, '_blank');
+
+    this.http.get(`${this.apiUrl}/exports/transactions.csv?${params}`, {
+      ...this.options(),
+      responseType: 'blob',
+      observe: 'response',
+    }).subscribe({
+      next: (response) => {
+        const blob = response.body;
+        if (!blob) {
+          this.showMessage('Não foi possível gerar o CSV.', 'error');
+          return;
+        }
+
+        const contentDisposition = response.headers.get('content-disposition') ?? '';
+        const fileName = /filename="?([^"]+)"?/i.exec(contentDisposition)?.[1] ?? `fintrack-transactions-${Date.now()}.csv`;
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        URL.revokeObjectURL(url);
+        this.showMessage('CSV baixado com sucesso.', 'success');
+      },
+      error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível exportar o CSV.'), 'error'),
+    });
   }
 
   protected accountName(id: string): string {

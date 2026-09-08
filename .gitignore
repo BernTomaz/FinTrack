@@ -23,8 +23,10 @@ appsettings.*.local.json
 # Logs
 *.log
 
+# Test artifacts
+TestResults/
+
 # SQL Server / local data
 *.bak
 *.mdf
 *.ldf
-
