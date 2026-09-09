@@ -202,7 +202,7 @@ public sealed class ApiFlowTests
         using var client = app.CreateClient();
         await RegisterAndAuthorize(client);
 
-        var account = await CreateAccount(client, "Conta Corrente");
+        var account = await CreateAccount(client, "Conta Corrente", 50);
         var expenseCategory = await CreateCategory(client, "Mercado", CategoryType.Expense);
         var billsCategory = await CreateCategory(client, "Contas", CategoryType.Expense);
         var incomeCategory = await CreateCategory(client, "Salário", CategoryType.Income);
@@ -220,7 +220,7 @@ public sealed class ApiFlowTests
         Assert.Equal(1000, dashboard.TotalIncome);
         Assert.Equal(300, dashboard.TotalExpense);
         Assert.Equal(700, dashboard.MonthBalance);
-        Assert.Equal(650, dashboard.CurrentBalance);
+        Assert.Equal(700, dashboard.CurrentBalance);
         Assert.Equal(2, dashboard.ExpensesByCategory.Count);
         Assert.Equal("Mercado", dashboard.ExpensesByCategory[0].CategoryName);
         Assert.Equal(3, dashboard.LatestTransactions.Count);
@@ -292,6 +292,36 @@ public sealed class ApiFlowTests
     }
 
     [Fact]
+    public async Task Profile_and_password_can_be_updated()
+    {
+        await using var app = new FinTrackApiFactory();
+        using var client = app.CreateClient();
+        await RegisterAndAuthorize(client);
+
+        var profile = await client.PutAsJsonAsync("/auth/me", new UpdateProfileRequest("Bernardo Tomaz"));
+        Assert.Equal(HttpStatusCode.OK, profile.StatusCode);
+
+        var updatedProfile = await profile.Content.ReadFromJsonAsync<AuthResponse>();
+        Assert.NotNull(updatedProfile);
+        Assert.Equal("Bernardo Tomaz", updatedProfile.Name);
+        Assert.False(string.IsNullOrWhiteSpace(updatedProfile.Token));
+
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", updatedProfile.Token);
+
+        var invalidPassword = await client.PutAsJsonAsync("/auth/password", new ChangePasswordRequest("senha-errada", "Nova@123"));
+        Assert.Equal(HttpStatusCode.Unauthorized, invalidPassword.StatusCode);
+
+        var password = await client.PutAsJsonAsync("/auth/password", new ChangePasswordRequest("Senha@123", "Nova@123"));
+        Assert.Equal(HttpStatusCode.NoContent, password.StatusCode);
+
+        var oldLogin = await client.PostAsJsonAsync("/auth/login", new LoginRequest("bernardo@email.com", "Senha@123"));
+        Assert.Equal(HttpStatusCode.Unauthorized, oldLogin.StatusCode);
+
+        var newLogin = await client.PostAsJsonAsync("/auth/login", new LoginRequest("bernardo@email.com", "Nova@123"));
+        Assert.Equal(HttpStatusCode.OK, newLogin.StatusCode);
+    }
+
+    [Fact]
     public async Task Private_endpoints_and_missing_items_return_expected_status()
     {
         await using var app = new FinTrackApiFactory();
@@ -353,9 +383,9 @@ public sealed class ApiFlowTests
         return auth;
     }
 
-    private static async Task<AccountResponse> CreateAccount(HttpClient client, string name)
+    private static async Task<AccountResponse> CreateAccount(HttpClient client, string name, decimal initialBalance = 0)
     {
-        var response = await client.PostAsJsonAsync("/accounts", new AccountRequest(name, AccountType.Checking, 0));
+        var response = await client.PostAsJsonAsync("/accounts", new AccountRequest(name, AccountType.Checking, initialBalance));
         Assert.True(response.StatusCode == HttpStatusCode.Created, await response.Content.ReadAsStringAsync());
 
         var account = await response.Content.ReadFromJsonAsync<AccountResponse>();

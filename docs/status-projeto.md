@@ -50,6 +50,11 @@ MVP funcional validado localmente.
 - README específico do frontend
 - Workflow de CI com validação de backend e frontend
 - Confirmação visual antes de excluir contas, categorias e lançamentos
+- Saldo atual considerando saldos iniciais das contas
+- Perfil editável com e-mail somente leitura
+- Alteração de senha autenticada
+- Serviço Angular centralizando chamadas à API e sessão
+- Componentes Angular separados para dashboard, relatórios, contas, categorias, exportação, lançamentos, perfil e alteração de senha
 
 ## Em Aberto
 
@@ -69,9 +74,9 @@ MVP funcional validado localmente.
 
 ## Última Validação Automatizada
 
-- Data: 03/09/2026.
+- Data: 09/09/2026.
 - Backend: `dotnet test FinTrack.slnx -m:1`.
-- Resultado backend: 34 testes aprovados.
+- Resultado backend: 35 testes aprovados.
 - Frontend: `npm run build`.
 - Resultado frontend: build de produção aprovado.
 

@@ -42,13 +42,6 @@
             Senha
             <input type="password" formControlName="password" autocomplete="current-password" placeholder="Sua senha" />
           </label>
-          <div class="form-line">
-            <label class="check">
-              <input type="checkbox" />
-              Lembrar-me
-            </label>
-            <button type="button" class="link">Esqueci minha senha</button>
-          </div>
           <button type="submit" class="primary">Entrar</button>
         </form>
 
@@ -150,38 +143,20 @@
       </header>
 
       @if (activeView() === 'profile') {
-        <section class="settings-page">
-          <article class="panel settings-card">
-            <div class="panel-head">
-              <h2>Meu perfil</h2>
-              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
-            </div>
-            <div class="profile-box">
-              <span class="avatar large">{{ initial() }}</span>
-              <div>
-                <strong>{{ userName() }}</strong>
-                <small>Usuário do FinTrack</small>
-              </div>
-            </div>
-            <label>Nome<input type="text" [value]="userName()" readonly /></label>
-            <label>E-mail<input type="email" [value]="userEmail()" readonly /></label>
-          </article>
-        </section>
+        <app-profile-panel
+          [form]="profileForm"
+          [initial]="initial()"
+          [name]="userName()"
+          [email]="userEmail()"
+          (save)="saveProfile()"
+          (back)="openView('dashboard')" />
       }
 
       @if (activeView() === 'password') {
-        <section class="settings-page">
-          <article class="panel settings-card" style="max-width:920px">
-            <div class="panel-head">
-              <h2>Alterar senha</h2>
-              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
-            </div>
-            <label>Senha atual<input type="password" placeholder="Informe sua senha atual" /></label>
-            <label>Nova senha<input type="password" placeholder="Informe a nova senha" /></label>
-            <label>Confirmar nova senha<input type="password" placeholder="Repita a nova senha" /></label>
-            <button type="button" class="primary" (click)="showUnavailableFeature('Alteração de senha')">Salvar alteração</button>
-          </article>
-        </section>
+        <app-password-panel
+          [form]="passwordForm"
+          (save)="changePassword()"
+          (back)="openView('dashboard')" />
       }
 
       @if (activeView() === 'preferences') {
@@ -241,203 +216,98 @@
         </section>
       }
 
+      @if (activeView() === 'dashboard') {
+        <app-dashboard-panel
+          [accounts]="accounts()"
+          [categories]="categories()"
+          [transactions]="transactions()"
+          [recentTransactions]="recentTransactions()"
+          [dashboard]="dashboard()"
+          [chartMonths]="chartMonths()"
+          [accountTypes]="accountTypes"
+          [categoryTypes]="categoryTypes"
+          [transactionTypes]="transactionTypes"
+          [accountForm]="accountForm"
+          [categoryForm]="categoryForm"
+          [transactionForm]="transactionForm"
+          [month]="currentMonthValue()"
+          [monthLabel]="currentMonthLabel()"
+          [chartRangeLabel]="chartRangeLabel()"
+          [hasMoreTransactions]="hasMoreTransactions()"
+          [editingTransaction]="editingTransactionId().length > 0"
+          (monthChange)="setCurrentMonth($event)"
+          (showTransactionsByType)="showTransactionsByType($event)"
+          (showTransactionsByCategory)="showTransactionsByCategory($event)"
+          (showAllTransactions)="showAllTransactions()"
+          (showAllAccounts)="showAllAccounts()"
+          (showMoreTransactions)="showMoreTransactions()"
+          (addExpense)="openView('expense')"
+          (editTransaction)="editTransaction($event)"
+          (deleteTransaction)="deleteTransaction($event)"
+          (deleteAccount)="deleteAccount($event)"
+          (createAccount)="createAccount()"
+          (createCategory)="createCategory()"
+          (createTransaction)="createTransaction()"
+          (cancelTransactionEdit)="cancelTransactionEdit()" />
+      }
+
       @if (activeView() === 'income' || activeView() === 'expense') {
-        <section class="settings-page">
-          <form class="panel settings-card" [formGroup]="transactionForm" (ngSubmit)="createTransaction()">
-            <div class="panel-head">
-              <h2>{{ editingTransactionId() ? 'Editar lançamento' : activeView() === 'income' ? 'Nova receita' : 'Nova despesa' }}</h2>
-              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
-            </div>
-            <label>Conta
-              <select formControlName="accountId">
-                <option value="">Selecione</option>
-                @for (account of accounts(); track account.id) {
-                  <option [value]="account.id">{{ account.name }}</option>
-                }
-              </select>
-            </label>
-            <label>Categoria
-              <select formControlName="categoryId">
-                <option value="">Selecione</option>
-                @for (category of categories(); track category.id) {
-                  <option [value]="category.id">{{ category.name }}</option>
-                }
-              </select>
-            </label>
-            <label>Valor<input type="number" formControlName="amount" min="0.01" step="0.01" /></label>
-            <label>Data<input type="date" formControlName="date" /></label>
-            <label>Descrição<input type="text" formControlName="description" /></label>
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-              <button type="submit" class="primary">{{ editingTransactionId() ? 'Atualizar lançamento' : 'Salvar lançamento' }}</button>
-              @if (editingTransactionId()) {
-                <button type="button" class="ghost" (click)="cancelTransactionEdit()">Cancelar edição</button>
-              }
-            </div>
-          </form>
-        </section>
+        <app-transaction-form-panel
+          [accounts]="accounts()"
+          [categories]="categories()"
+          [form]="transactionForm"
+          [title]="editingTransactionId() ? 'Editar lançamento' : activeView() === 'income' ? 'Nova receita' : 'Nova despesa'"
+          [editing]="editingTransactionId().length > 0"
+          (save)="createTransaction()"
+          (cancelEdit)="cancelTransactionEdit()"
+          (back)="openView('dashboard')" />
       }
 
       @if (activeView() === 'accounts') {
-        <section class="settings-page">
-          <div class="panel settings-card">
-            <div class="panel-head">
-              <h2>Contas</h2>
-              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
-            </div>
-            <div class="list">
-              @for (account of accounts(); track account.id) {
-                <div class="account-line">
-                  <span class="coin">▣</span>
-                  <div>
-                    <strong>{{ account.name }}</strong>
-                    <small>{{ accountTypeLabel(account.type) }}</small>
-                  </div>
-                  <button type="button" class="icon" title="Excluir conta" (click)="deleteAccount(account.id)">×</button>
-                </div>
-              } @empty {
-                <div class="empty-state">
-                  <strong>Nenhuma conta cadastrada</strong>
-                  <span>Cadastre uma conta para começar a organizar seus lançamentos.</span>
-                  <button type="button" class="primary" style="justify-self:center" (click)="openView('accounts')">Criar primeira conta</button>
-                </div>
-              }
-            </div>
-          </div>
-
-          <form class="panel settings-card" [formGroup]="accountForm" (ngSubmit)="createAccount()">
-            <h2>Nova conta</h2>
-            <label>Nome<input type="text" formControlName="name" /></label>
-            <label>Tipo
-              <select formControlName="type">
-                @for (type of accountTypes; track type) {
-                  <option [value]="type">{{ accountTypeLabel(type) }}</option>
-                }
-              </select>
-            </label>
-            <label>Saldo inicial<input type="number" formControlName="initialBalance" /></label>
-            <button type="submit" class="primary">Salvar conta</button>
-          </form>
-        </section>
+        <app-accounts-panel
+          [accounts]="accounts()"
+          [accountTypes]="accountTypes"
+          [form]="accountForm"
+          (save)="createAccount()"
+          (delete)="deleteAccount($event)"
+          (back)="openView('dashboard')" />
       }
 
       @if (activeView() === 'categories') {
-        <section class="settings-page">
-          <div class="panel settings-card">
-            <div class="panel-head">
-              <h2>Categorias</h2>
-              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
-            </div>
-            <div class="list">
-              @for (category of categories(); track category.id) {
-                <div class="account-line">
-                  <span class="coin">◇</span>
-                  <div>
-                    <strong>{{ category.name }}</strong>
-                    <small>{{ categoryTypeLabel(category.type) }}</small>
-                  </div>
-                  <button type="button" class="icon" title="Excluir categoria" (click)="deleteCategory(category.id)">×</button>
-                </div>
-              } @empty {
-                <div class="empty-state">
-                  <strong>Nenhuma categoria cadastrada</strong>
-                  <span>Cadastre categorias para organizar receitas e despesas.</span>
-                </div>
-              }
-            </div>
-          </div>
-
-          <form class="panel settings-card" [formGroup]="categoryForm" (ngSubmit)="createCategory()">
-            <div class="panel-head">
-              <h2>Nova categoria</h2>
-            </div>
-            <label>Nome<input type="text" formControlName="name" /></label>
-            <label>Tipo
-              <select formControlName="type">
-                @for (type of categoryTypes; track type) {
-                  <option [value]="type">{{ categoryTypeLabel(type) }}</option>
-                }
-              </select>
-            </label>
-            <button type="submit" class="primary">Salvar categoria</button>
-          </form>
-        </section>
+        <app-categories-panel
+          [categories]="categories()"
+          [categoryTypes]="categoryTypes"
+          [form]="categoryForm"
+          (save)="createCategory()"
+          (delete)="deleteCategory($event)"
+          (back)="openView('dashboard')" />
       }
 
       @if (activeView() === 'reports') {
-        <section class="settings-page" style="place-items:start center">
-          <article class="panel settings-card" style="max-width:min(1180px, calc(100vw - 64px))">
-            <div class="panel-head">
-              <h2>Relatórios</h2>
-              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
-            </div>
-            <div class="form-grid">
-              <label>Mês<input type="month" [value]="currentMonthValue()" (change)="setCurrentMonth($any($event.target).value)" /></label>
-              <label>Buscar<input type="search" [value]="transactionSearch()" (input)="updateTransactionSearch($any($event.target).value)" placeholder="Descrição, conta ou categoria" /></label>
-              <label>Tipo
-                <select [value]="transactionTypeFilter()" (change)="updateTransactionTypeFilter($any($event.target).value)">
-                  <option value="">Todos</option>
-                  @for (type of transactionTypes; track type) {
-                    <option [value]="type">{{ transactionTypeLabel(type) }}</option>
-                  }
-                </select>
-              </label>
-              <label>Categoria
-                <select [value]="transactionCategoryFilter()" (change)="updateTransactionCategoryFilter($any($event.target).value)">
-                  <option value="">Todas</option>
-                  @for (category of categories(); track category.id) {
-                    <option [value]="category.id">{{ category.name }}</option>
-                  }
-                </select>
-              </label>
-              <label>Conta
-                <select [value]="transactionAccountFilter()" (change)="updateTransactionAccountFilter($any($event.target).value)">
-                  <option value="">Todas</option>
-                  @for (account of accounts(); track account.id) {
-                    <option [value]="account.id">{{ account.name }}</option>
-                  }
-                </select>
-              </label>
-            </div>
-            <div class="table">
-              <div class="table-row table-head">
-                <button type="button" style="background:transparent;color:inherit;text-align:left" (click)="sortTransactions('date')">Data{{ sortLabel('date') }}</button>
-                <button type="button" style="background:transparent;color:inherit;text-align:left" (click)="sortTransactions('description')">Descrição{{ sortLabel('description') }}</button>
-                <button type="button" style="background:transparent;color:inherit;text-align:left" (click)="sortTransactions('category')">Categoria{{ sortLabel('category') }}</button>
-                <button type="button" style="background:transparent;color:inherit;text-align:left" (click)="sortTransactions('type')">Tipo{{ sortLabel('type') }}</button>
-                <button type="button" style="background:transparent;color:inherit;text-align:left" (click)="sortTransactions('amount')">Valor{{ sortLabel('amount') }}</button>
-                <span>Conta</span>
-                <span>Ações</span>
-              </div>
-              @for (transaction of reportTransactions(); track transaction.id) {
-                <div class="table-row">
-                  <span>{{ transaction.date }}</span>
-                  <span>{{ transaction.description || 'Lançamento' }}</span>
-                  <span>{{ categoryName(transaction.categoryId) }}</span>
-                  <span [class.positive]="transaction.type === 'Income'" [class.negative]="transaction.type === 'Expense'">
-                    {{ transaction.type === 'Income' ? 'Receita' : 'Despesa' }}
-                  </span>
-                  <strong [class.positive]="transaction.type === 'Income'" [class.negative]="transaction.type === 'Expense'">
-                    {{ money(transaction.amount) }}
-                  </strong>
-                  <span>{{ accountName(transaction.accountId) }}</span>
-                  <span style="display:flex;gap:8px">
-                    <button type="button" class="icon" title="Editar lançamento" (click)="editTransaction(transaction)">✎</button>
-                    <button type="button" class="icon danger-icon" title="Excluir lançamento" (click)="deleteTransaction(transaction.id)">×</button>
-                  </span>
-                </div>
-              } @empty {
-                <div class="empty-state">
-                  <strong>Nenhum lançamento encontrado</strong>
-                  <span>Ajuste os filtros ou cadastre receitas e despesas para acompanhar seus relatórios.</span>
-                  <button type="button" class="primary" style="justify-self:center" (click)="openView('expense')">Adicionar lançamento</button>
-                </div>
-              }
-            </div>
-            @if (hasMoreReportTransactions()) {
-              <button type="button" class="ghost" style="justify-self:center" (click)="showMoreReportTransactions()">Ver mais</button>
-            }
-          </article>
-        </section>
+        <app-reports-panel
+          [accounts]="accounts()"
+          [categories]="categories()"
+          [transactions]="reportTransactions()"
+          [transactionTypes]="transactionTypes"
+          [month]="currentMonthValue()"
+          [search]="transactionSearch()"
+          [typeFilter]="transactionTypeFilter()"
+          [categoryFilter]="transactionCategoryFilter()"
+          [accountFilter]="transactionAccountFilter()"
+          [sortField]="transactionSortField()"
+          [sortDirection]="transactionSortDirection()"
+          [hasMore]="hasMoreReportTransactions()"
+          (monthChange)="setCurrentMonth($event)"
+          (searchChange)="updateTransactionSearch($event)"
+          (typeFilterChange)="updateTransactionTypeFilter($event)"
+          (categoryFilterChange)="updateTransactionCategoryFilter($event)"
+          (accountFilterChange)="updateTransactionAccountFilter($event)"
+          (sort)="sortTransactions($event)"
+          (edit)="editTransaction($event)"
+          (delete)="deleteTransaction($event)"
+          (showMore)="showMoreReportTransactions()"
+          (addTransaction)="openView('expense')"
+          (back)="openView('dashboard')" />
       }
 
       @if (activeView() === 'categorySummary') {
@@ -469,258 +339,13 @@
       }
 
       @if (activeView() === 'export') {
-        <section class="settings-page">
-          <article class="panel settings-card">
-            <div class="panel-head">
-              <h2>Exportação CSV</h2>
-              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
-            </div>
-            <div class="form-grid">
-              <label>De<input type="date" [value]="exportStartDate()" (change)="updateExportStartDate($any($event.target).value)" /></label>
-              <label>Até<input type="date" [value]="exportEndDate()" (change)="updateExportEndDate($any($event.target).value)" /></label>
-            </div>
-            <div class="empty-state">
-              <strong>Baixar lançamentos filtrados</strong>
-              <span>Sem período livre, usa o mês selecionado. Com datas, exporta o intervalo escolhido.</span>
-              <button type="button" class="primary" style="justify-self: center" (click)="exportCsv()">Baixar CSV</button>
-            </div>
-          </article>
-        </section>
-      }
-
-      @if (activeView() === 'dashboard') {
-      <section class="toolbar">
-        <input class="select-like" type="month" [value]="currentMonthValue()" (change)="setCurrentMonth($any($event.target).value)" title="Selecionar mês" />
-      </section>
-
-      <section id="dashboard" class="summary" aria-label="Resumo mensal">
-        <button type="button" class="metric income" style="text-align:left" (click)="showTransactionsByType('Income')" title="Ver receitas do mês">
-          <span>↗</span>
-          <div>
-            <p>Receitas</p>
-            <strong>{{ money(dashboard()?.totalIncome ?? 0) }}</strong>
-            <small>{{ currentMonthLabel() }}</small>
-          </div>
-        </button>
-        <button type="button" class="metric expense" style="text-align:left" (click)="showTransactionsByType('Expense')" title="Ver despesas do mês">
-          <span>↘</span>
-          <div>
-            <p>Despesas</p>
-            <strong>{{ money(dashboard()?.totalExpense ?? 0) }}</strong>
-            <small>{{ currentMonthLabel() }}</small>
-          </div>
-        </button>
-        <button type="button" class="metric balance" style="text-align:left" (click)="showAllTransactions()" title="Ver lançamentos do mês">
-          <span>▣</span>
-          <div>
-            <p>Saldo</p>
-            <strong>{{ money(dashboard()?.monthBalance ?? 0) }}</strong>
-            <small>{{ currentMonthLabel() }}</small>
-          </div>
-        </button>
-        <button type="button" class="metric bills" style="text-align:left" (click)="showAllAccounts()" title="Ver contas">
-          <span>▤</span>
-          <div>
-            <p>Saldo atual</p>
-            <strong>{{ money(dashboard()?.currentBalance ?? 0) }}</strong>
-            <small>Contas e lançamentos atualizados</small>
-          </div>
-        </button>
-      </section>
-
-      <section class="grid">
-        <article class="panel chart-panel">
-          <div class="panel-head">
-            <h2>Fluxo de caixa mensal</h2>
-            <button type="button" class="select-like">{{ chartRangeLabel() }}</button>
-          </div>
-          @if (transactions().length > 0) {
-            <div class="bar-chart" aria-label="Gráfico de fluxo de caixa mensal">
-              @for (month of chartMonths(); track month.label) {
-                <div class="bar-group" [title]="cashFlowTooltip(month)">
-                  <span class="income-bar" [style.height.%]="month.income"></span>
-                  <span class="expense-bar" [style.height.%]="month.expense"></span>
-                  <small>{{ month.label }}</small>
-                </div>
-              }
-            </div>
-          } @else {
-            <div class="empty-state">
-              <strong>Nenhum lançamento cadastrado</strong>
-              <span>Cadastre receitas e despesas para visualizar o fluxo de caixa.</span>
-              <button type="button" class="primary" style="justify-self:center" (click)="openView('expense')">Adicionar lançamento</button>
-            </div>
-          }
-        </article>
-
-        @if ((dashboard()?.expensesByCategory?.length ?? 0) > 0) {
-          <article id="categorias" class="panel">
-            <div class="panel-head">
-              <h2>Despesas por categoria</h2>
-              <button type="button" class="select-like">{{ currentMonthLabel() }}</button>
-            </div>
-            <div class="category-card">
-              <div class="donut" [title]="expenseDonutTooltip()"><span>Total<br />{{ money(dashboard()?.totalExpense ?? 0) }}</span></div>
-              <div class="list compact">
-                @for (item of dashboard()?.expensesByCategory ?? []; track item.categoryName) {
-                  <button type="button" class="line" style="background:transparent;color:inherit;text-align:left;width:100%" (click)="showTransactionsByCategory(item.categoryName)" [title]="categoryExpenseTooltip(item)">
-                    <span>{{ item.categoryName }}</span>
-                    <strong>{{ money(item.total) }}</strong>
-                  </button>
-                }
-              </div>
-            </div>
-          </article>
-        } @else {
-          <article id="categorias" class="panel">
-            <div class="panel-head">
-              <h2>Despesas por categoria</h2>
-            </div>
-            <div class="empty-state">
-              <strong>Sem despesas por enquanto</strong>
-              <span>As categorias aparecem aqui depois dos primeiros lançamentos.</span>
-              <button type="button" class="primary" style="justify-self:center" (click)="openView('expense')">Adicionar despesa</button>
-            </div>
-          </article>
-        }
-
-        <article id="relatorios" class="panel table-panel">
-          <div class="panel-head">
-            <h2>Transações recentes</h2>
-            <button type="button" class="link strong" (click)="showAllTransactions()">Ver todas →</button>
-          </div>
-          <div class="table">
-            <div class="table-row table-head">
-              <span>Data</span>
-              <span>Descrição</span>
-              <span>Categoria</span>
-              <span>Tipo</span>
-              <span>Valor</span>
-              <span>Conta</span>
-              <span>Ações</span>
-            </div>
-            @for (transaction of recentTransactions(); track transaction.id) {
-              <div class="table-row">
-                <span>{{ transaction.date }}</span>
-                <span>{{ transaction.description || 'Lançamento' }}</span>
-                <span>{{ categoryName(transaction.categoryId) }}</span>
-                <span [class.positive]="transaction.type === 'Income'" [class.negative]="transaction.type === 'Expense'">
-                  {{ transaction.type === 'Income' ? 'Receita' : 'Despesa' }}
-                </span>
-                <strong [class.positive]="transaction.type === 'Income'" [class.negative]="transaction.type === 'Expense'">
-                  {{ money(transaction.amount) }}
-                </strong>
-                <span>{{ accountName(transaction.accountId) }}</span>
-                <span style="display:flex;gap:8px">
-                  <button type="button" class="icon" title="Editar lançamento" (click)="editTransaction(transaction)">✎</button>
-                  <button type="button" class="icon danger-icon" title="Excluir lançamento" (click)="deleteTransaction(transaction.id)">×</button>
-                </span>
-              </div>
-            } @empty {
-              <div class="empty-state">
-                <strong>Nenhum lançamento ainda</strong>
-                <span>Comece adicionando uma receita ou despesa.</span>
-                <button type="button" class="primary" style="justify-self:center" (click)="openView('expense')">Adicionar lançamento</button>
-              </div>
-            }
-          </div>
-          @if (hasMoreTransactions()) {
-            <button type="button" class="ghost" style="justify-self:center" (click)="showMoreTransactions()">Ver mais</button>
-          }
-        </article>
-
-        <article id="contas" class="panel accounts-panel">
-          <div class="panel-head">
-            <h2>Saldos das contas</h2>
-            <button type="button" class="link strong" (click)="showAllAccounts()">Ver todas →</button>
-          </div>
-          <div class="list">
-            @for (account of accounts(); track account.id) {
-              <div class="account-line">
-                <span class="coin">▣</span>
-                <div>
-                  <strong>{{ account.name }}</strong>
-                  <small>{{ accountTypeLabel(account.type) }}</small>
-                </div>
-                <button type="button" class="icon" title="Excluir conta" (click)="deleteAccount(account.id)">×</button>
-              </div>
-            } @empty {
-              <div class="empty-state">
-                <strong>Nenhuma conta cadastrada</strong>
-                <span>Cadastre uma conta para começar a organizar seus lançamentos.</span>
-                <button type="button" class="primary" style="justify-self:center" (click)="openView('accounts')">Criar primeira conta</button>
-              </div>
-            }
-          </div>
-        </article>
-      </section>
-
-      <section class="forms-grid">
-        <form id="contas" class="panel" [formGroup]="accountForm" (ngSubmit)="createAccount()">
-          <h2>Nova conta</h2>
-          <label>Nome<input type="text" formControlName="name" /></label>
-          <label>Tipo
-            <select formControlName="type">
-              @for (type of accountTypes; track type) {
-                <option [value]="type">{{ accountTypeLabel(type) }}</option>
-              }
-            </select>
-          </label>
-          <label>Saldo inicial<input type="number" formControlName="initialBalance" /></label>
-          <button type="submit" class="primary">Salvar conta</button>
-        </form>
-
-        <form class="panel" [formGroup]="categoryForm" (ngSubmit)="createCategory()">
-          <h2>Nova categoria</h2>
-          <label>Nome<input type="text" formControlName="name" /></label>
-          <label>Tipo
-            <select formControlName="type">
-              @for (type of categoryTypes; track type) {
-                <option [value]="type">{{ categoryTypeLabel(type) }}</option>
-              }
-            </select>
-          </label>
-          <button type="submit" class="primary">Salvar categoria</button>
-        </form>
-
-        <form id="receitas" class="panel transaction-form" [formGroup]="transactionForm" (ngSubmit)="createTransaction()">
-          <h2>{{ editingTransactionId() ? 'Editar lançamento' : 'Novo lançamento' }}</h2>
-          <div class="form-grid">
-            <label>Conta
-              <select formControlName="accountId">
-                <option value="">Selecione</option>
-                @for (account of accounts(); track account.id) {
-                  <option [value]="account.id">{{ account.name }}</option>
-                }
-              </select>
-            </label>
-            <label>Categoria
-              <select formControlName="categoryId">
-                <option value="">Selecione</option>
-                @for (category of categories(); track category.id) {
-                  <option [value]="category.id">{{ category.name }}</option>
-                }
-              </select>
-            </label>
-            <label>Tipo
-              <select formControlName="type">
-                @for (type of transactionTypes; track type) {
-                  <option [value]="type">{{ transactionTypeLabel(type) }}</option>
-                }
-              </select>
-            </label>
-            <label>Valor<input type="number" formControlName="amount" min="0.01" step="0.01" /></label>
-            <label>Data<input type="date" formControlName="date" /></label>
-            <label>Descrição<input type="text" formControlName="description" /></label>
-          </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button type="submit" class="primary">{{ editingTransactionId() ? 'Atualizar lançamento' : 'Salvar lançamento' }}</button>
-            @if (editingTransactionId()) {
-              <button type="button" class="ghost" (click)="cancelTransactionEdit()">Cancelar edição</button>
-            }
-          </div>
-        </form>
-      </section>
+        <app-export-panel
+          [startDate]="exportStartDate()"
+          [endDate]="exportEndDate()"
+          (startDateChange)="updateExportStartDate($event)"
+          (endDateChange)="updateExportEndDate($event)"
+          (export)="exportCsv()"
+          (back)="openView('dashboard')" />
       }
     </section>
 

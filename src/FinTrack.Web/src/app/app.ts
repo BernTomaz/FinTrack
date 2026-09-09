@@ -1,11 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, ViewEncapsulation, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Account, AccountType, AuthResponse, Category, CategoryType, Dashboard, FinTrackApiService, Transaction, TransactionType } from './fintrack-api.service';
+import { AccountsPanelComponent } from './accounts-panel.component';
+import { CategoriesPanelComponent } from './categories-panel.component';
+import { DashboardPanelComponent } from './dashboard-panel.component';
+import { ExportPanelComponent } from './export-panel.component';
+import { PasswordPanelComponent } from './password-panel.component';
+import { ProfilePanelComponent } from './profile-panel.component';
+import { ReportsPanelComponent } from './reports-panel.component';
+import { TransactionFormPanelComponent } from './transaction-form-panel.component';
 
-type AccountType = 'Wallet' | 'Checking' | 'Savings' | 'CreditCard';
-type CategoryType = 'Income' | 'Expense';
-type TransactionType = 'Income' | 'Expense';
 type Theme = 'light' | 'dark';
 type AuthMode = 'login' | 'register';
 type PetColor = 'green' | 'blue' | 'orange' | 'purple';
@@ -25,53 +30,27 @@ type View =
   | 'preferences'
   | 'about';
 
-interface AuthResponse {
-  name: string;
-  email: string;
-  token: string;
-}
-
-interface Account {
-  id: string;
-  name: string;
-  type: AccountType;
-  initialBalance: number;
-}
-
-interface Category {
-  id: string;
-  name: string;
-  type: CategoryType;
-}
-
-interface Transaction {
-  id: string;
-  accountId: string;
-  categoryId: string;
-  type: TransactionType;
-  amount: number;
-  date: string;
-  description: string | null;
-}
-
-interface Dashboard {
-  totalIncome: number;
-  totalExpense: number;
-  monthBalance: number;
-  currentBalance: number;
-  expensesByCategory: { categoryName: string; total: number }[];
-}
-
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    AccountsPanelComponent,
+    CategoriesPanelComponent,
+    DashboardPanelComponent,
+    ExportPanelComponent,
+    PasswordPanelComponent,
+    ProfilePanelComponent,
+    ReportsPanelComponent,
+    TransactionFormPanelComponent,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.css',
+  encapsulation: ViewEncapsulation.None,
 })
 export class App {
-  private readonly http = inject(HttpClient);
+  private readonly api = inject(FinTrackApiService);
   private readonly fb = inject(FormBuilder);
-  private readonly apiUrl = 'http://localhost:5080';
   private messageTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private messageClearTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
@@ -214,6 +193,16 @@ export class App {
     description: ['', Validators.maxLength(160)],
   });
 
+  protected readonly profileForm = this.fb.nonNullable.group({
+    name: [this.userName(), [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
+  });
+
+  protected readonly passwordForm = this.fb.nonNullable.group({
+    currentPassword: ['', [Validators.required, Validators.maxLength(100)]],
+    newPassword: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(100)]],
+    confirmPassword: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(100)]],
+  });
+
   constructor() {
     if (this.isLoggedIn()) {
       this.loadAll();
@@ -229,7 +218,7 @@ export class App {
       return;
     }
 
-    this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, this.loginForm.getRawValue()).subscribe({
+    this.api.login(this.loginForm.getRawValue()).subscribe({
       next: (auth) => this.startSession(auth),
       error: () => this.showMessage('Não foi possível entrar.'),
     });
@@ -243,7 +232,7 @@ export class App {
       return;
     }
 
-    this.http.post<AuthResponse>(`${this.apiUrl}/auth/register`, this.registerForm.getRawValue()).subscribe({
+    this.api.register(this.registerForm.getRawValue()).subscribe({
       next: (auth) => this.startSession(auth),
       error: () => this.showMessage('Não foi possível criar a conta.'),
     });
@@ -262,9 +251,7 @@ export class App {
   }
 
   protected logout(): void {
-    sessionStorage.removeItem('fintrack.token');
-    sessionStorage.removeItem('fintrack.name');
-    sessionStorage.removeItem('fintrack.email');
+    this.api.clearSession();
     this.token.set('');
     this.userName.set('');
     this.userEmail.set('');
@@ -281,13 +268,13 @@ export class App {
       return;
     }
 
-    this.http.post<Account>(`${this.apiUrl}/accounts`, this.accountForm.getRawValue(), this.options()).subscribe({
+    this.api.createAccount(this.token(), this.accountForm.getRawValue()).subscribe({
       next: () => {
         this.accountForm.reset({ name: '', type: 'Checking', initialBalance: 0 });
         this.loadAll();
         this.showMessage('Conta salva com sucesso.');
       },
-      error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível salvar a conta.')),
+      error: (error) => this.showMessage(this.api.errorMessage(error, 'Não foi possível salvar a conta.')),
     });
   }
 
@@ -312,9 +299,9 @@ export class App {
     if (!target) return;
 
     const requests = {
-      account: this.http.delete(`${this.apiUrl}/accounts/${target.id}`, this.options()),
-      category: this.http.delete(`${this.apiUrl}/categories/${target.id}`, this.options()),
-      transaction: this.http.delete(`${this.apiUrl}/transactions/${target.id}`, this.options()),
+      account: this.api.deleteAccount(this.token(), target.id),
+      category: this.api.deleteCategory(this.token(), target.id),
+      transaction: this.api.deleteTransaction(this.token(), target.id),
     };
 
     const labels = {
@@ -331,7 +318,7 @@ export class App {
       },
       error: (error) => {
         this.deleteTarget.set(null);
-        this.showMessage(this.errorMessage(error, 'Não foi possível excluir.'), 'error');
+        this.showMessage(this.api.errorMessage(error, 'Não foi possível excluir.'), 'error');
       },
     });
   }
@@ -344,13 +331,13 @@ export class App {
       return;
     }
 
-    this.http.post<Category>(`${this.apiUrl}/categories`, this.categoryForm.getRawValue(), this.options()).subscribe({
+    this.api.createCategory(this.token(), this.categoryForm.getRawValue()).subscribe({
       next: () => {
         this.categoryForm.reset({ name: '', type: 'Expense' });
         this.loadAll();
         this.showMessage('Categoria salva com sucesso.');
       },
-      error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível salvar a categoria.')),
+      error: (error) => this.showMessage(this.api.errorMessage(error, 'Não foi possível salvar a categoria.')),
     });
   }
 
@@ -364,8 +351,8 @@ export class App {
 
     const id = this.editingTransactionId();
     const request = id
-      ? this.http.put<Transaction>(`${this.apiUrl}/transactions/${id}`, this.transactionForm.getRawValue(), this.options())
-      : this.http.post<Transaction>(`${this.apiUrl}/transactions`, this.transactionForm.getRawValue(), this.options());
+      ? this.api.updateTransaction(this.token(), id, this.transactionForm.getRawValue())
+      : this.api.createTransaction(this.token(), this.transactionForm.getRawValue());
 
     request.subscribe({
       next: () => {
@@ -391,11 +378,7 @@ export class App {
     if (this.transactionCategoryFilter()) params.set('categoryId', this.transactionCategoryFilter());
     if (this.transactionAccountFilter()) params.set('accountId', this.transactionAccountFilter());
 
-    this.http.get(`${this.apiUrl}/exports/transactions.csv?${params}`, {
-      ...this.options(),
-      responseType: 'blob',
-      observe: 'response',
-    }).subscribe({
+    this.api.exportTransactions(this.token(), params).subscribe({
       next: (response) => {
         const blob = response.body;
         if (!blob) {
@@ -414,7 +397,7 @@ export class App {
         URL.revokeObjectURL(url);
         this.showMessage('CSV baixado com sucesso.', 'success');
       },
-      error: (error) => this.showMessage(this.errorMessage(error, 'Não foi possível exportar o CSV.'), 'error'),
+      error: (error) => this.showMessage(this.api.errorMessage(error, 'Não foi possível exportar o CSV.'), 'error'),
     });
   }
 
@@ -677,15 +660,11 @@ export class App {
   }
 
   protected loadAll(): void {
-    const options = this.options();
-    this.http.get<Account[]>(`${this.apiUrl}/accounts`, options).subscribe((accounts) => this.accounts.set(accounts));
-    this.http.get<Category[]>(`${this.apiUrl}/categories`, options).subscribe((categories) => this.categories.set(categories));
-    this.http
-      .get<Transaction[]>(`${this.apiUrl}/transactions?year=${this.selectedYear()}&month=${this.selectedMonthNumber()}`, options)
-      .subscribe((transactions) => this.transactions.set(transactions));
-    this.http
-      .get<Dashboard>(`${this.apiUrl}/dashboard/monthly?year=${this.selectedYear()}&month=${this.selectedMonthNumber()}`, options)
-      .subscribe((dashboard) => this.dashboard.set(dashboard));
+    const token = this.token();
+    this.api.getAccounts(token).subscribe((accounts) => this.accounts.set(accounts));
+    this.api.getCategories(token).subscribe((categories) => this.categories.set(categories));
+    this.api.getTransactions(token, this.selectedYear(), this.selectedMonthNumber()).subscribe((transactions) => this.transactions.set(transactions));
+    this.api.getDashboard(token, this.selectedYear(), this.selectedMonthNumber()).subscribe((dashboard) => this.dashboard.set(dashboard));
   }
 
   protected refreshData(): void {
@@ -693,8 +672,50 @@ export class App {
     this.showMessage('Dados atualizados.', 'success');
   }
 
-  protected showUnavailableFeature(feature: string): void {
-    this.showMessage(`${feature} ainda não está disponível no MVP.`);
+  protected saveProfile(): void {
+    const name = this.profileForm.controls.name.value.trim();
+    if (name.length < 2 || name.length > 80) {
+      this.profileForm.markAllAsTouched();
+      this.showMessage('Informe um nome entre 2 e 80 caracteres.', 'error');
+      return;
+    }
+
+    this.api.updateProfile(this.token(), { name }).subscribe({
+      next: (auth) => this.applyAuth(auth, 'Perfil atualizado com sucesso.'),
+      error: (error) => this.showMessage(this.api.errorMessage(error, 'Não foi possível atualizar o perfil.'), 'error'),
+    });
+  }
+
+  protected changePassword(): void {
+    const currentPassword = this.passwordForm.controls.currentPassword.value;
+    const newPassword = this.passwordForm.controls.newPassword.value;
+    const confirmPassword = this.passwordForm.controls.confirmPassword.value;
+
+    if (!currentPassword) {
+      this.passwordForm.markAllAsTouched();
+      this.showMessage('Informe a senha atual.', 'error');
+      return;
+    }
+
+    if (newPassword.length < 6 || newPassword.length > 100) {
+      this.passwordForm.markAllAsTouched();
+      this.showMessage('A nova senha deve ter entre 6 e 100 caracteres.', 'error');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      this.passwordForm.markAllAsTouched();
+      this.showMessage('A confirmação da senha não confere.', 'error');
+      return;
+    }
+
+    this.api.changePassword(this.token(), { currentPassword, newPassword }).subscribe({
+      next: () => {
+        this.passwordForm.reset({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        this.showMessage('Senha alterada com sucesso.', 'success');
+      },
+      error: (error) => this.showMessage(this.api.errorMessage(error, 'Não foi possível alterar a senha.'), 'error'),
+    });
   }
 
   protected showAllTransactions(): void {
@@ -734,16 +755,22 @@ export class App {
 
   private startSession(auth: AuthResponse): void {
     this.isEntering.set(true);
-    sessionStorage.setItem('fintrack.token', auth.token);
-    sessionStorage.setItem('fintrack.name', auth.name);
-    sessionStorage.setItem('fintrack.email', auth.email);
+    this.applyAuth(auth);
+    this.loadAll();
+    setTimeout(() => this.isEntering.set(false), 1400);
+  }
+
+  private applyAuth(auth: AuthResponse, message?: string): void {
+    this.api.saveSession(auth);
     this.token.set(auth.token);
     this.userName.set(auth.name);
     this.userEmail.set(auth.email);
+    this.profileForm.patchValue({ name: auth.name });
     this.message.set('');
     this.isMessageLeaving.set(false);
-    this.loadAll();
-    setTimeout(() => this.isEntering.set(false), 1400);
+    if (message) {
+      this.showMessage(message, 'success');
+    }
   }
 
   protected closeMessage(): void {
@@ -784,14 +811,6 @@ export class App {
         this.messageClearTimeoutId = null;
       }, 520);
     }, 3500);
-  }
-
-  private errorMessage(error: unknown, fallback: string): string {
-    if (error instanceof HttpErrorResponse && typeof error.error === 'string' && error.error.trim().length > 0) {
-      return error.error;
-    }
-
-    return fallback;
   }
 
   private loginValidationMessage(): string | null {
@@ -914,12 +933,6 @@ export class App {
   private currentMonthKey(): string {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  }
-
-  private options(): { headers: HttpHeaders } {
-    return {
-      headers: new HttpHeaders({ Authorization: `Bearer ${this.token()}` }),
-    };
   }
 
   private compareTransactions(left: Transaction, right: Transaction): number {

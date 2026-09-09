@@ -42,6 +42,9 @@ public static class DashboardEndpoints
             var currentExpense = await db.Transactions
                 .Where(transaction => transaction.UserId == userId && transaction.Type == TransactionType.Expense)
                 .SumAsync(transaction => (decimal?)transaction.Amount, cancellationToken) ?? 0;
+            var initialBalance = await db.Accounts
+                .Where(account => account.UserId == userId)
+                .SumAsync(account => (decimal?)account.InitialBalance, cancellationToken) ?? 0;
 
             var expenseRows = await monthTransactions
                 .Where(transaction => transaction.Type == TransactionType.Expense)
@@ -79,7 +82,7 @@ public static class DashboardEndpoints
                 totalIncome,
                 totalExpense,
                 totalIncome - totalExpense,
-                currentIncome - currentExpense,
+                initialBalance + currentIncome - currentExpense,
                 expensesByCategory,
                 latestTransactions));
         });

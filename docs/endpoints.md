@@ -6,7 +6,14 @@
 POST /auth/register
 POST /auth/login
 GET /auth/me
+PUT /auth/me
+PUT /auth/password
 ```
+
+Observações:
+
+- `PUT /auth/me` atualiza o nome do usuário autenticado e retorna um novo JWT com os dados atualizados.
+- `PUT /auth/password` valida a senha atual antes de salvar o novo hash de senha.
 
 ## Accounts
 
@@ -66,6 +73,10 @@ GET /transactions?year=2026&month=8&type=Expense&categoryId=1&accountId=2
 ```text
 GET /dashboard/monthly?year=2026&month=8
 ```
+
+Observação:
+
+- O saldo atual considera os saldos iniciais das contas do usuário mais receitas menos despesas.
 
 ## Exports
 

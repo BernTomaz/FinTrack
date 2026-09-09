@@ -19,6 +19,9 @@
 - Exportação CSV.
 - Exclusão de lançamentos.
 - Bloqueio de exclusão de contas e categorias com lançamentos vinculados.
+- Saldo atual com saldos iniciais das contas.
+- Perfil editável.
+- Alteração de senha.
 - Testes principais.
 - CI de backend e frontend.
 

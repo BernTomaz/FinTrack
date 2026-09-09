@@ -15,6 +15,16 @@ public sealed class User
     public string PasswordHash { get; private set; }
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
 
+    public void UpdateName(string name)
+    {
+        Name = Required(name);
+    }
+
+    public void ChangePassword(string passwordHash)
+    {
+        PasswordHash = Required(passwordHash);
+    }
+
     private static string Required(string value) =>
         string.IsNullOrWhiteSpace(value) ? throw new ArgumentException("Value is required.") : value.Trim();
 }

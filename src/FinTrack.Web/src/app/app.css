@@ -4,6 +4,15 @@
   font-family: Inter, "Segoe UI", Arial, sans-serif;
 }
 
+body {
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.app-shell,
+.login-page {
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
 button,
 input,
 select {
@@ -293,6 +302,10 @@ select {
 }
 
 .dark-theme :is(.panel h2, .panel label, .metric p, .empty-state strong, .menu-popover strong, .profile-box strong, .about-box strong) {
+  color: #f8fafc;
+}
+
+.dark-theme .topbar h1 {
   color: #f8fafc;
 }
 

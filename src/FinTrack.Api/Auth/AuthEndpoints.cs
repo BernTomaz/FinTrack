@@ -96,6 +96,67 @@ public static class AuthEndpoints
             }))
             .RequireAuthorization();
 
+        group.MapPut("/me", async (
+            UpdateProfileRequest request,
+            FinTrackDbContext db,
+            ClaimsPrincipal principal,
+            JwtTokenService tokenService,
+            CancellationToken cancellationToken) =>
+        {
+            var name = request.Name.Trim();
+            if (name.Length < 2 || name.Length > 80)
+            {
+                return Results.BadRequest("Name must have between 2 and 80 characters.");
+            }
+
+            var user = await db.Users.SingleOrDefaultAsync(user => user.Id == principal.GetUserId(), cancellationToken);
+            if (user is null)
+            {
+                return Results.NotFound();
+            }
+
+            user.UpdateName(name);
+            await db.SaveChangesAsync(cancellationToken);
+
+            return Results.Ok(ToResponse(user, tokenService));
+        })
+        .RequireAuthorization();
+
+        group.MapPut("/password", async (
+            ChangePasswordRequest request,
+            FinTrackDbContext db,
+            PasswordHasher passwordHasher,
+            ClaimsPrincipal principal,
+            CancellationToken cancellationToken) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.CurrentPassword) || string.IsNullOrWhiteSpace(request.NewPassword))
+            {
+                return Results.BadRequest("Current password and new password are required.");
+            }
+
+            if (request.NewPassword.Length < 6 || request.NewPassword.Length > 100)
+            {
+                return Results.BadRequest("Password must have between 6 and 100 characters.");
+            }
+
+            var user = await db.Users.SingleOrDefaultAsync(user => user.Id == principal.GetUserId(), cancellationToken);
+            if (user is null)
+            {
+                return Results.NotFound();
+            }
+
+            if (!passwordHasher.Verify(request.CurrentPassword, user.PasswordHash))
+            {
+                return Results.Unauthorized();
+            }
+
+            user.ChangePassword(passwordHasher.Hash(request.NewPassword));
+            await db.SaveChangesAsync(cancellationToken);
+
+            return Results.NoContent();
+        })
+        .RequireAuthorization();
+
         return app;
     }
 
