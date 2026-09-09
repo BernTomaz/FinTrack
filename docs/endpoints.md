@@ -27,6 +27,7 @@ DELETE /accounts/{id}
 
 Observações:
 
+- `POST /accounts` e `PUT /accounts/{id}` aceitam `openingDate`. Quando não informado, a data atual é usada.
 - `DELETE /accounts/{id}` retorna `404 Not Found` quando a conta não existe ou não pertence ao usuário autenticado.
 - `DELETE /accounts/{id}` retorna `409 Conflict` quando a conta possui lançamentos vinculados.
 - Para excluir uma conta com lançamentos, exclua primeiro os lançamentos relacionados.
@@ -60,6 +61,7 @@ DELETE /transactions/{id}
 Observações:
 
 - `DELETE /transactions/{id}` remove um lançamento do usuário autenticado.
+- A data do lançamento precisa ser igual ou posterior à data de início da conta.
 - Após excluir lançamentos vinculados a uma conta ou categoria, a conta ou categoria pode ser removida.
 
 Filtros:
@@ -76,7 +78,7 @@ GET /dashboard/monthly?year=2026&month=8
 
 Observação:
 
-- O saldo atual considera os saldos iniciais das contas do usuário mais receitas menos despesas.
+- O saldo atual considera, até o fim do mês selecionado, os saldos iniciais das contas já iniciadas mais receitas menos despesas.
 
 ## Exports
 
