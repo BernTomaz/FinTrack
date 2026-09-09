@@ -37,13 +37,13 @@ public static class DashboardEndpoints
                 .Where(transaction => transaction.Type == TransactionType.Expense)
                 .SumAsync(transaction => (decimal?)transaction.Amount, cancellationToken) ?? 0;
             var currentIncome = await db.Transactions
-                .Where(transaction => transaction.UserId == userId && transaction.Type == TransactionType.Income)
+                .Where(transaction => transaction.UserId == userId && transaction.Type == TransactionType.Income && transaction.Date < periodEnd)
                 .SumAsync(transaction => (decimal?)transaction.Amount, cancellationToken) ?? 0;
             var currentExpense = await db.Transactions
-                .Where(transaction => transaction.UserId == userId && transaction.Type == TransactionType.Expense)
+                .Where(transaction => transaction.UserId == userId && transaction.Type == TransactionType.Expense && transaction.Date < periodEnd)
                 .SumAsync(transaction => (decimal?)transaction.Amount, cancellationToken) ?? 0;
             var initialBalance = await db.Accounts
-                .Where(account => account.UserId == userId)
+                .Where(account => account.UserId == userId && account.OpeningDate < periodEnd)
                 .SumAsync(account => (decimal?)account.InitialBalance, cancellationToken) ?? 0;
 
             var expenseRows = await monthTransactions

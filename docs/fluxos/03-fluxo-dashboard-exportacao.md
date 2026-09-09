@@ -5,9 +5,11 @@
 ```text
 Usuário escolhe mês/ano
   -> API busca lançamentos do período
-  -> API calcula totais
+  -> API calcula totais e saldo atual até o fim do mês selecionado
   -> frontend exibe resumo
 ```
+
+O saldo atual inclui apenas contas que já começaram no período escolhido. Uma conta iniciada em agosto não entra no saldo de julho.
 
 ## Gráfico de fluxo de caixa
 

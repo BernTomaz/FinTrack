@@ -50,7 +50,8 @@ MVP funcional validado localmente.
 - README específico do frontend
 - Workflow de CI com validação de backend e frontend
 - Confirmação visual antes de excluir contas, categorias e lançamentos
-- Saldo atual considerando saldos iniciais das contas
+- Saldo atual considerando saldos iniciais apenas a partir da data de início das contas
+- Bloqueio de lançamentos com data anterior ao início da conta
 - Perfil editável com e-mail somente leitura
 - Alteração de senha autenticada
 - Serviço Angular centralizando chamadas à API e sessão
@@ -64,8 +65,8 @@ MVP funcional validado localmente.
 
 ## Última Validação Docker
 
-- Data: 04/09/2026.
-- Comando: `docker compose up --build`.
+- Data: 09/09/2026.
+- Comando: `docker compose up --build -d`.
 - Serviços validados: SQL Server, API e frontend.
 - API: health check em `/health` retornou `Healthy`.
 - Frontend: `http://localhost:4200` retornou `200`.

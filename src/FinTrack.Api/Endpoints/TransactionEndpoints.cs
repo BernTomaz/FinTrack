@@ -202,6 +202,7 @@ public static class TransactionEndpoints
         try
         {
             transaction.EnsureAccountBelongsToUser(account);
+            transaction.EnsureDateIsOnOrAfterAccountOpening(account);
             transaction.EnsureCategoryIsCompatible(category);
         }
         catch (InvalidOperationException exception)

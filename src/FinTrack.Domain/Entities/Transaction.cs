@@ -73,6 +73,14 @@ public sealed class Transaction
         }
     }
 
+    public void EnsureDateIsOnOrAfterAccountOpening(Account account)
+    {
+        if (Date < account.OpeningDate)
+        {
+            throw new InvalidOperationException("Transaction date must be on or after account opening date.");
+        }
+    }
+
     public void Update(
         Guid accountId,
         Guid categoryId,

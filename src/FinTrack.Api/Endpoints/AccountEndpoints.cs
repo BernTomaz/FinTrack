@@ -19,7 +19,7 @@ public static class AccountEndpoints
             var accounts = await db.Accounts
                 .Where(account => account.UserId == userId)
                 .OrderBy(account => account.Name)
-                .Select(account => new AccountResponse(account.Id, account.Name, account.Type, account.InitialBalance, account.CreatedAt))
+                .Select(account => new AccountResponse(account.Id, account.Name, account.Type, account.InitialBalance, account.OpeningDate, account.CreatedAt))
                 .ToListAsync(cancellationToken);
 
             return Results.Ok(accounts);
@@ -30,7 +30,7 @@ public static class AccountEndpoints
             var userId = user.GetUserId();
             var account = await db.Accounts
                 .Where(account => account.UserId == userId && account.Id == id)
-                .Select(account => new AccountResponse(account.Id, account.Name, account.Type, account.InitialBalance, account.CreatedAt))
+                .Select(account => new AccountResponse(account.Id, account.Name, account.Type, account.InitialBalance, account.OpeningDate, account.CreatedAt))
                 .SingleOrDefaultAsync(cancellationToken);
 
             return account is null ? Results.NotFound() : Results.Ok(account);
@@ -44,7 +44,7 @@ public static class AccountEndpoints
                 return validation;
             }
 
-            var account = new Account(user.GetUserId(), request.Name, request.Type, request.InitialBalance);
+            var account = new Account(user.GetUserId(), request.Name, request.Type, request.InitialBalance, request.OpeningDate);
             db.Accounts.Add(account);
             await db.SaveChangesAsync(cancellationToken);
 
@@ -66,7 +66,7 @@ public static class AccountEndpoints
                 return Results.NotFound();
             }
 
-            account.Update(request.Name, request.Type, request.InitialBalance);
+            account.Update(request.Name, request.Type, request.InitialBalance, request.OpeningDate ?? account.OpeningDate);
             await db.SaveChangesAsync(cancellationToken);
 
             return Results.Ok(ToResponse(account));
@@ -99,7 +99,7 @@ public static class AccountEndpoints
     }
 
     private static AccountResponse ToResponse(Account account) =>
-        new(account.Id, account.Name, account.Type, account.InitialBalance, account.CreatedAt);
+        new(account.Id, account.Name, account.Type, account.InitialBalance, account.OpeningDate, account.CreatedAt);
 
     private static IResult? ValidateRequest(AccountRequest request)
     {

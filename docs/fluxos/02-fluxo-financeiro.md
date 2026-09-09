@@ -7,6 +7,8 @@ Criar contas
 Criar categorias
 ```
 
+Ao criar uma conta, o usuário informa a data de início. O saldo inicial da conta só entra nos cálculos a partir desse período.
+
 ## Lançamento
 
 ```text
@@ -18,7 +20,7 @@ Informar data
 Salvar
 ```
 
-O sistema valida conta, categoria, valor, data e descrição antes de salvar. A categoria precisa ser do mesmo tipo do lançamento: receita com categoria de receita e despesa com categoria de despesa.
+O sistema valida conta, categoria, valor, data e descrição antes de salvar. A categoria precisa ser do mesmo tipo do lançamento: receita com categoria de receita e despesa com categoria de despesa. A data do lançamento não pode ser anterior à data de início da conta.
 
 ## Resultado
 

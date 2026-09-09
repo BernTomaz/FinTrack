@@ -19,6 +19,8 @@ import { Account, AccountType } from './fintrack-api.service';
               <div>
                 <strong>{{ account.name }}</strong>
                 <small>{{ accountTypeLabel(account.type) }}</small>
+                <small>Saldo inicial: {{ money(account.initialBalance) }}</small>
+                <small>Inicio: {{ account.openingDate }}</small>
               </div>
               <button type="button" class="icon" title="Excluir conta" (click)="delete.emit(account.id)">×</button>
             </div>
@@ -42,6 +44,7 @@ import { Account, AccountType } from './fintrack-api.service';
           </select>
         </label>
         <label>Saldo inicial<input type="number" formControlName="initialBalance" /></label>
+        <label>Inicio da conta<input type="date" formControlName="openingDate" /></label>
         <button type="submit" class="primary">Salvar conta</button>
       </form>
     </section>
@@ -62,5 +65,9 @@ export class AccountsPanelComponent {
       Savings: 'Poupança',
       CreditCard: 'Cartão de crédito',
     }[type];
+  }
+
+  money(value: number): string {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
   }
 }

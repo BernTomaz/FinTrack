@@ -166,6 +166,9 @@ public sealed class ApiFlowTests
         var invalidDate = await client.PostAsJsonAsync("/transactions", new TransactionRequest(account.Id, category.Id, TransactionType.Expense, 10, default, null));
         Assert.Equal(HttpStatusCode.BadRequest, invalidDate.StatusCode);
 
+        var beforeAccountOpening = await client.PostAsJsonAsync("/transactions", new TransactionRequest(account.Id, category.Id, TransactionType.Expense, 10, new DateOnly(2025, 12, 31), null));
+        Assert.Equal(HttpStatusCode.BadRequest, beforeAccountOpening.StatusCode);
+
         var invalidDescription = await client.PostAsJsonAsync("/transactions", new TransactionRequest(account.Id, category.Id, TransactionType.Expense, 10, date, new string('a', 161)));
         Assert.Equal(HttpStatusCode.BadRequest, invalidDescription.StatusCode);
 
@@ -210,7 +213,6 @@ public sealed class ApiFlowTests
         await CreateTransaction(client, account.Id, incomeCategory.Id, TransactionType.Income, 1000, new DateOnly(2026, 8, 1), "Salário");
         await CreateTransaction(client, account.Id, expenseCategory.Id, TransactionType.Expense, 200, new DateOnly(2026, 8, 2), "Mercado, mês");
         await CreateTransaction(client, account.Id, billsCategory.Id, TransactionType.Expense, 100, new DateOnly(2026, 8, 3), null);
-        await CreateTransaction(client, account.Id, expenseCategory.Id, TransactionType.Expense, 50, new DateOnly(2026, 7, 1), "Mercado anterior");
 
         var dashboardResponse = await client.GetAsync("/dashboard/monthly?year=2026&month=8");
         Assert.True(dashboardResponse.StatusCode == HttpStatusCode.OK, await dashboardResponse.Content.ReadAsStringAsync());
@@ -220,7 +222,7 @@ public sealed class ApiFlowTests
         Assert.Equal(1000, dashboard.TotalIncome);
         Assert.Equal(300, dashboard.TotalExpense);
         Assert.Equal(700, dashboard.MonthBalance);
-        Assert.Equal(700, dashboard.CurrentBalance);
+        Assert.Equal(750, dashboard.CurrentBalance);
         Assert.Equal(2, dashboard.ExpensesByCategory.Count);
         Assert.Equal("Mercado", dashboard.ExpensesByCategory[0].CategoryName);
         Assert.Equal(3, dashboard.LatestTransactions.Count);
@@ -383,9 +385,9 @@ public sealed class ApiFlowTests
         return auth;
     }
 
-    private static async Task<AccountResponse> CreateAccount(HttpClient client, string name, decimal initialBalance = 0)
+    private static async Task<AccountResponse> CreateAccount(HttpClient client, string name, decimal initialBalance = 0, DateOnly? openingDate = null)
     {
-        var response = await client.PostAsJsonAsync("/accounts", new AccountRequest(name, AccountType.Checking, initialBalance));
+        var response = await client.PostAsJsonAsync("/accounts", new AccountRequest(name, AccountType.Checking, initialBalance, openingDate ?? new DateOnly(2026, 1, 1)));
         Assert.True(response.StatusCode == HttpStatusCode.Created, await response.Content.ReadAsStringAsync());
 
         var account = await response.Content.ReadFromJsonAsync<AccountResponse>();

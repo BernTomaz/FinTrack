@@ -24,6 +24,7 @@ public sealed class FinTrackDbContext(DbContextOptions<FinTrackDbContext> option
         {
             entity.Property(account => account.Name).HasMaxLength(120).IsRequired();
             entity.Property(account => account.InitialBalance).HasPrecision(18, 2);
+            entity.Property(account => account.OpeningDate).IsRequired();
             entity.Property(account => account.Type).HasConversion<string>().HasMaxLength(40);
             entity.HasOne<User>().WithMany().HasForeignKey(account => account.UserId);
             entity.HasIndex(account => new { account.UserId, account.Name });

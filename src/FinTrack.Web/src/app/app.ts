@@ -177,6 +177,7 @@ export class App {
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
     type: ['Checking' as AccountType, Validators.required],
     initialBalance: [0, Validators.required],
+    openingDate: [new Date().toISOString().slice(0, 10), Validators.required],
   });
 
   protected readonly categoryForm = this.fb.nonNullable.group({
@@ -270,7 +271,7 @@ export class App {
 
     this.api.createAccount(this.token(), this.accountForm.getRawValue()).subscribe({
       next: () => {
-        this.accountForm.reset({ name: '', type: 'Checking', initialBalance: 0 });
+        this.accountForm.reset({ name: '', type: 'Checking', initialBalance: 0, openingDate: new Date().toISOString().slice(0, 10) });
         this.loadAll();
         this.showMessage('Conta salva com sucesso.');
       },

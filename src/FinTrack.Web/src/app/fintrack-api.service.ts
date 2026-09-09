@@ -16,6 +16,7 @@ export interface Account {
   name: string;
   type: AccountType;
   initialBalance: number;
+  openingDate: string;
 }
 
 export interface Category {
@@ -67,7 +68,7 @@ export class FinTrackApiService {
     return this.http.get<Account[]>(`${this.apiUrl}/accounts`, this.options(token));
   }
 
-  createAccount(token: string, request: { name: string; type: AccountType; initialBalance: number }) {
+  createAccount(token: string, request: { name: string; type: AccountType; initialBalance: number; openingDate: string }) {
     return this.http.post<Account>(`${this.apiUrl}/accounts`, request, this.options(token));
   }
 
