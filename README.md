@@ -8,6 +8,7 @@ Sistema web para controle financeiro pessoal, com cadastro de receitas, despesas
 
 ## Documentação
 
+- [Wiki do projeto](docs/wiki.md)
 - [Visão geral](docs/etapas/00-etapa-visao-geral.md)
 - [Arquitetura](docs/arquitetura.md)
 - [Configuração local](docs/configuracao.md)

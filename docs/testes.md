@@ -21,6 +21,8 @@
 - Validar nome, e-mail e senha no cadastro e login
 - Validar nome de conta e categoria
 - Validar descrição máxima de lançamento
+- Validar que o saldo inicial da conta respeita a data de início
+- Impedir lançamento com data anterior ao início da conta
 
 ## Estratégia
 
