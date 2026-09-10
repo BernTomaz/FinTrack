@@ -4,7 +4,7 @@
 
 Sistema web para controle financeiro pessoal, com cadastro de receitas, despesas, contas, categorias, dashboard mensal e exportação CSV.
 
-## Capturas
+## Visão do produto
 
 Tela de login com acesso direto, sem atalhos para recursos fora do MVP.
 
