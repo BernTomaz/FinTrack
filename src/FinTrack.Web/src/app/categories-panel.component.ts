@@ -20,7 +20,10 @@ import { Category, CategoryType } from './fintrack-api.service';
                 <strong>{{ category.name }}</strong>
                 <small>{{ categoryTypeLabel(category.type) }}</small>
               </div>
-              <button type="button" class="icon" title="Excluir categoria" (click)="delete.emit(category.id)">×</button>
+              <div class="row-actions">
+                <button type="button" class="icon" title="Editar categoria" (click)="edit.emit(category)">✎</button>
+                <button type="button" class="icon" title="Excluir categoria" (click)="delete.emit(category.id)">×</button>
+              </div>
             </div>
           } @empty {
             <div class="empty-state">
@@ -33,7 +36,10 @@ import { Category, CategoryType } from './fintrack-api.service';
 
       <form class="panel settings-card" [formGroup]="form" (ngSubmit)="save.emit()">
         <div class="panel-head">
-          <h2>Nova categoria</h2>
+          <h2>{{ editing ? 'Editar categoria' : 'Nova categoria' }}</h2>
+          @if (editing) {
+            <button type="button" class="ghost" (click)="cancelEdit.emit()">Cancelar</button>
+          }
         </div>
         <label>Nome<input type="text" formControlName="name" /></label>
         <label>Tipo
@@ -43,7 +49,7 @@ import { Category, CategoryType } from './fintrack-api.service';
             }
           </select>
         </label>
-        <button type="submit" class="primary">Salvar categoria</button>
+        <button type="submit" class="primary">{{ editing ? 'Atualizar categoria' : 'Salvar categoria' }}</button>
       </form>
     </section>
   `,
@@ -52,7 +58,10 @@ export class CategoriesPanelComponent {
   @Input() categories: Category[] = [];
   @Input() categoryTypes: CategoryType[] = [];
   @Input({ required: true }) form!: FormGroup;
+  @Input() editing = false;
   @Output() save = new EventEmitter<void>();
+  @Output() edit = new EventEmitter<Category>();
+  @Output() cancelEdit = new EventEmitter<void>();
   @Output() delete = new EventEmitter<string>();
   @Output() back = new EventEmitter<void>();
 

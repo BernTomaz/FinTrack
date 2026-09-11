@@ -83,6 +83,8 @@ export class App {
   protected readonly reportLimit = signal(10);
   protected readonly exportStartDate = signal('');
   protected readonly exportEndDate = signal('');
+  protected readonly editingAccountId = signal('');
+  protected readonly editingCategoryId = signal('');
   protected readonly editingTransactionId = signal('');
   protected readonly authMode = signal<AuthMode>('login');
   protected readonly activeView = signal<View>('dashboard');
@@ -261,7 +263,7 @@ export class App {
     this.userMenuOpen.set(false);
   }
 
-  protected createAccount(): void {
+  protected saveAccount(): void {
     const validation = this.accountValidationMessage();
     if (validation) {
       this.accountForm.markAllAsTouched();
@@ -269,14 +271,36 @@ export class App {
       return;
     }
 
-    this.api.createAccount(this.token(), this.accountForm.getRawValue()).subscribe({
+    const id = this.editingAccountId();
+    const request = id
+      ? this.api.updateAccount(this.token(), id, this.accountForm.getRawValue())
+      : this.api.createAccount(this.token(), this.accountForm.getRawValue());
+
+    request.subscribe({
       next: () => {
+        this.editingAccountId.set('');
         this.accountForm.reset({ name: '', type: 'Checking', initialBalance: 0, openingDate: new Date().toISOString().slice(0, 10) });
         this.loadAll();
-        this.showMessage('Conta salva com sucesso.');
+        this.showMessage(id ? 'Conta atualizada com sucesso.' : 'Conta salva com sucesso.', 'success');
       },
       error: (error) => this.showMessage(this.api.errorMessage(error, 'Não foi possível salvar a conta.')),
     });
+  }
+
+  protected editAccount(account: Account): void {
+    this.openView('accounts');
+    this.editingAccountId.set(account.id);
+    this.accountForm.setValue({
+      name: account.name,
+      type: account.type,
+      initialBalance: account.initialBalance,
+      openingDate: account.openingDate,
+    });
+  }
+
+  protected cancelAccountEdit(): void {
+    this.editingAccountId.set('');
+    this.accountForm.reset({ name: '', type: 'Checking', initialBalance: 0, openingDate: new Date().toISOString().slice(0, 10) });
   }
 
   protected deleteAccount(id: string): void {
@@ -324,7 +348,7 @@ export class App {
     });
   }
 
-  protected createCategory(): void {
+  protected saveCategory(): void {
     const validation = this.categoryValidationMessage();
     if (validation) {
       this.categoryForm.markAllAsTouched();
@@ -332,14 +356,34 @@ export class App {
       return;
     }
 
-    this.api.createCategory(this.token(), this.categoryForm.getRawValue()).subscribe({
+    const id = this.editingCategoryId();
+    const request = id
+      ? this.api.updateCategory(this.token(), id, this.categoryForm.getRawValue())
+      : this.api.createCategory(this.token(), this.categoryForm.getRawValue());
+
+    request.subscribe({
       next: () => {
+        this.editingCategoryId.set('');
         this.categoryForm.reset({ name: '', type: 'Expense' });
         this.loadAll();
-        this.showMessage('Categoria salva com sucesso.');
+        this.showMessage(id ? 'Categoria atualizada com sucesso.' : 'Categoria salva com sucesso.', 'success');
       },
       error: (error) => this.showMessage(this.api.errorMessage(error, 'Não foi possível salvar a categoria.')),
     });
+  }
+
+  protected editCategory(category: Category): void {
+    this.openView('categories');
+    this.editingCategoryId.set(category.id);
+    this.categoryForm.setValue({
+      name: category.name,
+      type: category.type,
+    });
+  }
+
+  protected cancelCategoryEdit(): void {
+    this.editingCategoryId.set('');
+    this.categoryForm.reset({ name: '', type: 'Expense' });
   }
 
   protected createTransaction(): void {
@@ -605,6 +649,14 @@ export class App {
     if (view === 'income' || view === 'expense') {
       this.editingTransactionId.set('');
       this.transactionForm.patchValue({ type: view === 'income' ? 'Income' : 'Expense' });
+    }
+
+    if (view !== 'accounts') {
+      this.cancelAccountEdit();
+    }
+
+    if (view !== 'categories') {
+      this.cancelCategoryEdit();
     }
   }
 

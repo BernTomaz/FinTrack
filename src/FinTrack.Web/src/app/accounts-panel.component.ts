@@ -22,7 +22,10 @@ import { Account, AccountType } from './fintrack-api.service';
                 <small>Saldo inicial: {{ money(account.initialBalance) }}</small>
                 <small>Início: {{ account.openingDate }}</small>
               </div>
-              <button type="button" class="icon" title="Excluir conta" (click)="delete.emit(account.id)">×</button>
+              <div class="row-actions">
+                <button type="button" class="icon" title="Editar conta" (click)="edit.emit(account)">✎</button>
+                <button type="button" class="icon" title="Excluir conta" (click)="delete.emit(account.id)">×</button>
+              </div>
             </div>
           } @empty {
             <div class="empty-state">
@@ -34,7 +37,12 @@ import { Account, AccountType } from './fintrack-api.service';
       </div>
 
       <form class="panel settings-card" [formGroup]="form" (ngSubmit)="save.emit()">
-        <h2>Nova conta</h2>
+        <div class="panel-head">
+          <h2>{{ editing ? 'Editar conta' : 'Nova conta' }}</h2>
+          @if (editing) {
+            <button type="button" class="ghost" (click)="cancelEdit.emit()">Cancelar</button>
+          }
+        </div>
         <label>Nome<input type="text" formControlName="name" /></label>
         <label>Tipo
           <select formControlName="type">
@@ -45,7 +53,7 @@ import { Account, AccountType } from './fintrack-api.service';
         </label>
         <label>Saldo inicial<input type="number" formControlName="initialBalance" /></label>
         <label>Início da conta<input type="date" formControlName="openingDate" /></label>
-        <button type="submit" class="primary">Salvar conta</button>
+        <button type="submit" class="primary">{{ editing ? 'Atualizar conta' : 'Salvar conta' }}</button>
       </form>
     </section>
   `,
@@ -54,7 +62,10 @@ export class AccountsPanelComponent {
   @Input() accounts: Account[] = [];
   @Input() accountTypes: AccountType[] = [];
   @Input({ required: true }) form!: FormGroup;
+  @Input() editing = false;
   @Output() save = new EventEmitter<void>();
+  @Output() edit = new EventEmitter<Account>();
+  @Output() cancelEdit = new EventEmitter<void>();
   @Output() delete = new EventEmitter<string>();
   @Output() back = new EventEmitter<void>();
 

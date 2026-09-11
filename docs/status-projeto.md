@@ -56,12 +56,13 @@ MVP funcional validado localmente.
 - Alteração de senha autenticada
 - Serviço Angular centralizando chamadas à API e sessão
 - Componentes Angular separados para dashboard, relatórios, contas, categorias, exportação, lançamentos, perfil e alteração de senha
+- Edição de contas pela interface
+- Edição de categorias pela interface
 
 ## Em Aberto
 
-- Preparar commit final do MVP.
-- Decidir se o próximo passo será deploy público ou melhorias pós-MVP.
 - Preencher manualmente o painel About do GitHub.
+- Decidir se o próximo passo será deploy público ou novas melhorias pós-MVP.
 
 ## Última Validação Docker
 
@@ -75,7 +76,7 @@ MVP funcional validado localmente.
 
 ## Última Validação Automatizada
 
-- Data: 09/09/2026.
+- Data: 11/09/2026.
 - Backend: `dotnet test FinTrack.slnx -m:1`.
 - Resultado backend: 35 testes aprovados.
 - Frontend: `npm run build`.

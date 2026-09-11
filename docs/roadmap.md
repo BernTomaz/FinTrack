@@ -2,10 +2,8 @@
 
 ## Agora
 
-- Preparar o commit final do MVP.
-- Revisar o histórico de alterações antes do commit.
-- Preencher manualmente o painel About do GitHub.
-- Decidir entre deploy público ou início das melhorias pós-MVP.
+- Implementar melhorias pós-MVP pequenas antes do deploy.
+- Revisar deploy público.
 
 ## MVP
 
@@ -31,6 +29,11 @@
 - Melhorias visuais.
 - Relatórios adicionais.
 - Backup e restauração.
+
+## Pós-MVP concluído
+
+- Edição de contas.
+- Edição de categorias.
 
 ## Fora do MVP
 

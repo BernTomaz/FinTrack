@@ -561,6 +561,7 @@ nav .active {
   display: grid;
   gap: 14px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 16px;
 }
 
 .metric {
@@ -606,7 +607,7 @@ nav .active {
 
 .grid {
   display: grid;
-  gap: 16px;
+  gap: 18px;
   grid-template-columns: minmax(0, 1.25fr) minmax(340px, 0.75fr);
 }
 
@@ -742,6 +743,11 @@ nav .active {
   grid-template-columns: auto minmax(0, 1fr) auto;
 }
 
+.row-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .account-line strong,
 .account-line small {
   display: block;
@@ -789,8 +795,9 @@ nav .active {
 
 .forms-grid {
   display: grid;
-  gap: 16px;
+  gap: 18px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 18px;
 }
 
 .forms-grid .panel {

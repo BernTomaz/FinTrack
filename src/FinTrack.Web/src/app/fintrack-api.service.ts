@@ -72,6 +72,10 @@ export class FinTrackApiService {
     return this.http.post<Account>(`${this.apiUrl}/accounts`, request, this.options(token));
   }
 
+  updateAccount(token: string, id: string, request: { name: string; type: AccountType; initialBalance: number; openingDate: string }) {
+    return this.http.put<Account>(`${this.apiUrl}/accounts/${id}`, request, this.options(token));
+  }
+
   deleteAccount(token: string, id: string) {
     return this.http.delete(`${this.apiUrl}/accounts/${id}`, this.options(token));
   }
@@ -82,6 +86,10 @@ export class FinTrackApiService {
 
   createCategory(token: string, request: { name: string; type: CategoryType }) {
     return this.http.post<Category>(`${this.apiUrl}/categories`, request, this.options(token));
+  }
+
+  updateCategory(token: string, id: string, request: { name: string; type: CategoryType }) {
+    return this.http.put<Category>(`${this.apiUrl}/categories/${id}`, request, this.options(token));
   }
 
   deleteCategory(token: string, id: string) {

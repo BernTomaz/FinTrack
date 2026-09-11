@@ -45,8 +45,14 @@ public sealed class ApiFlowTests
         Assert.NotNull(accountById);
         Assert.Equal(createdAccount.Id, accountById.Id);
 
-        var updatedAccount = await client.PutAsJsonAsync($"/accounts/{createdAccount.Id}", new AccountRequest("Reserva", AccountType.Savings, 100));
+        var updatedAccount = await client.PutAsJsonAsync($"/accounts/{createdAccount.Id}", new AccountRequest("Reserva", AccountType.Savings, 100, new DateOnly(2026, 8, 1)));
         Assert.Equal(HttpStatusCode.OK, updatedAccount.StatusCode);
+        var updatedAccountBody = await updatedAccount.Content.ReadFromJsonAsync<AccountResponse>();
+        Assert.NotNull(updatedAccountBody);
+        Assert.Equal("Reserva", updatedAccountBody.Name);
+        Assert.Equal(AccountType.Savings, updatedAccountBody.Type);
+        Assert.Equal(100, updatedAccountBody.InitialBalance);
+        Assert.Equal(new DateOnly(2026, 8, 1), updatedAccountBody.OpeningDate);
 
         var category = await client.PostAsJsonAsync("/categories", new CategoryRequest("Mercado", CategoryType.Expense));
         Assert.True(category.StatusCode == HttpStatusCode.Created, await category.Content.ReadAsStringAsync());
@@ -64,6 +70,10 @@ public sealed class ApiFlowTests
 
         var updatedCategory = await client.PutAsJsonAsync($"/categories/{createdCategory.Id}", new CategoryRequest("Salário", CategoryType.Income));
         Assert.Equal(HttpStatusCode.OK, updatedCategory.StatusCode);
+        var updatedCategoryBody = await updatedCategory.Content.ReadFromJsonAsync<CategoryResponse>();
+        Assert.NotNull(updatedCategoryBody);
+        Assert.Equal("Salário", updatedCategoryBody.Name);
+        Assert.Equal(CategoryType.Income, updatedCategoryBody.Type);
 
         var deleteAccount = await client.DeleteAsync($"/accounts/{createdAccount.Id}");
         Assert.Equal(HttpStatusCode.NoContent, deleteAccount.StatusCode);

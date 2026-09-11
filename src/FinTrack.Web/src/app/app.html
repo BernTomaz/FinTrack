@@ -245,8 +245,8 @@
           (editTransaction)="editTransaction($event)"
           (deleteTransaction)="deleteTransaction($event)"
           (deleteAccount)="deleteAccount($event)"
-          (createAccount)="createAccount()"
-          (createCategory)="createCategory()"
+          (createAccount)="saveAccount()"
+          (createCategory)="saveCategory()"
           (createTransaction)="createTransaction()"
           (cancelTransactionEdit)="cancelTransactionEdit()" />
       }
@@ -268,7 +268,10 @@
           [accounts]="accounts()"
           [accountTypes]="accountTypes"
           [form]="accountForm"
-          (save)="createAccount()"
+          [editing]="editingAccountId().length > 0"
+          (save)="saveAccount()"
+          (edit)="editAccount($event)"
+          (cancelEdit)="cancelAccountEdit()"
           (delete)="deleteAccount($event)"
           (back)="openView('dashboard')" />
       }
@@ -278,7 +281,10 @@
           [categories]="categories()"
           [categoryTypes]="categoryTypes"
           [form]="categoryForm"
-          (save)="createCategory()"
+          [editing]="editingCategoryId().length > 0"
+          (save)="saveCategory()"
+          (edit)="editCategory($event)"
+          (cancelEdit)="cancelCategoryEdit()"
           (delete)="deleteCategory($event)"
           (back)="openView('dashboard')" />
       }
