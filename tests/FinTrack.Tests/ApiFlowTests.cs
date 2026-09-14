@@ -257,11 +257,23 @@ public sealed class ApiFlowTests
         using var client = app.CreateClient();
         await RegisterAndAuthorize(client);
 
+        var transactions = await client.GetAsync("/transactions?year=2026&month=13");
+        Assert.Equal(HttpStatusCode.BadRequest, transactions.StatusCode);
+
+        var transactionsYear = await client.GetAsync("/transactions?year=10000&month=8");
+        Assert.Equal(HttpStatusCode.BadRequest, transactionsYear.StatusCode);
+
         var dashboard = await client.GetAsync("/dashboard/monthly?year=2026&month=13");
         Assert.Equal(HttpStatusCode.BadRequest, dashboard.StatusCode);
 
+        var dashboardYear = await client.GetAsync("/dashboard/monthly?year=10000&month=8");
+        Assert.Equal(HttpStatusCode.BadRequest, dashboardYear.StatusCode);
+
         var export = await client.GetAsync("/exports/transactions.csv?year=2026&month=13");
         Assert.Equal(HttpStatusCode.BadRequest, export.StatusCode);
+
+        var exportYear = await client.GetAsync("/exports/transactions.csv?year=10000&month=8");
+        Assert.Equal(HttpStatusCode.BadRequest, exportYear.StatusCode);
     }
 
     [Fact]

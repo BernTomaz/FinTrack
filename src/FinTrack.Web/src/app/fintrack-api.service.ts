@@ -46,7 +46,10 @@ export interface Dashboard {
 @Injectable({ providedIn: 'root' })
 export class FinTrackApiService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:5080';
+  private readonly apiUrl = (
+    document.querySelector<HTMLMetaElement>('meta[name="fintrack-api-url"]')?.content ??
+    'http://localhost:5080'
+  ).replace(/\/$/, '');
 
   login(request: { email: string; password: string }) {
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, request);

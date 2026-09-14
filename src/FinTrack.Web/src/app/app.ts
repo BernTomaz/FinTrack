@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ViewEncapsulation, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { Account, AccountType, AuthResponse, Category, CategoryType, Dashboard, FinTrackApiService, Transaction, TransactionType } from './fintrack-api.service';
 import { AccountsPanelComponent } from './accounts-panel.component';
 import { CategoriesPanelComponent } from './categories-panel.component';
@@ -179,7 +180,7 @@ export class App {
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
     type: ['Checking' as AccountType, Validators.required],
     initialBalance: [0, Validators.required],
-    openingDate: [new Date().toISOString().slice(0, 10), Validators.required],
+    openingDate: [this.today(), Validators.required],
   });
 
   protected readonly categoryForm = this.fb.nonNullable.group({
@@ -192,7 +193,7 @@ export class App {
     categoryId: ['', Validators.required],
     type: ['Expense' as TransactionType, Validators.required],
     amount: [0, [Validators.required, Validators.min(0.01)]],
-    date: [new Date().toISOString().slice(0, 10), Validators.required],
+    date: [this.today(), Validators.required],
     description: ['', Validators.maxLength(160)],
   });
 
@@ -279,7 +280,7 @@ export class App {
     request.subscribe({
       next: () => {
         this.editingAccountId.set('');
-        this.accountForm.reset({ name: '', type: 'Checking', initialBalance: 0, openingDate: new Date().toISOString().slice(0, 10) });
+        this.accountForm.reset({ name: '', type: 'Checking', initialBalance: 0, openingDate: this.today() });
         this.loadAll();
         this.showMessage(id ? 'Conta atualizada com sucesso.' : 'Conta salva com sucesso.', 'success');
       },
@@ -300,7 +301,7 @@ export class App {
 
   protected cancelAccountEdit(): void {
     this.editingAccountId.set('');
-    this.accountForm.reset({ name: '', type: 'Checking', initialBalance: 0, openingDate: new Date().toISOString().slice(0, 10) });
+    this.accountForm.reset({ name: '', type: 'Checking', initialBalance: 0, openingDate: this.today() });
   }
 
   protected deleteAccount(id: string): void {
@@ -714,10 +715,20 @@ export class App {
 
   protected loadAll(): void {
     const token = this.token();
-    this.api.getAccounts(token).subscribe((accounts) => this.accounts.set(accounts));
-    this.api.getCategories(token).subscribe((categories) => this.categories.set(categories));
-    this.api.getTransactions(token, this.selectedYear(), this.selectedMonthNumber()).subscribe((transactions) => this.transactions.set(transactions));
-    this.api.getDashboard(token, this.selectedYear(), this.selectedMonthNumber()).subscribe((dashboard) => this.dashboard.set(dashboard));
+    forkJoin({
+      accounts: this.api.getAccounts(token),
+      categories: this.api.getCategories(token),
+      transactions: this.api.getTransactions(token, this.selectedYear(), this.selectedMonthNumber()),
+      dashboard: this.api.getDashboard(token, this.selectedYear(), this.selectedMonthNumber()),
+    }).subscribe({
+      next: ({ accounts, categories, transactions, dashboard }) => {
+        this.accounts.set(accounts);
+        this.categories.set(categories);
+        this.transactions.set(transactions);
+        this.dashboard.set(dashboard);
+      },
+      error: (error) => this.showMessage(this.api.errorMessage(error, 'Não foi possível carregar seus dados.'), 'error'),
+    });
   }
 
   protected refreshData(): void {
@@ -986,6 +997,10 @@ export class App {
   private currentMonthKey(): string {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  private today(): string {
+    return new Date().toISOString().slice(0, 10);
   }
 
   private compareTransactions(left: Transaction, right: Transaction): number {

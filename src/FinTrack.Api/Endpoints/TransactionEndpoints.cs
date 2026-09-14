@@ -24,6 +24,16 @@ public static class TransactionEndpoints
             ClaimsPrincipal user,
             CancellationToken cancellationToken) =>
         {
+            if (year is < 1 or > 9999)
+            {
+                return Results.BadRequest("Year must be between 1 and 9999.");
+            }
+
+            if (month is < 1 or > 12)
+            {
+                return Results.BadRequest("Month must be between 1 and 12.");
+            }
+
             var userId = user.GetUserId();
             var query = db.Transactions.Where(transaction => transaction.UserId == userId);
 
@@ -187,13 +197,17 @@ public static class TransactionEndpoints
 
     private static async Task<IResult?> ValidateReferences(Transaction transaction, FinTrackDbContext db, CancellationToken cancellationToken)
     {
-        var account = await db.Accounts.SingleOrDefaultAsync(account => account.Id == transaction.AccountId, cancellationToken);
+        var account = await db.Accounts.SingleOrDefaultAsync(
+            account => account.UserId == transaction.UserId && account.Id == transaction.AccountId,
+            cancellationToken);
         if (account is null)
         {
             return Results.BadRequest("Account was not found.");
         }
 
-        var category = await db.Categories.SingleOrDefaultAsync(category => category.Id == transaction.CategoryId, cancellationToken);
+        var category = await db.Categories.SingleOrDefaultAsync(
+            category => category.UserId == transaction.UserId && category.Id == transaction.CategoryId,
+            cancellationToken);
         if (category is null)
         {
             return Results.BadRequest("Category was not found.");

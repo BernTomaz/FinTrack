@@ -25,6 +25,11 @@ public static class ExportEndpoints
             ClaimsPrincipal user,
             CancellationToken cancellationToken) =>
         {
+            if (year is < 1 or > 9999)
+            {
+                return Results.BadRequest("Year must be between 1 and 9999.");
+            }
+
             if (month is < 1 or > 12)
             {
                 return Results.BadRequest("Month must be between 1 and 12.");
