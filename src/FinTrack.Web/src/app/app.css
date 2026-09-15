@@ -839,6 +839,48 @@ nav .active {
   color: #111827;
 }
 
+.loading-page {
+  align-items: center;
+  background: #0b1220;
+  color: #f8fafc;
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+}
+
+.loading-card {
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+  text-align: center;
+}
+
+.loading-card h1 {
+  font-size: 2rem;
+  margin: 0;
+}
+
+.loading-card p {
+  color: #cbd5e1;
+  margin: 0;
+}
+
+.loading-bar {
+  background: #1e293b;
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+  width: 220px;
+}
+
+.loading-bar i {
+  animation: loading-bar 900ms ease-in-out infinite;
+  background: #10b981;
+  display: block;
+  height: 100%;
+  width: 45%;
+}
+
 .message {
   animation: message-enter 220ms ease-out;
   align-items: center;
@@ -852,6 +894,22 @@ nav .active {
   position: fixed;
   transform: translateX(-50%);
   z-index: 5;
+}
+
+.loading-strip {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  color: #1d4ed8;
+  font-size: 0.9rem;
+  font-weight: 800;
+  padding: 10px 12px;
+}
+
+.dark-theme .loading-strip {
+  background: #13223a;
+  border-color: #244268;
+  color: #bfdbfe;
 }
 
 .confirm-backdrop {

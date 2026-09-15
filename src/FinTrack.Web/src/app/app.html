@@ -1,11 +1,11 @@
 @if (isEntering()) {
-  <main style="align-items:center;background:#0b1220;color:#f8fafc;display:grid;min-height:100vh;place-items:center">
-    <section style="display:grid;gap:18px;justify-items:center;text-align:center">
+  <main class="loading-page">
+    <section class="loading-card">
       <span class="brand-mark" aria-hidden="true">FT</span>
-      <h1 style="font-size:2rem;margin:0">FinTrack</h1>
-      <p style="margin:0;color:#cbd5e1">Carregando seu painel financeiro...</p>
-      <span style="background:#1e293b;border-radius:999px;height:8px;overflow:hidden;width:220px">
-        <i style="animation:loading-bar 900ms ease-in-out infinite;background:#10b981;display:block;height:100%;width:45%"></i>
+      <h1>FinTrack</h1>
+      <p>Carregando seu painel financeiro...</p>
+      <span class="loading-bar">
+        <i></i>
       </span>
     </section>
   </main>
@@ -141,6 +141,10 @@
           </div>
         </div>
       </header>
+
+      @if (isLoading()) {
+        <div class="loading-strip">Carregando dados...</div>
+      }
 
       @if (activeView() === 'profile') {
         <app-profile-panel

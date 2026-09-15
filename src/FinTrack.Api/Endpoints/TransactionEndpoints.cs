@@ -37,12 +37,18 @@ public static class TransactionEndpoints
             var userId = user.GetUserId();
             var query = db.Transactions.Where(transaction => transaction.UserId == userId);
 
-            if (year is not null)
+            if (year is not null && month is not null)
             {
-                query = query.Where(transaction => transaction.Date.Year == year);
+                var (periodStart, periodEnd) = MonthRange(year.Value, month.Value);
+                query = query.Where(transaction => transaction.Date >= periodStart && transaction.Date < periodEnd);
             }
-
-            if (month is not null)
+            else if (year is not null)
+            {
+                var yearStart = new DateOnly(year.Value, 1, 1);
+                var yearEnd = yearStart.AddYears(1);
+                query = query.Where(transaction => transaction.Date >= yearStart && transaction.Date < yearEnd);
+            }
+            else if (month is not null)
             {
                 query = query.Where(transaction => transaction.Date.Month == month);
             }
@@ -237,4 +243,10 @@ public static class TransactionEndpoints
             transaction.Date,
             transaction.Description,
             transaction.CreatedAt);
+
+    private static (DateOnly Start, DateOnly End) MonthRange(int year, int month)
+    {
+        var start = new DateOnly(year, month, 1);
+        return (start, start.AddMonths(1));
+    }
 }

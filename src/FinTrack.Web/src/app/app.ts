@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ViewEncapsulation, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { finalize, forkJoin } from 'rxjs';
 import { Account, AccountType, AuthResponse, Category, CategoryType, Dashboard, FinTrackApiService, Transaction, TransactionType } from './fintrack-api.service';
 import { AccountsPanelComponent } from './accounts-panel.component';
 import { CategoriesPanelComponent } from './categories-panel.component';
@@ -62,6 +62,7 @@ export class App {
   protected readonly message = signal('');
   protected readonly messageKind = signal<'success' | 'error' | 'info'>('info');
   protected readonly isMessageLeaving = signal(false);
+  protected readonly isLoading = signal(false);
   protected readonly deleteTarget = signal<DeleteTarget | null>(null);
   protected readonly accounts = signal<Account[]>([]);
   protected readonly categories = signal<Category[]>([]);
@@ -713,27 +714,30 @@ export class App {
     this.theme.set(nextTheme);
   }
 
-  protected loadAll(): void {
+  protected loadAll(successMessage?: string): void {
     const token = this.token();
+    this.isLoading.set(true);
     forkJoin({
       accounts: this.api.getAccounts(token),
       categories: this.api.getCategories(token),
       transactions: this.api.getTransactions(token, this.selectedYear(), this.selectedMonthNumber()),
       dashboard: this.api.getDashboard(token, this.selectedYear(), this.selectedMonthNumber()),
-    }).subscribe({
+    }).pipe(finalize(() => this.isLoading.set(false))).subscribe({
       next: ({ accounts, categories, transactions, dashboard }) => {
         this.accounts.set(accounts);
         this.categories.set(categories);
         this.transactions.set(transactions);
         this.dashboard.set(dashboard);
+        if (successMessage) {
+          this.showMessage(successMessage, 'success');
+        }
       },
       error: (error) => this.showMessage(this.api.errorMessage(error, 'Não foi possível carregar seus dados.'), 'error'),
     });
   }
 
   protected refreshData(): void {
-    this.loadAll();
-    this.showMessage('Dados atualizados.', 'success');
+    this.loadAll('Dados atualizados.');
   }
 
   protected saveProfile(): void {

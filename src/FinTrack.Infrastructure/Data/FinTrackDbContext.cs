@@ -42,7 +42,7 @@ public sealed class FinTrackDbContext(DbContextOptions<FinTrackDbContext> option
         {
             entity.Property(transaction => transaction.Type).HasConversion<string>().HasMaxLength(40);
             entity.Property(transaction => transaction.Amount).HasPrecision(18, 2);
-            entity.Property(transaction => transaction.Description).HasMaxLength(300);
+            entity.Property(transaction => transaction.Description).HasMaxLength(160);
             entity.HasOne<User>().WithMany().HasForeignKey(transaction => transaction.UserId).OnDelete(DeleteBehavior.NoAction);
             entity.HasOne<Account>().WithMany().HasForeignKey(transaction => transaction.AccountId).OnDelete(DeleteBehavior.NoAction);
             entity.HasOne<Category>().WithMany().HasForeignKey(transaction => transaction.CategoryId).OnDelete(DeleteBehavior.NoAction);

@@ -109,50 +109,66 @@ Contas e categorias com lançamentos vinculados não podem ser excluídas direta
 
 ## Execução Local
 
-Restaurar e compilar o backend:
+Backend:
 
 ```powershell
 dotnet restore FinTrack.slnx -m:1
 dotnet build FinTrack.slnx --no-restore -m:1
-```
-
-Executar a API:
-
-```powershell
+dotnet test tests\FinTrack.Tests\FinTrack.Tests.csproj --no-restore -m:1
 dotnet run --project src\FinTrack.Api
 ```
 
-Endereços locais:
-
-- API: `http://localhost:5080`
-- Health check: `http://localhost:5080/health`
-- OpenAPI: `http://localhost:5080/openapi/v1.json`
-- Swagger UI: `http://localhost:5080/swagger`
-
-Usar SQL Server via Docker:
-
-```powershell
-Copy-Item .env.example .env
-docker compose up -d
-dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build
-```
-
-Usar SQL Server local:
-
-```powershell
-dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build --connection "Server=localhost;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
-```
-
-Usar LocalDB:
-
-```powershell
-dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build --connection "Server=(localdb)\MSSQLLocalDB;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
-```
-
-Instalar e executar o frontend:
+Frontend:
 
 ```powershell
 cd src\FinTrack.Web
 npm install
 npm start
+```
+
+Endereços locais:
+
+- API: `http://localhost:5080`
+- Frontend: `http://localhost:4200`
+- Health check: `http://localhost:5080/health`
+- OpenAPI: `http://localhost:5080/openapi/v1.json`
+- Swagger UI: `http://localhost:5080/swagger`
+
+Builds:
+
+```powershell
+dotnet publish src\FinTrack.Api\FinTrack.Api.csproj -c Release
+cd src\FinTrack.Web
+npm run build
+```
+
+Docker:
+
+```powershell
+Copy-Item .env.example .env
+docker compose build
+docker compose up -d
+```
+
+O `docker compose up -d` sobe SQL Server, API e frontend. A API aplica migrations automaticamente ao iniciar.
+
+Configurar URL da API no frontend:
+
+```html
+<meta name="fintrack-api-url" content="http://localhost:5080">
+```
+
+Em desenvolvimento local e Docker, o valor padrão é `http://localhost:5080`.
+
+Aplicar migrations manualmente, se necessário:
+
+```powershell
+dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build
+```
+
+Usar SQL Server local ou LocalDB:
+
+```powershell
+dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build --connection "Server=localhost;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
+dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build --connection "Server=(localdb)\MSSQLLocalDB;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
 ```
