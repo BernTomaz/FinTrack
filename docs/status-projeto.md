@@ -58,6 +58,10 @@ MVP funcional validado localmente.
 - Componentes Angular separados para dashboard, relatórios, contas, categorias, exportação, lançamentos, perfil e alteração de senha
 - Edição de contas pela interface
 - Edição de categorias pela interface
+- Healthchecks no Docker Compose para SQL Server, API e frontend
+- Script de seed/demo por API
+- Feedback de carregamento no frontend
+- Limite de descrição de lançamento alinhado entre API e banco
 
 ## Em Aberto
 
@@ -66,26 +70,25 @@ MVP funcional validado localmente.
 
 ## Última Validação Docker
 
-- Data: 09/09/2026.
+- Data: 16/09/2026.
 - Comando: `docker compose up --build -d`.
 - Serviços validados: SQL Server, API e frontend.
 - API: health check em `/health` retornou `Healthy`.
 - Frontend: `http://localhost:4200` retornou `200`.
-- Swagger UI: `http://localhost:5080/swagger` retornou `200`.
+- Fluxo real via API: cadastro, conta, categoria, lançamento, dashboard e CSV.
 - Resultado: aprovado.
 
 ## Última Validação Automatizada
 
-- Data: 11/09/2026.
-- Backend: `dotnet test FinTrack.slnx -m:1`.
-- Resultado backend: 35 testes aprovados.
+- Data: 16/09/2026.
+- Backend: `dotnet test tests\FinTrack.Tests\FinTrack.Tests.csproj --no-restore -m:1`.
+- Resultado backend: testes aprovados.
 - Frontend: `npm run build`.
 - Resultado frontend: build de produção aprovado.
 
 ## Última Validação Ponta a Ponta
 
-- Data: 21/08/2026.
+- Data: 16/09/2026.
 - Ambiente: Docker Compose com SQL Server, API e frontend.
-- Usuário de teste: `mvp-fechamento-20260821130648@fintrack.local`.
-- Fluxo validado: cadastro, login, conta, categoria de receita, categoria de despesa, receita, despesa, validações de formulários, dashboard mensal, gráfico de fluxo de caixa com dados reais, exportação CSV e regra de bloqueio para exclusão de conta com lançamentos.
+- Fluxo validado: cadastro, conta, categoria, lançamento, dashboard mensal e exportação CSV.
 - Resultado: aprovado.

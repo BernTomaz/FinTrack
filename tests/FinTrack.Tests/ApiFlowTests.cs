@@ -182,6 +182,9 @@ public sealed class ApiFlowTests
         var invalidDescription = await client.PostAsJsonAsync("/transactions", new TransactionRequest(account.Id, category.Id, TransactionType.Expense, 10, date, new string('a', 161)));
         Assert.Equal(HttpStatusCode.BadRequest, invalidDescription.StatusCode);
 
+        var maxDescription = await client.PostAsJsonAsync("/transactions", new TransactionRequest(account.Id, category.Id, TransactionType.Expense, 10, date, new string('a', 160)));
+        Assert.Equal(HttpStatusCode.Created, maxDescription.StatusCode);
+
         var invalidAccount = await client.PostAsJsonAsync("/transactions", new TransactionRequest(Guid.NewGuid(), category.Id, TransactionType.Expense, 10, date, null));
         Assert.Equal(HttpStatusCode.BadRequest, invalidAccount.StatusCode);
 

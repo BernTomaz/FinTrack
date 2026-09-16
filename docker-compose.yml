@@ -5,12 +5,19 @@ services:
       dockerfile: src/FinTrack.Api/Dockerfile
     container_name: fintrack-api
     depends_on:
-      - sqlserver
+      sqlserver:
+        condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: Server=sqlserver,1433;Database=${FINTRACK_DB_NAME};User Id=sa;Password=${MSSQL_SA_PASSWORD};Encrypt=False;TrustServerCertificate=True
     ports:
       - "5080:5080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
 
   web:
     image: node:20-alpine
@@ -23,7 +30,14 @@ services:
       - ./src/FinTrack.Web:/app
       - fintrack-web-node-modules:/app/node_modules
     depends_on:
-      - api
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4200').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -35,6 +49,12 @@ services:
       - "1433:1433"
     volumes:
       - fintrack-sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q \"SELECT 1\" || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -Q \"SELECT 1\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
 
 volumes:
   fintrack-web-node-modules:

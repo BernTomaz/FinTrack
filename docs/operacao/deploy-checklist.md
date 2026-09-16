@@ -5,6 +5,7 @@ O deploy público fica fora do MVP, mas o projeto já deve estar pronto para uma
 ## Fechamento do MVP
 
 - [x] Confirmar que `docker compose up --build` sobe SQL Server, API e frontend.
+- [x] Conferir healthchecks do Docker Compose.
 - [x] Validar o health check da API em `/health`.
 - [x] Criar um usuário de teste pelo frontend.
 - [x] Criar uma conta, uma categoria de receita e uma categoria de despesa.
@@ -22,6 +23,7 @@ O deploy público fica fora do MVP, mas o projeto já deve estar pronto para uma
 ## Antes de Publicar
 
 - Configurar variáveis de ambiente.
+- Configurar `fintrack-api-url` no frontend para a URL real da API.
 - Usar uma chave JWT forte.
 - Conferir a connection string do banco.
 - Rodar as migrations.

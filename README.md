@@ -79,6 +79,8 @@ FinTrack/
     sqlserver/
   scripts/
     database/
+    demo/
+    frontend/
 ```
 
 ## MVP
@@ -150,7 +152,7 @@ docker compose build
 docker compose up -d
 ```
 
-O `docker compose up -d` sobe SQL Server, API e frontend. A API aplica migrations automaticamente ao iniciar.
+O `docker compose up -d` sobe SQL Server, API e frontend com healthchecks. A API aplica migrations automaticamente ao iniciar.
 
 Configurar URL da API no frontend:
 
@@ -158,7 +160,17 @@ Configurar URL da API no frontend:
 <meta name="fintrack-api-url" content="http://localhost:5080">
 ```
 
-Em desenvolvimento local e Docker, o valor padrão é `http://localhost:5080`.
+Em desenvolvimento local e Docker, o valor padrão é `http://localhost:5080`. Para trocar:
+
+```powershell
+.\scripts\frontend\set-api-url.ps1 -ApiUrl "https://sua-api.exemplo.com"
+```
+
+Criar dados de demonstração em uma API em execução:
+
+```powershell
+.\scripts\demo\seed-demo.ps1
+```
 
 Aplicar migrations manualmente, se necessário:
 

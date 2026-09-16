@@ -19,6 +19,7 @@ Comandos:
 ```powershell
 dotnet restore FinTrack.slnx -m:1
 dotnet build FinTrack.slnx --no-restore -m:1
+dotnet test tests\FinTrack.Tests\FinTrack.Tests.csproj --no-restore -m:1
 dotnet run --project src\FinTrack.Api
 ```
 
@@ -60,13 +61,31 @@ Copy-Item .env.example .env
 docker compose up --build
 ```
 
-Na primeira execução, a API aplica as migrations automaticamente quando o SQL Server ficar disponível.
+Na primeira execução, a API aplica as migrations automaticamente quando o SQL Server ficar disponível. O Compose possui healthchecks para SQL Server, API e frontend.
 
 Endereços:
 
 - Web: `http://localhost:4200`
 - API: `http://localhost:5080`
 - Swagger UI: `http://localhost:5080/swagger`
+
+Para parar tudo:
+
+```powershell
+docker compose down
+```
+
+Para criar dados de demonstração depois que a API estiver no ar:
+
+```powershell
+.\scripts\demo\seed-demo.ps1
+```
+
+Para trocar a URL da API consumida pelo frontend:
+
+```powershell
+.\scripts\frontend\set-api-url.ps1 -ApiUrl "http://localhost:5080"
+```
 
 ## Banco
 
