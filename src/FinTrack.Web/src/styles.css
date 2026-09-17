@@ -4,6 +4,7 @@
 
 body {
   background: #f6faf8;
+  cursor: url('/cursors/fin-pointer.png') 4 2, auto;
   margin: 0;
 }
 
