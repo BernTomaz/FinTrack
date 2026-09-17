@@ -75,7 +75,7 @@ async function main() {
   await fs.mkdir(outDir, { recursive: true });
 
   const browser = await chromium.launch({ executablePath: browserPath, headless: true });
-  const page = await browser.newPage({ viewport: { width: 1100, height: 720 }, deviceScaleFactor: 1 });
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
 
   await prepare('login');
   await page.goto(baseUrl, { waitUntil: 'networkidle' });

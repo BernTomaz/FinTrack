@@ -15,9 +15,9 @@ GIFS = {
 def load_frame(path: Path) -> Image.Image:
     image = Image.open(path).convert("RGB")
     width, height = image.size
-    if width > 900:
-        height = round(height * 900 / width)
-        image = image.resize((900, height), Image.Resampling.LANCZOS)
+    if width > 1100:
+        height = round(height * 1100 / width)
+        image = image.resize((1100, height), Image.Resampling.LANCZOS)
     return image
 
 
