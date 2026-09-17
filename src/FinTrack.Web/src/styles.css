@@ -4,12 +4,12 @@
 
 body {
   background: #f6faf8;
-  cursor: url('/cursors/fin-pointer.png') 16 16, auto;
+  cursor: url('/cursors/fin-cursor.png') 16 16, auto;
   margin: 0;
 }
 
 button {
-  cursor: url('/cursors/fin-pointer.png') 16 16, pointer;
+  cursor: url('/cursors/fin-pointer.png') 8 4, pointer;
   transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
 }
 
@@ -17,7 +17,7 @@ a,
 select,
 summary,
 [role="button"] {
-  cursor: url('/cursors/fin-pointer.png') 16 16, pointer;
+  cursor: url('/cursors/fin-pointer.png') 8 4, pointer;
 }
 
 input,
