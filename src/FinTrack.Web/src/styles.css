@@ -4,11 +4,25 @@
 
 body {
   background: #f6faf8;
+  cursor: url('/cursors/fin-cursor.png') 4 3, auto;
   margin: 0;
 }
 
 button {
+  cursor: url('/cursors/fin-pointer.png') 9 9, pointer;
   transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
+}
+
+a,
+select,
+summary,
+[role="button"] {
+  cursor: url('/cursors/fin-pointer.png') 9 9, pointer;
+}
+
+input,
+textarea {
+  cursor: text;
 }
 
 button:hover {
