@@ -61,7 +61,7 @@ Copy-Item .env.example .env
 docker compose up --build
 ```
 
-Na primeira execução, a API aplica as migrations automaticamente quando o SQL Server ficar disponível. O Compose possui healthchecks para SQL Server, API e frontend.
+Na primeira execução, a API aplica as migrations automaticamente quando o SQL Server ficar disponível. O Compose possui healthchecks para SQL Server, API e frontend, além das imagens locais `fintrack-api:latest` e `fintrack-web:latest`.
 
 Endereços:
 

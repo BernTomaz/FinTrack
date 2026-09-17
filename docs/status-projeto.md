@@ -59,6 +59,7 @@ MVP funcional validado localmente.
 - Edição de contas pela interface
 - Edição de categorias pela interface
 - Healthchecks no Docker Compose para SQL Server, API e frontend
+- Imagens Docker locais nomeadas para API e frontend
 - Script de seed/demo por API
 - Feedback de carregamento no frontend
 - Limite de descrição de lançamento alinhado entre API e banco

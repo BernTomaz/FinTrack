@@ -152,7 +152,7 @@ docker compose build
 docker compose up -d
 ```
 
-O `docker compose up -d` sobe SQL Server, API e frontend com healthchecks. A API aplica migrations automaticamente ao iniciar.
+O `docker compose up -d` sobe SQL Server, API e frontend com healthchecks. As imagens locais são `fintrack-api:latest` e `fintrack-web:latest`. A API aplica migrations automaticamente ao iniciar.
 
 Configurar URL da API no frontend:
 
