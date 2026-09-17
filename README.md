@@ -8,15 +8,15 @@ Sistema web para controle financeiro pessoal, com cadastro de receitas, despesas
 
 Tela de login com acesso direto, sem atalhos para recursos fora do MVP.
 
-![Login do FinTrack](docs/assets/fintrack-login.png)
+![Login do FinTrack](docs/assets/fintrack-login.gif)
 
 Dashboard mensal com receitas, despesas, saldo do mês, saldo atual e gráficos baseados nos lançamentos reais.
 
-![Dashboard do FinTrack](docs/assets/fintrack-dashboard.png)
+![Dashboard do FinTrack com mascote Fin](docs/assets/fintrack-dashboard.gif)
 
 Tela de contas mostrando saldo inicial e data de início, usados no cálculo do saldo atual por período.
 
-![Contas do FinTrack](docs/assets/fintrack-accounts.png)
+![Contas do FinTrack](docs/assets/fintrack-accounts.gif)
 
 ## Documentação
 
