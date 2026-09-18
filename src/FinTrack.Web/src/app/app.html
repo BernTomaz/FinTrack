@@ -1,5 +1,5 @@
 @if (isEntering()) {
-  <main class="loading-page">
+  <main class="loading-page" [class.custom-cursor]="customCursorEnabled()">
     <section class="loading-card">
       <span class="brand-mark" aria-hidden="true">FT</span>
       <h1>FinTrack</h1>
@@ -10,7 +10,7 @@
     </section>
   </main>
 } @else if (!isLoggedIn()) {
-  <main class="login-page">
+  <main class="login-page" [class.custom-cursor]="customCursorEnabled()">
     <section class="login-brand" aria-labelledby="login-title">
       <div class="brand-row">
         <span class="brand-mark" aria-hidden="true">FT</span>
@@ -76,7 +76,7 @@
     </section>
   </main>
 } @else {
-  <main class="app-shell" [class.dark-theme]="theme() === 'dark'" [class.sidebar-hidden]="sidebarHidden()" [class.dashboard-view]="activeView() === 'dashboard'">
+  <main class="app-shell" [class.custom-cursor]="customCursorEnabled()" [class.dark-theme]="theme() === 'dark'" [class.sidebar-hidden]="sidebarHidden()" [class.dashboard-view]="activeView() === 'dashboard'">
     <aside class="sidebar">
       <div class="top-actions">
         <button type="button" class="brand-row brand-button" (click)="openView('dashboard')" title="Ir para o dashboard">
@@ -181,6 +181,10 @@
             <label class="check">
               <input type="checkbox" checked />
               Exibir resumo mensal no dashboard
+            </label>
+            <label class="check">
+              <input type="checkbox" [checked]="customCursorEnabled()" (change)="setCustomCursorEnabled($any($event.target).checked)" />
+              Usar cursor personalizado
             </label>
             <label class="check">
               <input type="checkbox" [checked]="petEnabled()" (change)="setPetEnabled($any($event.target).checked)" />

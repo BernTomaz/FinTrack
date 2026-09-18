@@ -4,19 +4,22 @@
 
 body {
   background: #f6faf8;
-  cursor: url('/cursors/fin-cursor.png') 16 16, auto;
   margin: 0;
 }
 
-button {
+.custom-cursor {
+  cursor: url('/cursors/fin-cursor.png') 16 16, auto;
+}
+
+.custom-cursor button {
   cursor: url('/cursors/fin-pointer.png') 8 4, pointer;
+}
+
+button {
   transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
 }
 
-a,
-select,
-summary,
-[role="button"] {
+.custom-cursor :is(a, select, summary, [role="button"]) {
   cursor: url('/cursors/fin-pointer.png') 8 4, pointer;
 }
 

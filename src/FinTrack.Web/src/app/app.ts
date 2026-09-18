@@ -73,6 +73,7 @@ export class App {
   protected readonly petOpen = signal(false);
   protected readonly petEnabled = signal(localStorage.getItem('fintrack.pet.enabled') !== 'false');
   protected readonly petColor = signal<PetColor>((localStorage.getItem('fintrack.pet.color') as PetColor | null) ?? 'green');
+  protected readonly customCursorEnabled = signal(localStorage.getItem('fintrack.cursor.custom') !== 'false');
   protected readonly petQuestion = signal('');
   protected readonly petAnswer = signal('Oi, sou o Fin. Pergunte sobre saldo, receitas, despesas ou categorias.');
   protected readonly transactionSearch = signal('');
@@ -536,6 +537,11 @@ export class App {
     const nextColor: PetColor = ['blue', 'orange', 'purple'].includes(color) ? (color as PetColor) : 'green';
     localStorage.setItem('fintrack.pet.color', nextColor);
     this.petColor.set(nextColor);
+  }
+
+  protected setCustomCursorEnabled(enabled: boolean): void {
+    localStorage.setItem('fintrack.cursor.custom', String(enabled));
+    this.customCursorEnabled.set(enabled);
   }
 
   protected petColorValue(): string {

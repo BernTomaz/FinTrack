@@ -21,7 +21,6 @@ select {
 
 button {
   border: 0;
-  cursor: url('/cursors/fin-pointer.png') 8 4, pointer;
 }
 
 h1,
@@ -495,6 +494,7 @@ nav .active {
 .toolbar {
   display: flex;
   justify-content: space-between;
+  margin-bottom: 14px;
 }
 
 .toolbar .select-like {
