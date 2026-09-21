@@ -65,6 +65,7 @@ Use os arquivos de `docs/wiki/` como base para publicar na Wiki do GitHub:
 
 - [Home](wiki/Home.md)
 - [Sidebar](wiki/_Sidebar.md)
+- [Footer](wiki/_Footer.md)
 - [Arquitetura](wiki/arquitetura.md)
 - [Domínio](wiki/dominio.md)
 - [API](wiki/api.md)
