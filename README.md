@@ -97,7 +97,7 @@ FinTrack/
 - Exclusão de lançamentos
 - Bloqueio de exclusão de contas e categorias com lançamentos vinculados
 
-## Modo de Desenvolvimento
+## Modo de desenvolvimento
 
 O projeto segue uma abordagem simples: menos abstração, menos dependência e mais fluxo direto. Recursos fora do MVP ficam documentados para depois.
 
@@ -109,7 +109,7 @@ MVP funcional validado localmente. O projeto já possui autenticação, contas, 
 
 Contas e categorias com lançamentos vinculados não podem ser excluídas diretamente. Para removê-las, exclua primeiro os lançamentos relacionados.
 
-## Execução Local
+## Execução local
 
 Backend:
 
@@ -152,7 +152,7 @@ docker compose build
 docker compose up -d
 ```
 
-O `docker compose up -d` sobe SQL Server, API e frontend com healthchecks. As imagens locais são `fintrack-api:latest` e `fintrack-web:latest`. A API aplica migrations automaticamente ao iniciar.
+O `docker compose up -d` sobe SQL Server, API e frontend com health checks. As imagens locais são `fintrack-api:latest` e `fintrack-web:latest`. A API aplica migrations automaticamente ao iniciar.
 
 Configurar URL da API no frontend:
 

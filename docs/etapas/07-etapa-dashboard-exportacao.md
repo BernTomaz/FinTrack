@@ -1,6 +1,6 @@
-# 07 - Dashboard e Exportação
+# 07 - Dashboard e exportação
 
-## Dashboard Mensal
+## Dashboard mensal
 
 Mostrar:
 

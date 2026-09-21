@@ -5,23 +5,23 @@
 - Implementar melhorias pós-MVP pequenas antes do deploy.
 - Revisar deploy público.
 
-## MVP
+## MVP concluído
 
-- Usuários.
-- Login.
-- Contas.
-- Categorias.
-- Lançamentos.
-- Dashboard mensal.
-- Gráfico de fluxo de caixa com dados reais.
-- Exportação CSV.
-- Exclusão de lançamentos.
-- Bloqueio de exclusão de contas e categorias com lançamentos vinculados.
-- Saldo atual com saldos iniciais das contas.
-- Perfil editável.
-- Alteração de senha.
-- Testes principais.
-- CI de backend e frontend.
+- Usuários
+- Login
+- Contas
+- Categorias
+- Lançamentos
+- Dashboard mensal
+- Gráfico de fluxo de caixa com dados reais
+- Exportação CSV
+- Exclusão de lançamentos
+- Bloqueio de exclusão de contas e categorias com lançamentos vinculados
+- Saldo atual com saldos iniciais das contas
+- Perfil editável
+- Alteração de senha
+- Testes principais
+- CI de backend e frontend
 
 ## Depois do MVP
 

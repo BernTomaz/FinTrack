@@ -49,7 +49,7 @@ docker compose down -v
 
 Use `-v` com cuidado, porque remove os dados locais do SQL Server.
 
-## URLs Locais
+## URLs locais
 
 - Frontend: `http://localhost:4200`
 - API: `http://localhost:5080`

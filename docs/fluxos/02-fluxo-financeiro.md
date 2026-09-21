@@ -1,4 +1,4 @@
-# Fluxo Financeiro
+# Fluxo financeiro
 
 ## Preparação
 

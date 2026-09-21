@@ -1,4 +1,4 @@
-# Fluxo Geral
+# Fluxo geral
 
 ```text
 Cadastro/Login
@@ -10,7 +10,7 @@ Cadastro/Login
   -> Exportação CSV
 ```
 
-## Jornada Principal
+## Jornada principal
 
 1. Usuário cria cadastro.
 2. Usuário faz login.

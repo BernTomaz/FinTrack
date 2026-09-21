@@ -1,11 +1,11 @@
-# Checklist de Entrega
+# Checklist de entrega
 
 O deploy público fica fora do MVP, mas o projeto já deve estar pronto para uma entrega local validada.
 
 ## Fechamento do MVP
 
 - [x] Confirmar que `docker compose up --build` sobe SQL Server, API e frontend.
-- [x] Conferir healthchecks do Docker Compose.
+- [x] Conferir health checks do Docker Compose.
 - [x] Validar o health check da API em `/health`.
 - [x] Criar um usuário de teste pelo frontend.
 - [x] Criar uma conta, uma categoria de receita e uma categoria de despesa.
@@ -20,12 +20,12 @@ O deploy público fica fora do MVP, mas o projeto já deve estar pronto para uma
 - [x] Rodar os testes automatizados do backend.
 - [x] Rodar o build de produção do frontend.
 
-## Antes de Publicar
+## Antes de publicar
 
 - Configurar variáveis de ambiente.
 - Configurar `fintrack-api-url` no frontend para a URL real da API.
 - Usar uma chave JWT forte.
-- Conferir a connection string do banco.
+- Conferir a string de conexão do banco.
 - Rodar as migrations.
 - Conferir CORS para a URL real do frontend.
 - Configurar HTTPS.

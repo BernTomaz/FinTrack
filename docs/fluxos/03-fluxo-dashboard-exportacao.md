@@ -1,4 +1,4 @@
-# Fluxo de Dashboard e Exportação
+# Fluxo de dashboard e exportação
 
 ## Dashboard
 

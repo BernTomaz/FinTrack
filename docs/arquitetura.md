@@ -1,6 +1,6 @@
 # Arquitetura
 
-O FinTrack usa uma divisão simples em camadas, seguindo a base do GradeFlow.
+O FinTrack usa uma divisão simples em camadas, focada em manter o MVP legível e fácil de evoluir.
 
 ## Camadas
 
@@ -61,7 +61,7 @@ Responsabilidades:
 - Estado local simples
 - Layout responsivo mobile-first
 
-## Regra de Dependência
+## Regra de dependência
 
 ```text
 Api -> Application -> Domain
@@ -70,7 +70,7 @@ Api -> Infrastructure
 Web -> Api
 ```
 
-## Decisão Arquitetural
+## Decisão arquitetural
 
 Começar com services diretos e DTOs simples. Repositórios só entram se o acesso a dados começar a repetir lógica real.
 

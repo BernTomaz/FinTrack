@@ -1,10 +1,10 @@
-# Fluxo de Autenticação
+# Fluxo de autenticação
 
 ## Cadastro
 
 ```text
-Nome + email + senha
-  -> validar email único
+Nome + e-mail + senha
+  -> validar e-mail único
   -> salvar senha com hash
   -> criar usuário
 ```
@@ -12,7 +12,7 @@ Nome + email + senha
 ## Login
 
 ```text
-Email + senha
+E-mail + senha
   -> validar credenciais
   -> gerar JWT
   -> frontend salva token

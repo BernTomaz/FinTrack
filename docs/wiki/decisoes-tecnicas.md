@@ -1,4 +1,4 @@
-# Decisões Técnicas
+# Decisões técnicas
 
 Cada decisão técnica deve registrar:
 

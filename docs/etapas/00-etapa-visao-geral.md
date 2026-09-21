@@ -1,4 +1,4 @@
-# 00 - Visão Geral
+# 00 - Visão geral
 
 O FinTrack é um sistema web de controle financeiro pessoal.
 
@@ -17,7 +17,7 @@ Permitir que o usuário registre contas, categorias e lançamentos, acompanhe o 
 - Usuário acompanha dashboard mensal
 - Usuário exporta lançamentos em CSV
 
-## Critério de Pronto
+## Critério de pronto
 
 O MVP termina quando os fluxos principais funcionarem de ponta a ponta com testes principais passando.
 

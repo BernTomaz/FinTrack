@@ -20,20 +20,22 @@ Permitir que o usuário organize suas movimentações financeiras, visualize res
 
 ### Frontend
 
-- Angular
+- Angular 20
 - TypeScript
 - Reactive Forms
 - HttpClient
+- Layout responsivo mobile-first
 
 ### Infraestrutura
 
 - Docker
 - Docker Compose
+- GitHub Actions
 - README com instruções de execução
 
 ## MVP
 
-O MVP deve conter apenas o necessário para o sistema funcionar bem.
+O MVP contém apenas o necessário para o sistema funcionar bem.
 
 ### Funcionalidades
 
@@ -44,7 +46,12 @@ O MVP deve conter apenas o necessário para o sistema funcionar bem.
 - Cadastro de lançamentos financeiros
 - Listagem e filtros de lançamentos
 - Dashboard mensal
+- Gráfico de fluxo de caixa com dados reais
 - Exportação CSV de lançamentos
+- Exclusão de lançamentos
+- Bloqueio de exclusão de contas e categorias com lançamentos vinculados
+- Perfil editável
+- Alteração de senha
 
 ## Fora do MVP
 
@@ -55,13 +62,13 @@ Não implementar agora:
 - IA
 - OCR
 - Upload de comprovantes
-- Notificações por email
+- Notificações por e-mail
 - App mobile
 - Multi-moeda
 - Compartilhamento de contas entre usuários
 - Assinatura paga
 
-Esses recursos podem ser pensados depois que o MVP estiver pronto.
+Esses recursos podem ser pensados depois do MVP.
 
 ## Entidades
 
@@ -79,7 +86,7 @@ Campos:
 
 Regras:
 
-- Email deve ser único
+- E-mail deve ser único
 - Senha deve ser armazenada como hash
 - Usuário só pode acessar os próprios dados
 
@@ -101,6 +108,7 @@ Campos:
 - Name
 - Type
 - InitialBalance
+- OpeningDate
 - CreatedAt
 
 Tipos sugeridos:
@@ -115,6 +123,8 @@ Regras:
 - Conta pertence a um usuário
 - Nome da conta é obrigatório
 - Saldo inicial pode ser zero
+- Data de início define quando a conta entra no cálculo de saldo atual
+- Conta com lançamentos vinculados não pode ser excluída diretamente
 
 ### Category
 
@@ -147,6 +157,7 @@ Regras:
 - Categoria pertence a um usuário
 - Categoria deve ser de receita ou despesa
 - Nome é obrigatório
+- Categoria com lançamentos vinculados não pode ser excluída diretamente
 
 ### Transaction
 
@@ -177,6 +188,7 @@ Regras:
 - Lançamento pertence a uma categoria
 - Tipo do lançamento deve ser compatível com o tipo da categoria
 - Usuário só pode usar contas e categorias dele
+- Data do lançamento não pode ser anterior à data de início da conta
 
 ## Regras de Negócio
 
@@ -195,9 +207,10 @@ O dashboard deve mostrar:
 - Total de receitas do mês
 - Total de despesas do mês
 - Saldo do mês
-- Saldo geral atual
+- Saldo atual
 - Gastos por categoria
 - Últimos lançamentos
+- Fluxo de caixa com dados reais
 
 ### Filtros de lançamentos
 
@@ -216,6 +229,9 @@ Filtros necessários:
 ```text
 POST /auth/register
 POST /auth/login
+GET /auth/me
+PUT /auth/me
+PUT /auth/password
 ```
 
 ### Accounts
@@ -248,7 +264,7 @@ PUT /transactions/{id}
 DELETE /transactions/{id}
 ```
 
-Query params sugeridos para listagem:
+Query params da listagem:
 
 ```text
 GET /transactions?year=2026&month=8&type=Expense&categoryId=1&accountId=2
@@ -266,7 +282,7 @@ GET /dashboard/monthly?year=2026&month=8
 GET /exports/transactions.csv?year=2026&month=8
 ```
 
-## Estrutura Recomendada
+## Estrutura do projeto
 
 ```text
 FinTrack/
@@ -275,8 +291,12 @@ FinTrack/
     FinTrack.Application/
     FinTrack.Domain/
     FinTrack.Infrastructure/
+    FinTrack.Web/
   tests/
     FinTrack.Tests/
+  docs/
+  docker/
+  scripts/
   docker-compose.yml
   README.md
 ```
@@ -291,8 +311,9 @@ Responsável por:
 - Autenticação
 - Configuração da API
 - Swagger
+- Health check
 
-Controllers devem ser finos.
+Endpoints devem manter a lógica de negócio nos services.
 
 ### FinTrack.Application
 
@@ -320,7 +341,7 @@ Responsável por:
 - Repositórios, se forem necessários
 - Configuração do Entity Framework
 
-## DTOs Iniciais
+## DTOs principais
 
 ### RegisterRequest
 
@@ -338,6 +359,7 @@ Responsável por:
 - Name
 - Type
 - InitialBalance
+- OpeningDate
 
 ### CategoryRequest
 
@@ -405,6 +427,12 @@ Responsável por:
 - Excluir lançamento
 - Filtros
 
+### Perfil
+
+- Nome
+- E-mail somente leitura
+- Alteração de senha
+
 ## Testes
 
 Testes mínimos:
@@ -417,12 +445,14 @@ Testes mínimos:
 - Calcular total de despesas do mês
 - Calcular saldo mensal
 - Exportar CSV com lançamentos filtrados
+- Impedir lançamento antes da data de início da conta
+- Impedir exclusão de conta ou categoria com lançamentos vinculados
 
-## Etapas de Implementação
+## Etapas de implementação
 
 ### 1. Estrutura
 
-- Criar solution
+- Criar solução `FinTrack.slnx`
 - Criar projetos da API, Application, Domain, Infrastructure e Tests
 - Referenciar projetos
 - Configurar Swagger
@@ -493,7 +523,7 @@ Testes mínimos:
 - Docker
 - Deploy opcional
 
-## README Deve Conter
+## README contém
 
 - Nome do projeto
 - Descrição curta
@@ -506,17 +536,17 @@ Testes mínimos:
 - Prints ou GIFs
 - Próximos passos
 
-## Critério de Pronto
+## Critério de pronto
 
 O FinTrack MVP está pronto quando:
 
-- Usuário consegue cadastrar e logar
-- Usuário consegue criar contas
-- Usuário consegue criar categorias
-- Usuário consegue criar receitas e despesas
-- Dashboard mensal mostra os valores corretos
-- Lançamentos podem ser filtrados
-- CSV pode ser exportado
-- Testes principais passam
-- README explica como rodar o projeto
+- Usuário consegue se cadastrar e fazer login.
+- Usuário consegue criar contas.
+- Usuário consegue criar categorias.
+- Usuário consegue criar receitas e despesas.
+- Dashboard mensal mostra os valores corretos.
+- Lançamentos podem ser filtrados.
+- CSV pode ser exportado.
+- Testes principais passam.
+- README explica como rodar o projeto.
 

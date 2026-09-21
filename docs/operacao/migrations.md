@@ -2,11 +2,11 @@
 
 ## Objetivo
 
-Manter a evolucao do banco rastreavel.
+Manter a evolução do banco rastreável.
 
-## Fluxo Planejado
+## Fluxo planejado
 
-1. Alterar entidades ou configuracoes do EF Core.
+1. Alterar entidades ou configurações do EF Core.
 2. Criar migration.
 3. Revisar migration.
 4. Aplicar no banco local.

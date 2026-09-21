@@ -1,4 +1,4 @@
-# Configuração Local
+# Configuração local
 
 Instruções para executar o FinTrack localmente.
 
@@ -61,7 +61,7 @@ Copy-Item .env.example .env
 docker compose up --build
 ```
 
-Na primeira execução, a API aplica as migrations automaticamente quando o SQL Server ficar disponível. O Compose possui healthchecks para SQL Server, API e frontend, além das imagens locais `fintrack-api:latest` e `fintrack-web:latest`.
+Na primeira execução, a API aplica as migrations automaticamente quando o SQL Server ficar disponível. O Compose possui health checks para SQL Server, API e frontend, além das imagens locais `fintrack-api:latest` e `fintrack-web:latest`.
 
 Endereços:
 
@@ -100,7 +100,7 @@ docker compose up -d sqlserver
 
 Se a API também estiver rodando pelo Docker, ela aplica as migrations automaticamente.
 
-Connection string padrão:
+String de conexão padrão:
 
 ```text
 Server=localhost,1433;Database=FinTrackDb;User Id=sa;Password=Your_strong_password123;Encrypt=False;TrustServerCertificate=True
@@ -122,9 +122,9 @@ dotnet ef database update --project src\FinTrack.Infrastructure --startup-projec
 
 Para rodar a API com outro banco sem editar `appsettings.json`, defina `ConnectionStrings__DefaultConnection` como variável de ambiente ou use user-secrets.
 
-## Segredos Locais
+## Segredos locais
 
-A chave JWT e senhas locais não devem ser versionadas. Usar user-secrets no backend e `.env` local para Docker.
+A chave JWT e senhas locais não devem ser versionadas. Use user-secrets no backend e `.env` local para Docker.
 
 ## CI
 

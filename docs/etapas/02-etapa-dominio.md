@@ -21,9 +21,9 @@ Concluída.
 - TransactionType
 - CategoryType
 
-## Regras Iniciais
+## Regras iniciais
 
-- Email de usuário deve ser único
+- E-mail de usuário deve ser único
 - Senha deve ser salva como hash
 - Valor de lançamento deve ser maior que zero
 - Usuário só acessa os próprios dados

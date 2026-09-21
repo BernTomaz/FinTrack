@@ -1,10 +1,10 @@
 # API
 
-## Visão Geral
+## Visão geral
 
 A API expõe endpoints REST para autenticação, perfil, contas, categorias, lançamentos, dashboard e exportação CSV.
 
-## Endpoints Principais
+## Endpoints principais
 
 | Recurso | Endpoints |
 | --- | --- |
@@ -22,13 +22,13 @@ A API expõe endpoints REST para autenticação, perfil, contas, categorias, lan
 | Exportação CSV | GET `/exports/transactions.csv?year=2026&month=8` |
 | Health check | GET `/health` |
 
-## Filtros de Lançamentos
+## Filtros de lançamentos
 
 ```text
 GET /transactions?year=2026&month=8&type=Expense&categoryId=1&accountId=2
 ```
 
-## Regras de Resposta
+## Regras de resposta
 
 - `DELETE /accounts/{id}` retorna `409 Conflict` quando a conta possui lançamentos vinculados.
 - `DELETE /categories/{id}` retorna `409 Conflict` quando a categoria possui lançamentos vinculados.

@@ -1,6 +1,6 @@
 # Frontend Angular
 
-## Visão Geral
+## Visão geral
 
 O frontend do FinTrack é uma aplicação Angular 20 focada no fluxo principal do MVP.
 
@@ -30,7 +30,7 @@ Os painéis principais foram separados em componentes para manter o arquivo prin
 - `profile-panel`
 - `password-panel`
 
-## API e Sessão
+## API e sessão
 
 O serviço Angular centraliza:
 

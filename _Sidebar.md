@@ -11,17 +11,17 @@
 - [Domínio](dominio)
 - [Frontend Angular](frontend-angular)
 - [API](api)
-- [Autenticação e Autorização](autenticacao-autorizacao)
+- [Autenticação e autorização](autenticacao-autorizacao)
 
 ## Técnico
 
 - [Arquitetura](arquitetura)
-- [Banco de Dados](banco-de-dados)
+- [Banco de dados](banco-de-dados)
 - [Testes](testes)
 - [CI/CD](cicd)
 - [Docker](docker)
 - [Deploy](deploy)
-- [Decisões Técnicas](decisoes-tecnicas)
+- [Decisões técnicas](decisoes-tecnicas)
 
 ## Projeto
 

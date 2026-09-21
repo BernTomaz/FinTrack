@@ -1,10 +1,10 @@
 # FinTrack Wiki
 
-## Visão Geral
+## Visão geral
 
 FinTrack é um sistema web para controle financeiro pessoal, com cadastro de usuários, login, contas financeiras, categorias, lançamentos, dashboard mensal, gráfico de fluxo de caixa e exportação CSV.
 
-## Status Atual
+## Status atual
 
 O MVP está funcional e validado localmente com backend, frontend, banco, Docker, testes automatizados e CI.
 
@@ -48,7 +48,7 @@ Próximas etapas:
 - Health checks
 - Migrations EF Core
 
-## Segurança Atual
+## Segurança atual
 
 - Cadastro e login com hash de senha.
 - JWT para proteger endpoints do usuário autenticado.
@@ -62,14 +62,14 @@ Próximas etapas:
 - [Arquitetura](arquitetura)
 - [Domínio](dominio)
 - [API](api)
-- [Autenticação e Autorização](autenticacao-autorizacao)
+- [Autenticação e autorização](autenticacao-autorizacao)
 - [Frontend Angular](frontend-angular)
-- [Banco de Dados](banco-de-dados)
+- [Banco de dados](banco-de-dados)
 - [Testes](testes)
 - [CI/CD](cicd)
 - [Docker](docker)
 - [Deploy](deploy)
 - [Roadmap](roadmap)
-- [Decisões Técnicas](decisoes-tecnicas)
+- [Decisões técnicas](decisoes-tecnicas)
 - [Contribuição](contribuicao)
 - [Glossário](glossario)

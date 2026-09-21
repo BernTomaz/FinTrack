@@ -1,4 +1,4 @@
-# Roadmap de Implementação
+# Roadmap de implementação
 
 ## 1. Base
 
@@ -49,7 +49,7 @@
 - CI de backend e frontend
 - Docker Compose validado
 
-## 8. Ajustes de Validação do MVP
+## 8. Ajustes de validação do MVP
 
 - Gráfico de fluxo de caixa com dados reais.
 - Exclusão de lançamentos pela interface.

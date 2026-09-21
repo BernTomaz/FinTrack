@@ -1,4 +1,4 @@
-# 01 - Estrutura do Projeto
+# 01 - Estrutura do projeto
 
 ## Objetivo
 
@@ -14,7 +14,7 @@ Criar a base técnica do projeto sem implementar regra de negócio ainda.
 - Configurar arquivos base de ambiente
 - Preparar Docker Compose
 
-## Estrutura Esperada
+## Estrutura esperada
 
 ```text
 src/

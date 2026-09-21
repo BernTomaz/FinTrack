@@ -1,4 +1,4 @@
-# 09 - Testes e Finalização
+# 09 - Testes e finalização
 
 ## Objetivo
 
@@ -12,7 +12,7 @@ Garantir que o MVP funcione e seja simples de executar localmente.
 - Validar Docker
 - Registrar próximos passos
 
-## Critério de Pronto
+## Critério de pronto
 
 - Login funcionando
 - CRUDs principais funcionando

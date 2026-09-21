@@ -13,7 +13,7 @@ Concluída: DbContext, mapeamentos, migration inicial, script SQL e suporte para
 - Criar `FinTrackDbContext`
 - Mapear entidades
 - Criar migration inicial
-- Configurar connection string
+- Configurar string de conexão
 - Preparar SQL Server no Docker
 
 ## Banco

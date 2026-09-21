@@ -12,7 +12,7 @@ Frontend Angular do FinTrack.
 - Exportação CSV via API
 - Layout responsivo para desktop e mobile
 
-## Execução Local
+## Execução local
 
 Instalar dependências:
 

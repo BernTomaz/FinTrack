@@ -1,6 +1,6 @@
-# Status do Projeto
+# Status do projeto
 
-## Status Atual
+## Status atual
 
 MVP funcional validado localmente.
 
@@ -58,18 +58,18 @@ MVP funcional validado localmente.
 - Componentes Angular separados para dashboard, relatórios, contas, categorias, exportação, lançamentos, perfil e alteração de senha
 - Edição de contas pela interface
 - Edição de categorias pela interface
-- Healthchecks no Docker Compose para SQL Server, API e frontend
+- Health checks no Docker Compose para SQL Server, API e frontend
 - Imagens Docker locais nomeadas para API e frontend
 - Script de seed/demo por API
 - Feedback de carregamento no frontend
 - Limite de descrição de lançamento alinhado entre API e banco
 
-## Em Aberto
+## Em aberto
 
 - Preencher manualmente o painel About do GitHub.
 - Decidir se o próximo passo será deploy público ou novas melhorias pós-MVP.
 
-## Última Validação Docker
+## Última validação Docker
 
 - Data: 16/09/2026.
 - Comando: `docker compose up --build -d`.
@@ -79,7 +79,7 @@ MVP funcional validado localmente.
 - Fluxo real via API: cadastro, conta, categoria, lançamento, dashboard e CSV.
 - Resultado: aprovado.
 
-## Última Validação Automatizada
+## Última validação automatizada
 
 - Data: 16/09/2026.
 - Backend: `dotnet test tests\FinTrack.Tests\FinTrack.Tests.csproj --no-restore -m:1`.
@@ -87,7 +87,7 @@ MVP funcional validado localmente.
 - Frontend: `npm run build`.
 - Resultado frontend: build de produção aprovado.
 
-## Última Validação Ponta a Ponta
+## Última validação ponta a ponta
 
 - Data: 16/09/2026.
 - Ambiente: Docker Compose com SQL Server, API e frontend.

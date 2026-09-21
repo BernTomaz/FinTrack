@@ -54,7 +54,7 @@ Regras:
 - A data do lançamento não pode ser anterior à data de início da conta.
 - A listagem pode ser filtrada por ano, mês, tipo, conta e categoria.
 
-## Dashboard Mensal
+## Dashboard mensal
 
 Consolida os dados de um mês selecionado:
 
