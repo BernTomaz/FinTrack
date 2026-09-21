@@ -1,7 +1,5 @@
 # FinTrack Wiki
 
-Esta página organiza a documentação do FinTrack no mesmo formato usado na wiki do GradeFlow: uma página inicial curta, páginas técnicas separadas e navegação por assunto.
-
 ## Visão Geral
 
 FinTrack é um sistema web para controle financeiro pessoal, com cadastro de usuários, login, contas financeiras, categorias, lançamentos, dashboard mensal, gráfico de fluxo de caixa e exportação CSV.
@@ -61,29 +59,17 @@ Próximas etapas:
 
 ## Páginas
 
-Use os arquivos de `docs/wiki/` como base para publicar na Wiki do GitHub:
-
-- [Home](wiki/Home.md)
-- [Sidebar](wiki/_Sidebar.md)
-- [Arquitetura](wiki/arquitetura.md)
-- [Domínio](wiki/dominio.md)
-- [API](wiki/api.md)
-- [Autenticação e Autorização](wiki/autenticacao-autorizacao.md)
-- [Frontend Angular](wiki/frontend-angular.md)
-- [Banco de Dados](wiki/banco-de-dados.md)
-- [Testes](wiki/testes.md)
-- [CI/CD](wiki/cicd.md)
-- [Docker](wiki/docker.md)
-- [Deploy](wiki/deploy.md)
-- [Roadmap](wiki/roadmap.md)
-- [Decisões Técnicas](wiki/decisoes-tecnicas.md)
-- [Contribuição](wiki/contribuicao.md)
-- [Glossário](wiki/glossario.md)
-
-## Regras Importantes
-
-- O saldo atual considera saldos iniciais das contas que já começaram até o fim do mês selecionado, mais receitas, menos despesas.
-- Uma conta iniciada em agosto não entra no saldo de julho.
-- Um lançamento não pode ter data anterior à data de início da conta.
-- Contas e categorias com lançamentos vinculados não podem ser excluídas diretamente.
-- O gráfico de fluxo de caixa usa apenas lançamentos reais.
+- [Arquitetura](arquitetura)
+- [Domínio](dominio)
+- [API](api)
+- [Autenticação e Autorização](autenticacao-autorizacao)
+- [Frontend Angular](frontend-angular)
+- [Banco de Dados](banco-de-dados)
+- [Testes](testes)
+- [CI/CD](cicd)
+- [Docker](docker)
+- [Deploy](deploy)
+- [Roadmap](roadmap)
+- [Decisões Técnicas](decisoes-tecnicas)
+- [Contribuição](contribuicao)
+- [Glossário](glossario)

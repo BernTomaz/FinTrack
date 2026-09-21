@@ -1,0 +1,17 @@
+# FinTrack Wiki
+
+- [Home](Home)
+- [Arquitetura](arquitetura)
+- [Domínio](dominio)
+- [API](api)
+- [Autenticação e Autorização](autenticacao-autorizacao)
+- [Frontend Angular](frontend-angular)
+- [Banco de Dados](banco-de-dados)
+- [Testes](testes)
+- [CI/CD](cicd)
+- [Docker](docker)
+- [Deploy](deploy)
+- [Roadmap](roadmap)
+- [Decisões Técnicas](decisoes-tecnicas)
+- [Contribuição](contribuicao)
+- [Glossário](glossario)
