@@ -176,7 +176,7 @@ small {
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 28px 70px rgba(16, 185, 129, 0.42);
 }
 
 .auth-card {
@@ -184,6 +184,20 @@ small {
   display: grid;
   gap: 26px;
   padding: 44px;
+  position: relative;
+}
+
+.auth-card::before {
+  border-radius: inherit;
+  background: rgba(16, 185, 129, 0.24);
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.28), 0 32px 90px rgba(16, 185, 129, 0.5);
+  content: "";
+  filter: blur(12px);
+  inset: -20px;
+  opacity: 1;
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
 }
 
 .auth-card form,
@@ -213,6 +227,27 @@ select {
   color: #344054;
   min-height: 44px;
   min-width: 0;
+  padding: 10px 12px;
+}
+
+.auth-input {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.08);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.auth-input:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18), 0 0 24px rgba(16, 185, 129, 0.18);
+  outline: 0;
+}
+
+.login-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #b91c1c;
+  font-size: 0.9rem;
+  font-weight: 800;
   padding: 10px 12px;
 }
 

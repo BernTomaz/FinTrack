@@ -4,11 +4,11 @@
 
 Registro financeiro usado para agrupar lançamentos. Pode representar conta corrente, carteira, poupança ou outro local onde há saldo.
 
-## Saldo inicial
+## Saldo Inicial
 
 Valor inicial da conta. Entra no cálculo do saldo atual a partir da data de início da conta.
 
-## Data de início da conta
+## Data de Início da Conta
 
 Data a partir da qual a conta passa a participar do cálculo financeiro.
 
@@ -28,15 +28,15 @@ Entrada de dinheiro.
 
 Saída de dinheiro.
 
-## Dashboard mensal
+## Dashboard Mensal
 
 Tela que consolida receitas, despesas, saldo do mês, saldo atual e gráficos do mês selecionado.
 
-## Saldo do mês
+## Saldo do Mês
 
 Receitas menos despesas dentro do mês selecionado.
 
-## Saldo atual
+## Saldo Atual
 
 Saldo acumulado até o fim do mês selecionado, considerando saldos iniciais das contas aplicáveis e lançamentos reais.
 

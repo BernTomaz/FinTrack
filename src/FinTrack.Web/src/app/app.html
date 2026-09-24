@@ -36,13 +36,16 @@
           <p>Entre com seu e-mail e senha.</p>
           <label>
             E-mail
-            <input type="email" formControlName="email" autocomplete="email" placeholder="seu@email.com" />
+            <input class="auth-input" type="email" formControlName="email" autocomplete="email" placeholder="seu@email.com" />
           </label>
           <label>
             Senha
-            <input type="password" formControlName="password" autocomplete="current-password" placeholder="Sua senha" />
+            <input class="auth-input" type="password" formControlName="password" autocomplete="current-password" placeholder="Sua senha" />
           </label>
           <button type="submit" class="primary">Entrar</button>
+          @if (loginError()) {
+            <p class="login-error" role="alert">{{ loginError() }}</p>
+          }
         </form>
 
         <div class="auth-switch">

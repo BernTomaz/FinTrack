@@ -1,15 +1,21 @@
 param(
-    [string]$ApiUrl = "http://localhost:5080"
+    [string]$ApiUrl = "http://localhost:5080",
+    [string]$Email = "demo@fintrack.local",
+    [string]$Password = "Senha@123"
 )
 
-$email = "demo-$([guid]::NewGuid().ToString('N'))@fintrack.local"
-$password = "Senha@123"
-
-$auth = Invoke-RestMethod -Method Post -Uri "$ApiUrl/auth/register" -ContentType "application/json" -Body (@{
-    name = "Demo FinTrack"
-    email = $email
-    password = $password
-} | ConvertTo-Json)
+try {
+    $auth = Invoke-RestMethod -Method Post -Uri "$ApiUrl/auth/register" -ContentType "application/json" -Body (@{
+        name = "Demo FinTrack"
+        email = $Email
+        password = $Password
+    } | ConvertTo-Json)
+} catch {
+    $auth = Invoke-RestMethod -Method Post -Uri "$ApiUrl/auth/login" -ContentType "application/json" -Body (@{
+        email = $Email
+        password = $Password
+    } | ConvertTo-Json)
+}
 
 $headers = @{ Authorization = "Bearer $($auth.token)" }
 
@@ -49,7 +55,7 @@ Invoke-RestMethod -Method Post -Uri "$ApiUrl/transactions" -Headers $headers -Co
 } | ConvertTo-Json) | Out-Null
 
 [pscustomobject]@{
-    Email = $email
-    Password = $password
+    Email = $Email
+    Password = $Password
     Month = "2026-08"
 } | Format-List

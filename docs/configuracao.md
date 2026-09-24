@@ -50,7 +50,8 @@ docker compose up web
 
 Endereço:
 
-- Web: `http://localhost:4200`
+- Web local: `http://localhost:4200`
+- Web Docker: `http://localhost:4201`
 
 ## Aplicação via Docker
 
@@ -65,7 +66,8 @@ Na primeira execução, a API aplica as migrations automaticamente quando o SQL 
 
 Endereços:
 
-- Web: `http://localhost:4200`
+- Web local: `http://localhost:4200`
+- Web Docker: `http://localhost:4201`
 - API: `http://localhost:5080`
 - Swagger UI: `http://localhost:5080/swagger`
 

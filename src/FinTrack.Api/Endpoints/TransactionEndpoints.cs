@@ -39,7 +39,7 @@ public static class TransactionEndpoints
 
             if (year is not null && month is not null)
             {
-                var (periodStart, periodEnd) = MonthRange(year.Value, month.Value);
+                var (periodStart, periodEnd) = DateRanges.Month(year.Value, month.Value);
                 query = query.Where(transaction => transaction.Date >= periodStart && transaction.Date < periodEnd);
             }
             else if (year is not null)
@@ -244,9 +244,4 @@ public static class TransactionEndpoints
             transaction.Description,
             transaction.CreatedAt);
 
-    private static (DateOnly Start, DateOnly End) MonthRange(int year, int month)
-    {
-        var start = new DateOnly(year, month, 1);
-        return (start, start.AddMonths(1));
-    }
 }

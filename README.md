@@ -131,7 +131,8 @@ npm start
 Endereços locais:
 
 - API: `http://localhost:5080`
-- Frontend: `http://localhost:4200`
+- Frontend local: `http://localhost:4200`
+- Frontend Docker: `http://localhost:4201`
 - Health check: `http://localhost:5080/health`
 - OpenAPI: `http://localhost:5080/openapi/v1.json`
 - Swagger UI: `http://localhost:5080/swagger`

@@ -27,12 +27,9 @@ services:
       dockerfile: Dockerfile
     container_name: fintrack-web
     working_dir: /app
-    command: npm start -- --host 0.0.0.0 --port 4200 --poll 2000
+    command: npm start -- --host 0.0.0.0 --port 4200
     ports:
-      - "4200:4200"
-    volumes:
-      - ./src/FinTrack.Web:/app
-      - fintrack-web-node-modules:/app/node_modules
+      - "4201:4200"
     depends_on:
       api:
         condition: service_healthy
@@ -61,5 +58,4 @@ services:
       start_period: 30s
 
 volumes:
-  fintrack-web-node-modules:
   fintrack-sqlserver-data:

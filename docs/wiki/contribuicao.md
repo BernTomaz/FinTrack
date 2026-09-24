@@ -4,7 +4,7 @@
 
 Manter o FinTrack simples e focado no MVP.
 
-## Antes de alterar
+## Antes de Alterar
 
 - Entenda o fluxo financeiro impactado.
 - Reuse padrões existentes.
@@ -12,7 +12,7 @@ Manter o FinTrack simples e focado no MVP.
 - Evite abstrações especulativas.
 - Preserve responsividade mobile.
 
-## Validações recomendadas
+## Validações Recomendadas
 
 Backend:
 

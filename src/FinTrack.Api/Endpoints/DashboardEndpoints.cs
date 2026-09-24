@@ -26,8 +26,7 @@ public static class DashboardEndpoints
             }
 
             var userId = user.GetUserId();
-            var periodStart = new DateOnly(year, month, 1);
-            var periodEnd = periodStart.AddMonths(1);
+            var (periodStart, periodEnd) = DateRanges.Month(year, month);
 
             var monthTransactions = db.Transactions
                 .Where(transaction =>

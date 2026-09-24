@@ -1,6 +1,6 @@
 # Testes
 
-## Visão geral
+## Visão Geral
 
 O FinTrack possui testes automatizados para regras de domínio, autenticação, infraestrutura e fluxo principal da API.
 
@@ -25,7 +25,7 @@ O FinTrack possui testes automatizados para regras de domínio, autenticação, 
 dotnet test tests\FinTrack.Tests\FinTrack.Tests.csproj --no-restore -m:1
 ```
 
-## Validação de frontend
+## Validação de Frontend
 
 Build de produção:
 

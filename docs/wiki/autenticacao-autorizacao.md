@@ -1,6 +1,6 @@
-# Autenticação e autorização
+# Autenticação e Autorização
 
-## Visão geral
+## Visão Geral
 
 O FinTrack usa autenticação JWT para proteger os dados financeiros do usuário autenticado.
 
@@ -22,11 +22,11 @@ O usuário pode:
 
 O e-mail fica somente leitura depois do cadastro.
 
-## Isolamento de dados
+## Isolamento de Dados
 
 Contas, categorias, lançamentos, dashboard e exportação CSV sempre usam o usuário autenticado como filtro.
 
-## Segurança atual
+## Segurança Atual
 
 - Senhas salvas como hash.
 - JWT assinado pela chave configurada no ambiente.

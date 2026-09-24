@@ -1,10 +1,10 @@
-# Banco de dados
+# Banco de Dados
 
-## Visão geral
+## Visão Geral
 
 O FinTrack usa SQL Server com Entity Framework Core.
 
-## Entidades principais
+## Entidades Principais
 
 - Users
 - Accounts
@@ -37,7 +37,7 @@ O script versionado fica em:
 docker/sqlserver/fintrack-migrations.sql
 ```
 
-## Regras persistidas
+## Regras Persistidas
 
 - Contas possuem saldo inicial e data de início.
 - Lançamentos possuem descrição com limite alinhado entre API e banco.

@@ -61,6 +61,8 @@ export class App {
   protected readonly userEmail = signal(sessionStorage.getItem('fintrack.email') ?? '');
   protected readonly message = signal('');
   protected readonly messageKind = signal<'success' | 'error' | 'info'>('info');
+  protected readonly loginError = signal('');
+  protected readonly loginAttemptsRemaining = signal(3);
   protected readonly isMessageLeaving = signal(false);
   protected readonly isLoading = signal(false);
   protected readonly deleteTarget = signal<DeleteTarget | null>(null);
@@ -217,16 +219,24 @@ export class App {
   }
 
   protected login(): void {
+    this.loginError.set('');
     const validation = this.loginValidationMessage();
     if (validation) {
       this.loginForm.markAllAsTouched();
-      this.showMessage(validation);
+      this.loginError.set(validation);
+      this.showMessage(validation, 'error');
       return;
     }
 
     this.api.login(this.loginForm.getRawValue()).subscribe({
       next: (auth) => this.startSession(auth),
-      error: () => this.showMessage('Não foi possível entrar.'),
+      error: () => {
+        const attempts = Math.max(this.loginAttemptsRemaining() - 1, 0);
+        const text = `E-mail ou senha incorretos. Tentativas restantes: ${attempts}.`;
+        this.loginAttemptsRemaining.set(attempts);
+        this.loginError.set(text);
+        this.showMessage(text, 'error');
+      },
     });
   }
 
@@ -246,6 +256,7 @@ export class App {
 
   protected showLogin(): void {
     this.authMode.set('login');
+    this.loginError.set('');
     this.message.set('');
     this.isMessageLeaving.set(false);
   }
@@ -828,6 +839,8 @@ export class App {
   }
 
   private startSession(auth: AuthResponse): void {
+    this.loginError.set('');
+    this.loginAttemptsRemaining.set(3);
     this.isEntering.set(true);
     this.applyAuth(auth);
     this.loadAll();
@@ -1010,7 +1023,8 @@ export class App {
   }
 
   private today(): string {
-    return new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   }
 
   private compareTransactions(left: Transaction, right: Transaction): number {

@@ -28,12 +28,12 @@
 - Bloqueio de exclusão de contas e categorias com lançamentos vinculados
 - Saldo atual considerando saldos iniciais por data de início
 
-## Em desenvolvimento
+## Em Desenvolvimento
 
 - Refinamento de UX e documentação.
 - Preparação para possível deploy público.
 
-## Próxima etapa operacional
+## Próxima Etapa Operacional
 
 - Escolher hospedagem.
 - Configurar secrets.

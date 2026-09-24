@@ -1,6 +1,6 @@
 # Arquitetura
 
-## Visão geral
+## Visão Geral
 
 O FinTrack usa arquitetura em camadas para separar regras de negócio, casos de uso, persistência, exposição HTTP e interface web.
 
@@ -64,7 +64,7 @@ Api -> Infrastructure
 Web -> Api
 ```
 
-## Decisão arquitetural
+## Decisão Arquitetural
 
 O projeto começa com services diretos e DTOs simples. Repositórios e abstrações novas só entram se reduzirem repetição real.
 

@@ -2,11 +2,11 @@
 
 Esta página organiza a documentação do FinTrack no formato da wiki de referência: uma página inicial curta, páginas técnicas separadas e navegação por assunto.
 
-## Visão geral
+## Visão Geral
 
 FinTrack é um sistema web para controle financeiro pessoal, com cadastro de usuários, login, contas financeiras, categorias, lançamentos, dashboard mensal, gráfico de fluxo de caixa e exportação CSV.
 
-## Status atual
+## Status Atual
 
 O MVP está funcional e validado localmente com backend, frontend, banco, Docker, testes automatizados e CI.
 
@@ -50,7 +50,7 @@ Próximas etapas:
 - Health checks
 - Migrations EF Core
 
-## Segurança atual
+## Segurança Atual
 
 - Cadastro e login com hash de senha.
 - JWT para proteger endpoints do usuário autenticado.
@@ -69,19 +69,19 @@ Use os arquivos de `docs/wiki/` como base para publicar na Wiki do GitHub:
 - [Arquitetura](wiki/arquitetura.md)
 - [Domínio](wiki/dominio.md)
 - [API](wiki/api.md)
-- [Autenticação e autorização](wiki/autenticacao-autorizacao.md)
+- [Autenticação e Autorização](wiki/autenticacao-autorizacao.md)
 - [Frontend Angular](wiki/frontend-angular.md)
-- [Banco de dados](wiki/banco-de-dados.md)
+- [Banco de Dados](wiki/banco-de-dados.md)
 - [Testes](wiki/testes.md)
 - [CI/CD](wiki/cicd.md)
 - [Docker](wiki/docker.md)
 - [Deploy](wiki/deploy.md)
 - [Roadmap](wiki/roadmap.md)
-- [Decisões técnicas](wiki/decisoes-tecnicas.md)
+- [Decisões Técnicas](wiki/decisoes-tecnicas.md)
 - [Contribuição](wiki/contribuicao.md)
 - [Glossário](wiki/glossario.md)
 
-## Regras importantes
+## Regras Importantes
 
 - O saldo atual considera saldos iniciais das contas que já começaram até o fim do mês selecionado, mais receitas, menos despesas.
 - Uma conta iniciada em agosto não entra no saldo de julho.
