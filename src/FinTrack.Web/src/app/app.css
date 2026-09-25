@@ -176,11 +176,12 @@ small {
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  box-shadow: 0 28px 70px rgba(16, 185, 129, 0.42);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.04);
 }
 
 .auth-card {
   align-self: center;
+  box-shadow: 0 28px 70px rgba(16, 185, 129, 0.42);
   display: grid;
   gap: 26px;
   padding: 44px;
