@@ -1,138 +1,167 @@
-# Configuração local
+# Como rodar o FinTrack
 
-Instruções para executar o FinTrack localmente.
+Este guia mostra como rodar o projeto localmente ou com Docker.
 
 ## Pré-requisitos
 
+Para rodar localmente:
+
 - .NET 10 SDK
-- Node.js 20.19
+- Node.js 20.19 ou superior
 - Angular CLI
-- Docker Desktop, se for usar banco em container
-- SQL Server local ou LocalDB, se não for usar Docker
+- SQL Server LocalDB ou SQL Server local
 
-## Backend
+Para rodar com Docker:
 
-Solução: `FinTrack.slnx`.
+- Docker Desktop
 
-Comandos:
+Execute os comandos na raiz do projeto, onde ficam `FinTrack.slnx` e `docker-compose.yml`.
+
+## Rodar localmente, sem Docker
+
+Use este processo quando quiser rodar o backend e o frontend diretamente na máquina, pelo Visual Studio, VS Code ou terminal.
+
+Não use este processo junto com o Docker ao mesmo tempo, porque a API usa a mesma porta nos dois modos.
+
+Por padrão, o backend usa SQL Server LocalDB, uma versão leve do SQL Server para desenvolvimento local:
+
+```text
+Server=(localdb)\MSSQLLocalDB;Database=FinTrackDb
+```
+
+Se o SQL Server LocalDB estiver instalado e funcionando, não precisa configurar o banco manualmente. A API cria ou atualiza o banco ao iniciar.
+
+Se você usa SQL Server instalado como serviço, como `localhost`, `SQLEXPRESS` ou outra instância aberta pelo SSMS, veja a seção [Usar SQL Server local em vez de LocalDB](#usar-sql-server-local-em-vez-de-localdb).
+
+### Backend
+
+Pelo Visual Studio:
+
+1. Abra a solução.
+2. Selecione `FinTrack.Api`.
+3. Clique em executar.
+
+Pelo terminal:
 
 ```powershell
 dotnet restore FinTrack.slnx -m:1
 dotnet build FinTrack.slnx --no-restore -m:1
-dotnet test tests\FinTrack.Tests\FinTrack.Tests.csproj --no-restore -m:1
 dotnet run --project src\FinTrack.Api
 ```
 
-Endereços locais:
+API:
 
-- API: `http://localhost:5080`
-- Health check: `http://localhost:5080/health`
-- OpenAPI: `http://localhost:5080/openapi/v1.json`
-- Swagger UI: `http://localhost:5080/swagger`
+- `http://localhost:5080`
+- `http://localhost:5080/swagger`
+- `http://localhost:5080/health`
 
-## Frontend
+### Frontend
 
-O layout é responsivo, com prioridade para boa experiência mobile.
+Abra outro terminal.
 
-Comandos:
+Na primeira vez que clonar o repositório, instale as dependências:
 
 ```powershell
 cd src\FinTrack.Web
 npm install
+```
+
+Depois disso, para rodar o frontend no dia a dia, use apenas:
+
+```powershell
+cd src\FinTrack.Web
 npm start
 ```
 
-### Frontend via Docker
+Frontend:
 
-```powershell
-docker compose up web
-```
+- `http://localhost:4200`
 
-Endereço:
+## Rodar com Docker
 
-- Web local: `http://localhost:4200`
-- Web Docker: `http://localhost:4201`
+Use este processo quando quiser rodar tudo via Docker: banco, API e frontend.
 
-## Aplicação via Docker
-
-Para subir frontend, API e SQL Server:
+Não use este processo junto com a API local ao mesmo tempo, porque a API usa a mesma porta nos dois modos: `5080`.
 
 ```powershell
 Copy-Item .env.example .env
 docker compose up --build
 ```
 
-Na primeira execução, a API aplica as migrations automaticamente quando o SQL Server ficar disponível. O Compose possui health checks para SQL Server, API e frontend, além das imagens locais `fintrack-api:latest` e `fintrack-web:latest`.
-
 Endereços:
 
-- Web local: `http://localhost:4200`
-- Web Docker: `http://localhost:4201`
+- Frontend: `http://localhost:4201`
 - API: `http://localhost:5080`
-- Swagger UI: `http://localhost:5080/swagger`
+- Swagger: `http://localhost:5080/swagger`
+- Health check: `http://localhost:5080/health`
 
-Para parar tudo:
+Para parar:
 
 ```powershell
 docker compose down
 ```
 
-Para criar dados de demonstração depois que a API estiver no ar:
+Para parar e apagar os dados do banco Docker:
+
+```powershell
+docker compose down -v
+```
+
+## Usar SQL Server local em vez de LocalDB
+
+Altere a `DefaultConnection` em `src\FinTrack.Api\appsettings.json`:
+
+```json
+"DefaultConnection": "Server=localhost;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
+```
+
+Se o servidor tiver outro nome, troque `localhost`.
+
+## Dados de demonstração
+
+Com a API rodando:
 
 ```powershell
 .\scripts\demo\seed-demo.ps1
 ```
 
-Para trocar a URL da API consumida pelo frontend:
+## Testes
+
+Backend:
 
 ```powershell
-.\scripts\frontend\set-api-url.ps1 -ApiUrl "http://localhost:5080"
+dotnet test tests\FinTrack.Tests\FinTrack.Tests.csproj --no-restore -m:1
 ```
 
-## Banco
-
-O banco principal será SQL Server. O projeto pode usar SQL Server no Docker, SQL Server local ou LocalDB.
-
-### Docker
+Frontend:
 
 ```powershell
-Copy-Item .env.example .env
-docker compose up -d sqlserver
+cd src\FinTrack.Web
+npm run build
 ```
 
-Se a API também estiver rodando pelo Docker, ela aplica as migrations automaticamente.
+## Problemas comuns
 
-String de conexão padrão:
+### Porta 5080 em uso
 
-```text
-Server=localhost,1433;Database=FinTrackDb;User Id=sa;Password=Your_strong_password123;Encrypt=False;TrustServerCertificate=True
-```
-
-### SQL Server local
+Pare a API no Visual Studio ou encerre os containers:
 
 ```powershell
-dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build --connection "Server=localhost;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
+docker compose down
 ```
 
-Se o servidor local tiver outro nome, troque `localhost` pelo nome exibido no SSMS.
-
-### LocalDB
+Para descobrir qual processo usa a porta:
 
 ```powershell
-dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build --connection "Server=(localdb)\MSSQLLocalDB;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
+netstat -ano | findstr :5080
 ```
 
-Para rodar a API com outro banco sem editar `appsettings.json`, defina `ConnectionStrings__DefaultConnection` como variável de ambiente ou use user-secrets.
+### LocalDB não conecta
 
-## Segredos locais
+Teste:
 
-A chave JWT e senhas locais não devem ser versionadas. Use user-secrets no backend e `.env` local para Docker.
+```powershell
+sqllocaldb info MSSQLLocalDB
+```
 
-## CI
-
-O repositório possui GitHub Actions em `.github/workflows/ci.yml`.
-
-O workflow executa:
-
-- Restore, build e testes do backend.
-- Instalação e build de produção do frontend.
+Se falhar, repare o SQL Server LocalDB, use SQL Server local ou rode com Docker.

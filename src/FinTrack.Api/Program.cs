@@ -86,14 +86,17 @@ static async Task ApplyMigrations(WebApplication app)
         return;
     }
 
-    for (var attempt = 1; attempt <= 20; attempt++)
+    var configuredConnection = app.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
+    var maxAttempts = configuredConnection.Contains("Server=sqlserver", StringComparison.OrdinalIgnoreCase) ? 20 : 1;
+
+    for (var attempt = 1; attempt <= maxAttempts; attempt++)
     {
         try
         {
             await db.Database.MigrateAsync();
             return;
         }
-        catch when (attempt < 20)
+        catch when (attempt < maxAttempts)
         {
             await Task.Delay(TimeSpan.FromSeconds(3));
         }
