@@ -37,9 +37,27 @@ Na sua máquina pode ser `localhost`, `SQLEXPRESS`, o nome do computador ou outr
 
 O importante é: a API e o SSMS precisam usar o mesmo servidor e o mesmo banco.
 
+### 1. Ajustar o servidor do banco local
+
+Altere a `DefaultConnection` em `src\FinTrack.Api\appsettings.json` para usar o mesmo servidor que você abre no SSMS:
+
+```json
+"DefaultConnection": "Server=NOME_DO_SERVIDOR;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
+```
+
+Troque `NOME_DO_SERVIDOR` pelo nome que aparece no SSMS.
+
+Exemplos:
+
+```text
+Server=localhost;Database=FinTrackDb
+Server=.\SQLEXPRESS;Database=FinTrackDb
+Server=BERNARDO;Database=FinTrackDb
+```
+
 A API cria ou atualiza o banco ao iniciar.
 
-### Backend
+### 2. Rodar o backend
 
 Pelo Visual Studio:
 
@@ -61,7 +79,7 @@ API:
 - `http://localhost:5080/swagger`
 - `http://localhost:5080/health`
 
-### Frontend
+### 3. Rodar o frontend
 
 Abra outro terminal.
 
@@ -111,24 +129,6 @@ Para parar e apagar os dados do banco Docker:
 
 ```powershell
 docker compose down -v
-```
-
-## Configurar outro SQL Server local
-
-Altere a `DefaultConnection` em `src\FinTrack.Api\appsettings.json`:
-
-```json
-"DefaultConnection": "Server=NOME_DO_SERVIDOR;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
-```
-
-Troque `NOME_DO_SERVIDOR` pelo nome que aparece no SSMS.
-
-Exemplos:
-
-```text
-Server=localhost;Database=FinTrackDb
-Server=.\SQLEXPRESS;Database=FinTrackDb
-Server=BERNARDO;Database=FinTrackDb
 ```
 
 ## Dados de demonstração
