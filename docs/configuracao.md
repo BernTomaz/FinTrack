@@ -23,15 +23,15 @@ Use este processo quando quiser rodar o backend e o frontend diretamente na máq
 
 Não use este processo junto com o Docker ao mesmo tempo, porque a API usa a mesma porta nos dois modos.
 
-Por padrão, o backend usa SQL Server LocalDB, uma versão leve do SQL Server para desenvolvimento local:
+Por padrão, o backend local usa o SQL Server instalado na máquina:
 
 ```text
-Server=(localdb)\MSSQLLocalDB;Database=FinTrackDb
+Server=BERNARDO;Database=FinTrackDb
 ```
 
-Se o SQL Server LocalDB estiver instalado e funcionando, não precisa configurar o banco manualmente. A API cria ou atualiza o banco ao iniciar.
+Esse deve ser o mesmo servidor que você abre no SSMS para consultar as tabelas.
 
-Se você usa SQL Server instalado como serviço, como `localhost`, `SQLEXPRESS` ou outra instância aberta pelo SSMS, veja a seção [Usar SQL Server local em vez de LocalDB](#usar-sql-server-local-em-vez-de-localdb).
+A API cria ou atualiza o banco ao iniciar.
 
 ### Backend
 
@@ -107,7 +107,7 @@ Para parar e apagar os dados do banco Docker:
 docker compose down -v
 ```
 
-## Usar SQL Server local em vez de LocalDB
+## Usar outro SQL Server local
 
 Altere a `DefaultConnection` em `src\FinTrack.Api\appsettings.json`:
 
@@ -115,7 +115,7 @@ Altere a `DefaultConnection` em `src\FinTrack.Api\appsettings.json`:
 "DefaultConnection": "Server=localhost;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
 ```
 
-Se o servidor tiver outro nome, troque `localhost`.
+Troque `localhost` pelo nome do servidor que aparece no SSMS, se for diferente.
 
 ## Dados de demonstração
 
@@ -156,12 +156,8 @@ Para descobrir qual processo usa a porta:
 netstat -ano | findstr :5080
 ```
 
-### LocalDB não conecta
+### Dados não aparecem no SSMS
 
-Teste:
+Confira se o servidor aberto no SSMS é o mesmo da `DefaultConnection` em `src\FinTrack.Api\appsettings.json`.
 
-```powershell
-sqllocaldb info MSSQLLocalDB
-```
-
-Se falhar, repare o SQL Server LocalDB, use SQL Server local ou rode com Docker.
+Se a API estiver usando `Server=BERNARDO`, consulte o banco `FinTrackDb` dentro do servidor `BERNARDO`.
