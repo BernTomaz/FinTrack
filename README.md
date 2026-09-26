@@ -111,16 +111,17 @@ Contas e categorias com lançamentos vinculados não podem ser excluídas direta
 
 ## Execução local
 
-Backend:
+Veja o passo a passo completo em [Configuração local](docs/configuracao.md).
+
+Resumo para rodar sem Docker:
 
 ```powershell
 dotnet restore FinTrack.slnx -m:1
 dotnet build FinTrack.slnx --no-restore -m:1
-dotnet test tests\FinTrack.Tests\FinTrack.Tests.csproj --no-restore -m:1
 dotnet run --project src\FinTrack.Api
 ```
 
-Frontend:
+Em outro terminal:
 
 ```powershell
 cd src\FinTrack.Web
@@ -134,26 +135,31 @@ Endereços locais:
 - Frontend local: `http://localhost:4200`
 - Frontend Docker: `http://localhost:4201`
 - Health check: `http://localhost:5080/health`
-- OpenAPI: `http://localhost:5080/openapi/v1.json`
+- OpenAPI: `http://localhost:5080/swagger/v1/swagger.json`
 - Swagger UI: `http://localhost:5080/swagger`
 
-Builds:
+Observações:
+
+- Antes de rodar localmente, ajuste a `DefaultConnection` em `src\FinTrack.Api\appsettings.json` para o mesmo SQL Server usado no SSMS.
+- O `npm install` só precisa na primeira vez ou quando dependências mudarem.
+- A API aplica migrations automaticamente ao iniciar.
+
+Testes e builds:
 
 ```powershell
-dotnet publish src\FinTrack.Api\FinTrack.Api.csproj -c Release
+dotnet test tests\FinTrack.Tests\FinTrack.Tests.csproj --no-restore -m:1
 cd src\FinTrack.Web
 npm run build
 ```
 
-Docker:
+Resumo para rodar com Docker:
 
 ```powershell
 Copy-Item .env.example .env
-docker compose build
-docker compose up -d
+docker compose up --build
 ```
 
-O `docker compose up -d` sobe SQL Server, API e frontend com health checks. As imagens locais são `fintrack-api:latest` e `fintrack-web:latest`. A API aplica migrations automaticamente ao iniciar.
+O Docker Compose sobe SQL Server, API e frontend com health checks. A API aplica migrations automaticamente ao iniciar.
 
 Configurar URL da API no frontend:
 
@@ -171,17 +177,4 @@ Criar dados de demonstração em uma API em execução:
 
 ```powershell
 .\scripts\demo\seed-demo.ps1
-```
-
-Aplicar migrations manualmente, se necessário:
-
-```powershell
-dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build
-```
-
-Usar SQL Server local ou LocalDB:
-
-```powershell
-dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build --connection "Server=localhost;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
-dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build --connection "Server=(localdb)\MSSQLLocalDB;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
 ```

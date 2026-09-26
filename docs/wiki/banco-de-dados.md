@@ -15,7 +15,17 @@ O FinTrack usa SQL Server com Entity Framework Core.
 
 As migrations ficam no projeto `FinTrack.Infrastructure`.
 
-Aplicar migrations manualmente:
+Em execução normal, a API aplica migrations automaticamente ao iniciar.
+
+Para rodar localmente, confira se a `DefaultConnection` em `src/FinTrack.Api/appsettings.json` aponta para o mesmo servidor SQL Server aberto no SSMS.
+
+Exemplo:
+
+```json
+"DefaultConnection": "Server=NOME_DO_SERVIDOR;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
+```
+
+Aplicar migrations manualmente, se necessário:
 
 ```powershell
 dotnet ef database update --project src\FinTrack.Infrastructure --startup-project src\FinTrack.Api --no-build
