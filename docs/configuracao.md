@@ -52,7 +52,7 @@ Exemplos:
 ```text
 Server=localhost;Database=FinTrackDb
 Server=.\SQLEXPRESS;Database=FinTrackDb
-Server=BERNARDO;Database=FinTrackDb
+Server=NOME_DO_COMPUTADOR;Database=FinTrackDb
 ```
 
 A API cria ou atualiza o banco ao iniciar.
