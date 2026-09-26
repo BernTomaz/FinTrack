@@ -23,13 +23,19 @@ Use este processo quando quiser rodar o backend e o frontend diretamente na máq
 
 Não use este processo junto com o Docker ao mesmo tempo, porque a API usa a mesma porta nos dois modos.
 
-Por padrão, o backend local usa o SQL Server instalado na máquina:
+Para rodar localmente, a API precisa apontar para o SQL Server da sua máquina.
+
+Confira o nome do servidor no SSMS e use esse nome na `DefaultConnection` em `src\FinTrack.Api\appsettings.json`.
+
+Exemplo:
 
 ```text
-Server=BERNARDO;Database=FinTrackDb
+Server=NOME_DO_SERVIDOR;Database=FinTrackDb
 ```
 
-Esse deve ser o mesmo servidor que você abre no SSMS para consultar as tabelas.
+Na sua máquina pode ser `localhost`, `SQLEXPRESS`, o nome do computador ou outro nome exibido no SSMS.
+
+O importante é: a API e o SSMS precisam usar o mesmo servidor e o mesmo banco.
 
 A API cria ou atualiza o banco ao iniciar.
 
@@ -107,15 +113,23 @@ Para parar e apagar os dados do banco Docker:
 docker compose down -v
 ```
 
-## Usar outro SQL Server local
+## Configurar outro SQL Server local
 
 Altere a `DefaultConnection` em `src\FinTrack.Api\appsettings.json`:
 
 ```json
-"DefaultConnection": "Server=localhost;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
+"DefaultConnection": "Server=NOME_DO_SERVIDOR;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
 ```
 
-Troque `localhost` pelo nome do servidor que aparece no SSMS, se for diferente.
+Troque `NOME_DO_SERVIDOR` pelo nome que aparece no SSMS.
+
+Exemplos:
+
+```text
+Server=localhost;Database=FinTrackDb
+Server=.\SQLEXPRESS;Database=FinTrackDb
+Server=BERNARDO;Database=FinTrackDb
+```
 
 ## Dados de demonstração
 
@@ -160,4 +174,4 @@ netstat -ano | findstr :5080
 
 Confira se o servidor aberto no SSMS é o mesmo da `DefaultConnection` em `src\FinTrack.Api\appsettings.json`.
 
-Se a API estiver usando `Server=BERNARDO`, consulte o banco `FinTrackDb` dentro do servidor `BERNARDO`.
+Se a API estiver usando `Server=NOME_DO_SERVIDOR`, consulte o banco `FinTrackDb` dentro desse mesmo servidor.
