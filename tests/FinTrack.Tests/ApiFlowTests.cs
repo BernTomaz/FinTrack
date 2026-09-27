@@ -299,6 +299,9 @@ public sealed class ApiFlowTests
         var duplicate = await client.PostAsJsonAsync("/auth/register", new RegisterRequest("Bernardo", "bernardo@email.com", "Senha@123"));
         Assert.Equal(HttpStatusCode.Conflict, duplicate.StatusCode);
 
+        var duplicateName = await client.PostAsJsonAsync("/auth/register", new RegisterRequest("Bernardo", "outro@email.com", "Senha@123"));
+        Assert.Equal(HttpStatusCode.Conflict, duplicateName.StatusCode);
+
         var badLogin = await client.PostAsJsonAsync("/auth/login", new LoginRequest("", ""));
         Assert.Equal(HttpStatusCode.BadRequest, badLogin.StatusCode);
 
@@ -337,6 +340,9 @@ public sealed class ApiFlowTests
 
         var invalidPassword = await client.PutAsJsonAsync("/auth/password", new ChangePasswordRequest("senha-errada", "Nova@123"));
         Assert.Equal(HttpStatusCode.Unauthorized, invalidPassword.StatusCode);
+
+        var weakPassword = await client.PutAsJsonAsync("/auth/password", new ChangePasswordRequest("Senha@123", "nova1234"));
+        Assert.Equal(HttpStatusCode.BadRequest, weakPassword.StatusCode);
 
         var password = await client.PutAsJsonAsync("/auth/password", new ChangePasswordRequest("Senha@123", "Nova@123"));
         Assert.Equal(HttpStatusCode.NoContent, password.StatusCode);

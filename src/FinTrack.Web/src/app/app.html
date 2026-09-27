@@ -11,6 +11,14 @@
   </main>
 } @else if (!isLoggedIn()) {
   <main class="login-page" [class.custom-cursor]="customCursorEnabled()">
+    @if (message()) {
+      <div class="message" [class.leaving]="isMessageLeaving()" [attr.style]="messageStyle()">
+        <strong style="border:1px solid currentColor;border-radius:999px;display:grid;flex:0 0 28px;height:28px;place-items:center;width:28px">{{ messageIcon() }}</strong>
+        <span style="flex:1">{{ message() }}</span>
+        <button type="button" style="background:transparent;color:inherit;cursor:pointer;font-size:1.25rem;line-height:1;padding:2px 0 2px 8px" (click)="closeMessage()">×</button>
+      </div>
+    }
+
     <section class="login-brand" aria-labelledby="login-title">
       <div class="brand-row">
         <span class="brand-mark" aria-hidden="true">FT</span>
@@ -40,7 +48,18 @@
           </label>
           <label>
             Senha
-            <input class="auth-input" type="password" formControlName="password" autocomplete="current-password" placeholder="Sua senha" />
+            <span style="display:block;position:relative;width:100%">
+              <input class="auth-input" style="box-sizing:border-box;padding-right:48px;width:100%" [type]="loginPasswordVisible() ? 'text' : 'password'" formControlName="password" autocomplete="current-password" placeholder="Sua senha" />
+              <button type="button" style="background:transparent;border-radius:8px;color:#667085;cursor:pointer;display:grid;height:36px;place-items:center;position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px" [attr.aria-label]="loginPasswordVisible() ? 'Ocultar senha' : 'Mostrar senha'" [title]="loginPasswordVisible() ? 'Ocultar senha' : 'Mostrar senha'" (click)="toggleLoginPassword()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" />
+                  @if (loginPasswordVisible()) {
+                    <path d="M4 20 20 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  }
+                </svg>
+              </button>
+            </span>
           </label>
           <button type="submit" class="primary">Entrar</button>
           @if (loginError()) {
@@ -66,9 +85,36 @@
           </label>
           <label>
             Senha
-            <input type="password" formControlName="password" autocomplete="new-password" placeholder="Crie uma senha" />
+            <span style="display:block;position:relative;width:100%">
+              <input style="box-sizing:border-box;padding-right:48px;width:100%" [type]="registerPasswordVisible() ? 'text' : 'password'" formControlName="password" autocomplete="new-password" placeholder="Crie sua senha" />
+              <button type="button" style="background:transparent;border-radius:8px;color:#667085;cursor:pointer;display:grid;height:36px;place-items:center;position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px" [attr.aria-label]="registerPasswordVisible() ? 'Ocultar senha' : 'Mostrar senha'" [title]="registerPasswordVisible() ? 'Ocultar senha' : 'Mostrar senha'" (click)="toggleRegisterPassword()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" />
+                  @if (registerPasswordVisible()) {
+                    <path d="M4 20 20 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  }
+                </svg>
+              </button>
+            </span>
+            @if (registerForm.controls.password.value) {
+              <span style="display:grid;gap:8px">
+                <span style="background:#e5e7eb;border-radius:999px;height:7px;overflow:hidden">
+                  <i style="display:block;height:100%;transition:width 160ms ease" [style.background]="passwordStrengthColor(registerForm.controls.password.value)" [style.width.%]="passwordStrength(registerForm.controls.password.value) * 20"></i>
+                </span>
+                <small style="font-size:0.82rem;font-weight:800;letter-spacing:0" [style.color]="passwordStrengthColor(registerForm.controls.password.value)">
+                  Força da senha: {{ passwordStrengthLabel(registerForm.controls.password.value) }}
+                </small>
+                <span style="display:grid;font-size:0.78rem;font-weight:700;gap:4px;grid-template-columns:repeat(2,minmax(0,1fr));line-height:1.25">
+                  <small [style.color]="passwordRequirementColor(registerForm.controls.password.value, 'length')">{{ passwordRequirementIcon(registerForm.controls.password.value, 'length') }} 8+ caracteres</small>
+                  <small [style.color]="passwordRequirementColor(registerForm.controls.password.value, 'upper')">{{ passwordRequirementIcon(registerForm.controls.password.value, 'upper') }} Letra maiúscula</small>
+                  <small [style.color]="passwordRequirementColor(registerForm.controls.password.value, 'lower')">{{ passwordRequirementIcon(registerForm.controls.password.value, 'lower') }} Letra minúscula</small>
+                  <small [style.color]="passwordRequirementColor(registerForm.controls.password.value, 'numberSymbol')">{{ passwordRequirementIcon(registerForm.controls.password.value, 'numberSymbol') }} Número e símbolo</small>
+                </span>
+              </span>
+            }
           </label>
-          <button type="submit" class="primary">Criar conta</button>
+          <button type="submit" class="primary" [disabled]="!canCreateAccount()" [style.opacity]="canCreateAccount() ? 1 : 0.38">Criar conta</button>
         </form>
 
         <div class="auth-switch">
@@ -420,9 +466,9 @@
 
     @if (message()) {
       <div class="message" [class.leaving]="isMessageLeaving()" [attr.style]="messageStyle()">
-        <strong>{{ messageIcon() }}</strong>
-        <span>{{ message() }}</span>
-        <button type="button" style="background:transparent;color:inherit;padding:0 0 0 8px" (click)="closeMessage()">×</button>
+        <strong style="border:1px solid currentColor;border-radius:999px;display:grid;flex:0 0 28px;height:28px;place-items:center;width:28px">{{ messageIcon() }}</strong>
+        <span style="flex:1">{{ message() }}</span>
+        <button type="button" style="background:transparent;color:inherit;cursor:pointer;font-size:1.25rem;line-height:1;padding:2px 0 2px 8px" (click)="closeMessage()">×</button>
       </div>
     }
   </main>

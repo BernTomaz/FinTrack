@@ -17,13 +17,15 @@ As migrations ficam no projeto `FinTrack.Infrastructure`.
 
 Em execução normal, a API aplica migrations automaticamente ao iniciar.
 
-Para rodar localmente, confira se a `DefaultConnection` em `src/FinTrack.Api/appsettings.json` aponta para o mesmo servidor SQL Server aberto no SSMS.
+Para rodar localmente, configure a `DefaultConnection` da sua máquina com user-secrets. Assim cada pessoa usa o próprio SQL Server sem alterar o `appsettings.json` do projeto.
 
 Exemplo:
 
-```json
-"DefaultConnection": "Server=NOME_DO_SERVIDOR;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
+```powershell
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=NOME_DO_SERVIDOR;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True" --project src\FinTrack.Api
 ```
+
+Troque `NOME_DO_SERVIDOR` pelo servidor que aparece no SSMS.
 
 Aplicar migrations manualmente, se necessário:
 

@@ -25,7 +25,7 @@ Não use este processo junto com o Docker ao mesmo tempo, porque a API usa a mes
 
 Para rodar localmente, a API precisa apontar para o SQL Server da sua máquina.
 
-Confira o nome do servidor no SSMS e use esse nome na `DefaultConnection` em `src\FinTrack.Api\appsettings.json`.
+Confira o nome do servidor no SSMS e configure a `DefaultConnection` local com user-secrets.
 
 Exemplo:
 
@@ -39,10 +39,10 @@ O importante é: a API e o SSMS precisam usar o mesmo servidor e o mesmo banco.
 
 ### 1. Ajustar o servidor do banco local
 
-Altere a `DefaultConnection` em `src\FinTrack.Api\appsettings.json` para usar o mesmo servidor que você abre no SSMS:
+Configure a `DefaultConnection` local para usar o mesmo servidor que você abre no SSMS:
 
-```json
-"DefaultConnection": "Server=NOME_DO_SERVIDOR;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True"
+```powershell
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=NOME_DO_SERVIDOR;Database=FinTrackDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True" --project src\FinTrack.Api
 ```
 
 Troque `NOME_DO_SERVIDOR` pelo nome que aparece no SSMS.
@@ -54,6 +54,8 @@ Server=localhost;Database=FinTrackDb
 Server=.\SQLEXPRESS;Database=FinTrackDb
 Server=NOME_DO_COMPUTADOR;Database=FinTrackDb
 ```
+
+Esse comando salva a conexão apenas na sua máquina e não altera o arquivo versionado do projeto.
 
 A API cria ou atualiza o banco ao iniciar.
 
@@ -172,6 +174,6 @@ netstat -ano | findstr :5080
 
 ### Dados não aparecem no SSMS
 
-Confira se o servidor aberto no SSMS é o mesmo da `DefaultConnection` em `src\FinTrack.Api\appsettings.json`.
+Confira se o servidor aberto no SSMS é o mesmo da `DefaultConnection` configurada localmente.
 
 Se a API estiver usando `Server=NOME_DO_SERVIDOR`, consulte o banco `FinTrackDb` dentro desse mesmo servidor.

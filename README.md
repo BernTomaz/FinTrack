@@ -140,7 +140,7 @@ Endereços locais:
 
 Observações:
 
-- Antes de rodar localmente, ajuste a `DefaultConnection` em `src\FinTrack.Api\appsettings.json` para o mesmo SQL Server usado no SSMS.
+- Antes de rodar localmente, configure a `DefaultConnection` da sua máquina com user-secrets, conforme `docs\configuracao.md`. Assim cada pessoa usa o próprio SQL Server sem alterar o `appsettings.json` do projeto.
 - O `npm install` só precisa na primeira vez ou quando dependências mudarem.
 - A API aplica migrations automaticamente ao iniciar.
 

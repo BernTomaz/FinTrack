@@ -40,15 +40,22 @@ public static class AuthEndpoints
                 return Results.BadRequest("Email is invalid.");
             }
 
-            if (request.Password.Length < 6 || request.Password.Length > 100)
+            if (!IsStrongPassword(request.Password))
             {
-                return Results.BadRequest("Password must have between 6 and 100 characters.");
+                return Results.BadRequest("A senha deve ter de 8 a 100 caracteres, com letra maiúscula, letra minúscula, número e caractere especial.");
             }
 
-            var exists = await db.Users.AnyAsync(user => user.Email == email, cancellationToken);
-            if (exists)
+            var emailExists = await db.Users.AnyAsync(user => user.Email == email, cancellationToken);
+            if (emailExists)
             {
-                return Results.Conflict("Email is already registered.");
+                return Results.Conflict("Este e-mail já está em uso.");
+            }
+
+            var normalizedName = name.ToLowerInvariant();
+            var nameExists = await db.Users.AnyAsync(user => user.Name.ToLower() == normalizedName, cancellationToken);
+            if (nameExists)
+            {
+                return Results.Conflict("Este nome já está em uso.");
             }
 
             var user = new User(name, email, passwordHasher.Hash(request.Password));
@@ -109,7 +116,15 @@ public static class AuthEndpoints
                 return Results.BadRequest("Name must have between 2 and 80 characters.");
             }
 
-            var user = await db.Users.SingleOrDefaultAsync(user => user.Id == principal.GetUserId(), cancellationToken);
+            var userId = principal.GetUserId();
+            var normalizedName = name.ToLowerInvariant();
+            var exists = await db.Users.AnyAsync(user => user.Id != userId && user.Name.ToLower() == normalizedName, cancellationToken);
+            if (exists)
+            {
+                return Results.Conflict("Este nome já está em uso.");
+            }
+
+            var user = await db.Users.SingleOrDefaultAsync(user => user.Id == userId, cancellationToken);
             if (user is null)
             {
                 return Results.NotFound();
@@ -134,9 +149,9 @@ public static class AuthEndpoints
                 return Results.BadRequest("Current password and new password are required.");
             }
 
-            if (request.NewPassword.Length < 6 || request.NewPassword.Length > 100)
+            if (!IsStrongPassword(request.NewPassword))
             {
-                return Results.BadRequest("Password must have between 6 and 100 characters.");
+                return Results.BadRequest("A nova senha deve ter de 8 a 100 caracteres, com letra maiúscula, letra minúscula, número e caractere especial.");
             }
 
             var user = await db.Users.SingleOrDefaultAsync(user => user.Id == principal.GetUserId(), cancellationToken);
@@ -174,4 +189,11 @@ public static class AuthEndpoints
             return false;
         }
     }
+
+    private static bool IsStrongPassword(string password) =>
+        password.Length is >= 8 and <= 100 &&
+        password.Any(char.IsUpper) &&
+        password.Any(char.IsLower) &&
+        password.Any(char.IsDigit) &&
+        password.Any(character => !char.IsLetterOrDigit(character));
 }

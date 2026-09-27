@@ -14,7 +14,7 @@ Manter o FinTrack simples e focado no MVP.
 
 ## Validações Recomendadas
 
-Antes de rodar localmente, confira [Configuração local](../configuracao.md) e ajuste a `DefaultConnection` para o SQL Server da sua máquina.
+Antes de rodar localmente, confira [Configuração local](../configuracao.md) e configure a `DefaultConnection` local com user-secrets para o SQL Server da sua máquina.
 
 Backend:
 

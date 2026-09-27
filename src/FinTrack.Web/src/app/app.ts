@@ -15,6 +15,7 @@ import { TransactionFormPanelComponent } from './transaction-form-panel.componen
 type Theme = 'light' | 'dark';
 type AuthMode = 'login' | 'register';
 type PetColor = 'green' | 'blue' | 'orange' | 'purple';
+type PasswordRequirement = 'length' | 'upper' | 'lower' | 'numberSymbol';
 type DeleteTarget = { type: 'account' | 'category' | 'transaction'; id: string; title: string; description: string };
 type TransactionSortField = 'date' | 'description' | 'category' | 'type' | 'amount';
 type View =
@@ -63,6 +64,8 @@ export class App {
   protected readonly messageKind = signal<'success' | 'error' | 'info'>('info');
   protected readonly loginError = signal('');
   protected readonly loginAttemptsRemaining = signal(3);
+  protected readonly loginPasswordVisible = signal(false);
+  protected readonly registerPasswordVisible = signal(false);
   protected readonly isMessageLeaving = signal(false);
   protected readonly isLoading = signal(false);
   protected readonly deleteTarget = signal<DeleteTarget | null>(null);
@@ -93,7 +96,7 @@ export class App {
   protected readonly editingTransactionId = signal('');
   protected readonly authMode = signal<AuthMode>('login');
   protected readonly activeView = signal<View>('dashboard');
-  protected readonly theme = signal<Theme>((localStorage.getItem('fintrack.theme') as Theme | null) ?? 'light');
+  protected readonly theme = signal<Theme>('light');
   protected readonly selectedMonth = signal(this.currentMonthKey());
 
   protected readonly isLoggedIn = computed(() => this.token().length > 0);
@@ -177,7 +180,7 @@ export class App {
   protected readonly registerForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
     email: ['', [Validators.required, Validators.email, Validators.maxLength(120)]],
-    password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(100)]],
+    password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
   });
 
   protected readonly accountForm = this.fb.nonNullable.group({
@@ -207,12 +210,13 @@ export class App {
 
   protected readonly passwordForm = this.fb.nonNullable.group({
     currentPassword: ['', [Validators.required, Validators.maxLength(100)]],
-    newPassword: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(100)]],
-    confirmPassword: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(100)]],
+    newPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
+    confirmPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
   });
 
   constructor() {
     if (this.isLoggedIn()) {
+      this.theme.set(this.savedThemeFor(this.userEmail()));
       this.loadAll();
       setTimeout(() => this.isEntering.set(false), 1400);
     }
@@ -244,14 +248,73 @@ export class App {
     const validation = this.registerValidationMessage();
     if (validation) {
       this.registerForm.markAllAsTouched();
-      this.showMessage(validation);
+      this.showMessage(validation, 'error');
       return;
     }
 
     this.api.register(this.registerForm.getRawValue()).subscribe({
-      next: (auth) => this.startSession(auth),
-      error: () => this.showMessage('Não foi possível criar a conta.'),
+      next: () => {
+        const email = this.registerForm.controls.email.value.trim();
+        this.registerForm.reset({ name: '', email: '', password: '' });
+        this.loginForm.patchValue({ email, password: '' });
+        this.authMode.set('login');
+        this.loginError.set('');
+        this.showMessage('Usuário criado com sucesso. Entre com seu e-mail e senha.', 'success');
+      },
+      error: (error) => this.showMessage(this.api.errorMessage(error, 'Não foi possível criar a conta.'), 'error'),
     });
+  }
+
+  protected toggleLoginPassword(): void {
+    this.loginPasswordVisible.update((visible) => !visible);
+  }
+
+  protected toggleRegisterPassword(): void {
+    this.registerPasswordVisible.update((visible) => !visible);
+  }
+
+  protected passwordStrength(password: string): number {
+    return this.passwordRequirements(password).filter(Boolean).length;
+  }
+
+  protected passwordStrengthLabel(password: string): string {
+    const strength = this.passwordStrength(password);
+
+    if (strength < 3) {
+      return 'fraca';
+    }
+
+    if (strength < 5) {
+      return 'média';
+    }
+
+    return 'forte';
+  }
+
+  protected passwordStrengthColor(password: string): string {
+    const strength = this.passwordStrength(password);
+
+    if (strength < 3) {
+      return '#dc2626';
+    }
+
+    if (strength < 5) {
+      return '#d97706';
+    }
+
+    return '#059669';
+  }
+
+  protected passwordRequirementColor(password: string, requirement: PasswordRequirement): string {
+    return this.passwordRequirementMet(password, requirement) ? '#059669' : '#dc2626';
+  }
+
+  protected passwordRequirementIcon(password: string, requirement: PasswordRequirement): string {
+    return this.passwordRequirementMet(password, requirement) ? '✓' : '•';
+  }
+
+  protected canCreateAccount(): boolean {
+    return this.isStrongPassword(this.registerForm.controls.password.value);
   }
 
   protected showLogin(): void {
@@ -727,7 +790,7 @@ export class App {
 
   protected setTheme(theme: string): void {
     const nextTheme: Theme = theme === 'dark' ? 'dark' : 'light';
-    localStorage.setItem('fintrack.theme', nextTheme);
+    localStorage.setItem(this.themeStorageKey(this.userEmail()), nextTheme);
     this.theme.set(nextTheme);
   }
 
@@ -782,9 +845,9 @@ export class App {
       return;
     }
 
-    if (newPassword.length < 6 || newPassword.length > 100) {
+    if (!this.isStrongPassword(newPassword)) {
       this.passwordForm.markAllAsTouched();
-      this.showMessage('A nova senha deve ter entre 6 e 100 caracteres.', 'error');
+      this.showMessage('A nova senha deve ter de 8 a 100 caracteres, com letra maiúscula, letra minúscula, número e caractere especial.', 'error');
       return;
     }
 
@@ -852,6 +915,7 @@ export class App {
     this.token.set(auth.token);
     this.userName.set(auth.name);
     this.userEmail.set(auth.email);
+    this.theme.set(this.savedThemeFor(auth.email));
     this.profileForm.patchValue({ name: auth.name });
     this.message.set('');
     this.isMessageLeaving.set(false);
@@ -871,9 +935,9 @@ export class App {
 
   protected messageStyle(): string {
     return {
-      success: 'background:#ecfdf3;border-color:#bbf7d0;color:#047857',
-      error: 'background:#fef2f2;border-color:#fecaca;color:#b91c1c',
-      info: 'background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8',
+      success: 'background:#ecfdf3;border-color:#bbf7d0;color:#047857;box-shadow:0 24px 70px #0f172a30',
+      error: 'background:#fef2f2;border-color:#fecaca;color:#b91c1c;box-shadow:0 24px 70px #0f172a30',
+      info: 'background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8;box-shadow:0 24px 70px #0f172a30',
     }[this.messageKind()];
   }
 
@@ -898,6 +962,14 @@ export class App {
         this.messageClearTimeoutId = null;
       }, 520);
     }, 3500);
+  }
+
+  private savedThemeFor(email: string): Theme {
+    return (localStorage.getItem(this.themeStorageKey(email)) as Theme | null) ?? 'light';
+  }
+
+  private themeStorageKey(email: string): string {
+    return `fintrack.theme.${email.trim().toLowerCase()}`;
   }
 
   private loginValidationMessage(): string | null {
@@ -940,15 +1012,38 @@ export class App {
       return 'Informe um e-mail válido.';
     }
 
-    if (password.length < 6) {
-      return 'A senha deve ter pelo menos 6 caracteres.';
-    }
-
-    if (password.length > 100) {
-      return 'A senha deve ter no máximo 100 caracteres.';
+    if (!this.isStrongPassword(password)) {
+      return 'A senha deve ter de 8 a 100 caracteres, com letra maiúscula, letra minúscula, número e caractere especial.';
     }
 
     return null;
+  }
+
+  private isStrongPassword(password: string): boolean {
+    return password.length <= 100 && this.passwordStrength(password) === 5;
+  }
+
+  private passwordRequirements(password: string): boolean[] {
+    return [
+      password.length >= 8,
+      /[A-Z]/.test(password),
+      /[a-z]/.test(password),
+      /\d/.test(password),
+      /[^A-Za-z0-9]/.test(password),
+    ];
+  }
+
+  private passwordRequirementMet(password: string, requirement: PasswordRequirement): boolean {
+    switch (requirement) {
+      case 'length':
+        return password.length >= 8;
+      case 'upper':
+        return /[A-Z]/.test(password);
+      case 'lower':
+        return /[a-z]/.test(password);
+      case 'numberSymbol':
+        return /\d/.test(password) && /[^A-Za-z0-9]/.test(password);
+    }
   }
 
   private accountValidationMessage(): string | null {
