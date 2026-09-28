@@ -1,6 +1,0 @@
-@FinTrack.Api_HostAddress = http://localhost:5080
-
-GET {{FinTrack.Api_HostAddress}}/health
-Accept: application/json
-
-###
