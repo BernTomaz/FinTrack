@@ -7,8 +7,7 @@ O FinTrack possui testes automatizados para regras de domínio, autenticação, 
 ## Stack
 
 - xUnit
-- FluentAssertions
-- ASP.NET Core TestHost
+- Microsoft.AspNetCore.Mvc.Testing
 
 ## Escopos
 

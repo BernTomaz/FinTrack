@@ -3,7 +3,7 @@
 ## Ferramentas
 
 - xUnit
-- FluentAssertions
+- Microsoft.AspNetCore.Mvc.Testing
 
 ## Testes do MVP
 
@@ -14,7 +14,7 @@
 - Calcular total de receitas do mês
 - Calcular total de despesas do mês
 - Calcular saldo mensal
-- Exportar CSV com lançamentos filtrados
+- Exportar CSV com lançamentos filtrados por mês ou intervalo
 - Impedir exclusão de conta com lançamentos vinculados
 - Impedir exclusão de categoria com lançamentos vinculados
 - Permitir exclusão de lançamentos pela API

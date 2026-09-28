@@ -19,6 +19,7 @@ Endpoint:
 
 ```text
 GET /exports/transactions.csv?year=2026&month=8
+GET /exports/transactions.csv?startDate=2026-08-01&endDate=2026-08-31
 ```
 
 ## Endpoints
@@ -26,6 +27,7 @@ GET /exports/transactions.csv?year=2026&month=8
 ```text
 GET /dashboard/monthly?year=2026&month=8
 GET /exports/transactions.csv?year=2026&month=8
+GET /exports/transactions.csv?startDate=2026-08-01&endDate=2026-08-31
 ```
 
 ## Status

@@ -29,9 +29,10 @@ async function post(url, token, body) {
 }
 
 async function seed() {
-  const email = `gif-${Date.now()}@fintrack.local`;
+  const id = Date.now();
+  const email = `gif-${id}@fintrack.local`;
   const password = 'Senha@123';
-  const auth = await post('/auth/register', null, { name: 'Demo Fin', email, password });
+  const auth = await post('/auth/register', null, { name: `Demo Fin ${id}`, email, password });
   const account = await post('/accounts', auth.token, {
     name: 'Conta GIF',
     type: 'Checking',
@@ -46,7 +47,7 @@ async function seed() {
     categoryId: income.id,
     type: 'Income',
     amount: 5000,
-    date: '2026-08-05',
+    date: '2026-09-05',
     description: 'Receita GIF',
   });
   await post('/transactions', auth.token, {
@@ -54,7 +55,7 @@ async function seed() {
     categoryId: expense.id,
     type: 'Expense',
     amount: 750.50,
-    date: '2026-08-12',
+    date: '2026-09-12',
     description: 'Despesa GIF',
   });
 

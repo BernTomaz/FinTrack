@@ -19,7 +19,7 @@ A API expõe endpoints REST para autenticação, perfil, contas, categorias, lan
 | Lançamentos | GET, POST `/transactions` |
 | Lançamento por Id | GET, PUT, DELETE `/transactions/{id}` |
 | Dashboard mensal | GET `/dashboard/monthly?year=2026&month=8` |
-| Exportação CSV | GET `/exports/transactions.csv?year=2026&month=8` |
+| Exportação CSV | GET `/exports/transactions.csv?year=2026&month=8` ou GET `/exports/transactions.csv?startDate=2026-08-01&endDate=2026-08-31` |
 | Health check | GET `/health` |
 
 ## Filtros de Lançamentos
@@ -27,6 +27,15 @@ A API expõe endpoints REST para autenticação, perfil, contas, categorias, lan
 ```text
 GET /transactions?year=2026&month=8&type=Expense&categoryId=1&accountId=2
 ```
+
+## Exportação CSV
+
+```text
+GET /exports/transactions.csv?year=2026&month=8
+GET /exports/transactions.csv?startDate=2026-08-01&endDate=2026-08-31
+```
+
+Sem intervalo livre, a exportação usa o mês selecionado. Com `startDate` ou `endDate`, usa as datas informadas.
 
 ## Regras de Resposta
 

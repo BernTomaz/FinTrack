@@ -16,7 +16,7 @@ Permitir que o usuário organize suas movimentações financeiras, visualize res
 - Entity Framework Core
 - SQL Server
 - xUnit
-- FluentAssertions
+- Microsoft.AspNetCore.Mvc.Testing
 
 ### Frontend
 
@@ -47,7 +47,7 @@ O MVP contém apenas o necessário para o sistema funcionar bem.
 - Listagem e filtros de lançamentos
 - Dashboard mensal
 - Gráfico de fluxo de caixa com dados reais
-- Exportação CSV de lançamentos
+- Exportação CSV de lançamentos por mês ou intervalo
 - Exclusão de lançamentos
 - Bloqueio de exclusão de contas e categorias com lançamentos vinculados
 - Perfil editável
@@ -280,6 +280,7 @@ GET /dashboard/monthly?year=2026&month=8
 
 ```text
 GET /exports/transactions.csv?year=2026&month=8
+GET /exports/transactions.csv?startDate=2026-08-01&endDate=2026-08-31
 ```
 
 ## Estrutura do projeto
@@ -444,7 +445,7 @@ Testes mínimos:
 - Calcular total de receitas do mês
 - Calcular total de despesas do mês
 - Calcular saldo mensal
-- Exportar CSV com lançamentos filtrados
+- Exportar CSV com lançamentos filtrados por mês ou intervalo
 - Impedir lançamento antes da data de início da conta
 - Impedir exclusão de conta ou categoria com lançamentos vinculados
 

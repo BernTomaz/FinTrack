@@ -75,7 +75,7 @@ MVP funcional validado localmente.
 - Comando: `docker compose up --build -d`.
 - Serviços validados: SQL Server, API e frontend.
 - API: health check em `/health` retornou `Healthy`.
-- Frontend: `http://localhost:4200` retornou `200`.
+- Frontend: `http://localhost:4201` retornou `200`.
 - Fluxo real via API: cadastro, conta, categoria, lançamento, dashboard e CSV.
 - Resultado: aprovado.
 

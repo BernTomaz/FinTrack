@@ -52,7 +52,7 @@ Frontend:
 Testes:
 
 - xUnit
-- FluentAssertions
+- Microsoft.AspNetCore.Mvc.Testing
 
 Infra:
 
@@ -93,7 +93,7 @@ FinTrack/
 - Listagem e filtros de lançamentos
 - Dashboard mensal
 - Gráfico de fluxo de caixa com dados reais
-- Exportação CSV de lançamentos
+- Exportação CSV de lançamentos por mês ou intervalo
 - Exclusão de lançamentos
 - Bloqueio de exclusão de contas e categorias com lançamentos vinculados
 

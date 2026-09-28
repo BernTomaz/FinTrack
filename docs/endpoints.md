@@ -84,5 +84,11 @@ Observação:
 
 ```text
 GET /exports/transactions.csv?year=2026&month=8
+GET /exports/transactions.csv?startDate=2026-08-01&endDate=2026-08-31
 ```
+
+Observações:
+
+- Sem `startDate` ou `endDate`, a exportação usa `year` e `month`.
+- Com `startDate` ou `endDate`, a exportação usa o intervalo informado.
 
