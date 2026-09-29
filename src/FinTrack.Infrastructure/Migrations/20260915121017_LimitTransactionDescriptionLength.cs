@@ -1,10 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace FinTrack.Infrastructure.Migrations
 {
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage]
     public partial class LimitTransactionDescriptionLength : Migration
     {
         /// <inheritdoc />

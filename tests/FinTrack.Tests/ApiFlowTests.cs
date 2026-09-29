@@ -54,6 +54,12 @@ public sealed class ApiFlowTests
         Assert.Equal(100, updatedAccountBody.InitialBalance);
         Assert.Equal(new DateOnly(2026, 8, 1), updatedAccountBody.OpeningDate);
 
+        var renamedAccount = await client.PutAsJsonAsync($"/accounts/{createdAccount.Id}", new AccountRequest("Reserva 2", AccountType.Savings, 200));
+        Assert.Equal(HttpStatusCode.OK, renamedAccount.StatusCode);
+        var renamedAccountBody = await renamedAccount.Content.ReadFromJsonAsync<AccountResponse>();
+        Assert.NotNull(renamedAccountBody);
+        Assert.Equal(new DateOnly(2026, 8, 1), renamedAccountBody.OpeningDate);
+
         var category = await client.PostAsJsonAsync("/categories", new CategoryRequest("Mercado", CategoryType.Expense));
         Assert.True(category.StatusCode == HttpStatusCode.Created, await category.Content.ReadAsStringAsync());
         var createdCategory = await category.Content.ReadFromJsonAsync<CategoryResponse>();
@@ -115,6 +121,14 @@ public sealed class ApiFlowTests
             $"/transactions?year=2026&month=8&type=Expense&accountId={account.Id}&categoryId={expenseCategory.Id}");
         Assert.NotNull(filtered);
         Assert.Single(filtered);
+
+        var byYear = await client.GetFromJsonAsync<List<TransactionResponse>>("/transactions?year=2026");
+        Assert.NotNull(byYear);
+        Assert.Single(byYear);
+
+        var byMonth = await client.GetFromJsonAsync<List<TransactionResponse>>("/transactions?month=8");
+        Assert.NotNull(byMonth);
+        Assert.Single(byMonth);
 
         var byId = await client.GetFromJsonAsync<TransactionResponse>($"/transactions/{created.Id}");
         Assert.NotNull(byId);
@@ -225,7 +239,7 @@ public sealed class ApiFlowTests
 
         await CreateTransaction(client, account.Id, incomeCategory.Id, TransactionType.Income, 1000, new DateOnly(2026, 8, 1), "Salário");
         await CreateTransaction(client, account.Id, expenseCategory.Id, TransactionType.Expense, 200, new DateOnly(2026, 8, 2), "Mercado, mês");
-        await CreateTransaction(client, account.Id, billsCategory.Id, TransactionType.Expense, 100, new DateOnly(2026, 8, 3), null);
+        await CreateTransaction(client, account.Id, billsCategory.Id, TransactionType.Expense, 100, new DateOnly(2026, 8, 3), "Conta \"luz\"\nAgosto");
 
         var dashboardResponse = await client.GetAsync("/dashboard/monthly?year=2026&month=8");
         Assert.True(dashboardResponse.StatusCode == HttpStatusCode.OK, await dashboardResponse.Content.ReadAsStringAsync());
@@ -240,6 +254,8 @@ public sealed class ApiFlowTests
         Assert.Equal("Mercado", dashboard.ExpensesByCategory[0].CategoryName);
         Assert.Equal(3, dashboard.LatestTransactions.Count);
 
+        await CreateTransaction(client, account.Id, billsCategory.Id, TransactionType.Expense, 50, new DateOnly(2026, 8, 4), null);
+
         var csvResponse = await client.GetAsync($"/exports/transactions.csv?year=2026&month=8&type=Expense&accountId={account.Id}&categoryId={expenseCategory.Id}");
         Assert.Equal(HttpStatusCode.OK, csvResponse.StatusCode);
         Assert.Equal("text/csv", csvResponse.Content.Headers.ContentType?.MediaType);
@@ -250,7 +266,20 @@ public sealed class ApiFlowTests
 
         var allCsvResponse = await client.GetAsync("/exports/transactions.csv?year=2026&month=8");
         var allCsv = await allCsvResponse.Content.ReadAsStringAsync();
-        Assert.Contains("2026-08-03,Expense,100.00,", allCsv);
+        Assert.Contains("2026-08-04,Expense,50.00,", allCsv);
+        Assert.Contains("2026-08-03,Expense,100.00,\"Conta \"\"luz\"\"", allCsv);
+
+        var yearCsvResponse = await client.GetAsync("/exports/transactions.csv?year=2026");
+        Assert.Equal(HttpStatusCode.OK, yearCsvResponse.StatusCode);
+
+        var monthCsvResponse = await client.GetAsync("/exports/transactions.csv?month=8");
+        Assert.Equal(HttpStatusCode.OK, monthCsvResponse.StatusCode);
+
+        var dateCsvResponse = await client.GetAsync("/exports/transactions.csv?startDate=2026-08-02&endDate=2026-08-03");
+        var dateCsv = await dateCsvResponse.Content.ReadAsStringAsync();
+        Assert.Contains("2026-08-02,Expense,200.00,\"Mercado, mês\"", dateCsv);
+        Assert.Contains("2026-08-03,Expense,100.00,\"Conta \"\"luz\"\"", dateCsv);
+        Assert.DoesNotContain("2026-08-01,Income,1000.00,Salário", dateCsv);
     }
 
     [Fact]
@@ -277,6 +306,9 @@ public sealed class ApiFlowTests
 
         var exportYear = await client.GetAsync("/exports/transactions.csv?year=10000&month=8");
         Assert.Equal(HttpStatusCode.BadRequest, exportYear.StatusCode);
+
+        var exportInvalidRange = await client.GetAsync("/exports/transactions.csv?startDate=2026-08-03&endDate=2026-08-02");
+        Assert.Equal(HttpStatusCode.BadRequest, exportInvalidRange.StatusCode);
     }
 
     [Fact]
@@ -291,8 +323,20 @@ public sealed class ApiFlowTests
         var invalidEmail = await client.PostAsJsonAsync("/auth/register", new RegisterRequest("Bernardo", "email-invalido", "Senha@123"));
         Assert.Equal(HttpStatusCode.BadRequest, invalidEmail.StatusCode);
 
+        var shortName = await client.PostAsJsonAsync("/auth/register", new RegisterRequest("A", "a@email.com", "Senha@123"));
+        Assert.Equal(HttpStatusCode.BadRequest, shortName.StatusCode);
+
+        var longName = await client.PostAsJsonAsync("/auth/register", new RegisterRequest(new string('A', 81), "longo@email.com", "Senha@123"));
+        Assert.Equal(HttpStatusCode.BadRequest, longName.StatusCode);
+
+        var longEmail = await client.PostAsJsonAsync("/auth/register", new RegisterRequest("Bernardo", $"{new string('a', 121)}@email.com", "Senha@123"));
+        Assert.Equal(HttpStatusCode.BadRequest, longEmail.StatusCode);
+
         var shortPassword = await client.PostAsJsonAsync("/auth/register", new RegisterRequest("Bernardo", "curta@email.com", "123"));
         Assert.Equal(HttpStatusCode.BadRequest, shortPassword.StatusCode);
+
+        var weakPassword = await client.PostAsJsonAsync("/auth/register", new RegisterRequest("Bernardo", "fraca@email.com", "senha1234"));
+        Assert.Equal(HttpStatusCode.BadRequest, weakPassword.StatusCode);
 
         await RegisterAndAuthorize(client);
 
@@ -328,6 +372,9 @@ public sealed class ApiFlowTests
         using var client = app.CreateClient();
         await RegisterAndAuthorize(client);
 
+        var invalidProfile = await client.PutAsJsonAsync("/auth/me", new UpdateProfileRequest("A"));
+        Assert.Equal(HttpStatusCode.BadRequest, invalidProfile.StatusCode);
+
         var profile = await client.PutAsJsonAsync("/auth/me", new UpdateProfileRequest("Bernardo Tomaz"));
         Assert.Equal(HttpStatusCode.OK, profile.StatusCode);
 
@@ -341,6 +388,9 @@ public sealed class ApiFlowTests
         var invalidPassword = await client.PutAsJsonAsync("/auth/password", new ChangePasswordRequest("senha-errada", "Nova@123"));
         Assert.Equal(HttpStatusCode.Unauthorized, invalidPassword.StatusCode);
 
+        var missingPassword = await client.PutAsJsonAsync("/auth/password", new ChangePasswordRequest("", ""));
+        Assert.Equal(HttpStatusCode.BadRequest, missingPassword.StatusCode);
+
         var weakPassword = await client.PutAsJsonAsync("/auth/password", new ChangePasswordRequest("Senha@123", "nova1234"));
         Assert.Equal(HttpStatusCode.BadRequest, weakPassword.StatusCode);
 
@@ -352,6 +402,43 @@ public sealed class ApiFlowTests
 
         var newLogin = await client.PostAsJsonAsync("/auth/login", new LoginRequest("bernardo@email.com", "Nova@123"));
         Assert.Equal(HttpStatusCode.OK, newLogin.StatusCode);
+    }
+
+    [Fact]
+    public async Task Profile_rejects_name_used_by_another_user()
+    {
+        await using var app = new FinTrackApiFactory();
+        using var client = app.CreateClient();
+        await RegisterAndAuthorize(client);
+
+        using var otherClient = app.CreateClient();
+        await RegisterAndAuthorize(otherClient, "Ana", "ana@email.com");
+
+        var conflict = await client.PutAsJsonAsync("/auth/me", new UpdateProfileRequest("Ana"));
+
+        Assert.Equal(HttpStatusCode.Conflict, conflict.StatusCode);
+    }
+
+    [Fact]
+    public async Task Profile_and_password_return_not_found_when_user_no_longer_exists()
+    {
+        await using var app = new FinTrackApiFactory();
+        using var client = app.CreateClient();
+        var auth = await RegisterAndAuthorize(client);
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<FinTrackDbContext>();
+            var user = await db.Users.SingleAsync(user => user.Id == auth.UserId);
+            db.Users.Remove(user);
+            await db.SaveChangesAsync();
+        }
+
+        var profile = await client.PutAsJsonAsync("/auth/me", new UpdateProfileRequest("Bernardo Tomaz"));
+        Assert.Equal(HttpStatusCode.NotFound, profile.StatusCode);
+
+        var password = await client.PutAsJsonAsync("/auth/password", new ChangePasswordRequest("Senha@123", "Nova@123"));
+        Assert.Equal(HttpStatusCode.NotFound, password.StatusCode);
     }
 
     [Fact]
@@ -380,6 +467,9 @@ public sealed class ApiFlowTests
         var shortAccount = await client.PostAsJsonAsync("/accounts", new AccountRequest("A", AccountType.Checking, 0));
         Assert.Equal(HttpStatusCode.BadRequest, shortAccount.StatusCode);
 
+        var longAccount = await client.PostAsJsonAsync("/accounts", new AccountRequest(new string('A', 81), AccountType.Checking, 0));
+        Assert.Equal(HttpStatusCode.BadRequest, longAccount.StatusCode);
+
         var deleteAccount = await client.DeleteAsync($"/accounts/{Guid.NewGuid()}");
         Assert.Equal(HttpStatusCode.NotFound, deleteAccount.StatusCode);
 
@@ -402,9 +492,12 @@ public sealed class ApiFlowTests
         Assert.Equal(HttpStatusCode.NotFound, deleteCategory.StatusCode);
     }
 
-    private static async Task<AuthResponse> RegisterAndAuthorize(HttpClient client)
+    private static async Task<AuthResponse> RegisterAndAuthorize(
+        HttpClient client,
+        string name = "Bernardo",
+        string email = "bernardo@email.com")
     {
-        var register = await client.PostAsJsonAsync("/auth/register", new RegisterRequest("Bernardo", "bernardo@email.com", "Senha@123"));
+        var register = await client.PostAsJsonAsync("/auth/register", new RegisterRequest(name, email, "Senha@123"));
         Assert.True(register.StatusCode == HttpStatusCode.Created, await register.Content.ReadAsStringAsync());
 
         var auth = await register.Content.ReadFromJsonAsync<AuthResponse>();
