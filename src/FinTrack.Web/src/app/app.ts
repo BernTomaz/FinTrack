@@ -669,6 +669,14 @@ export class App {
     this.reportLimit.set(10);
   }
 
+  protected clearTransactionFilters(): void {
+    this.transactionSearch.set('');
+    this.transactionTypeFilter.set('');
+    this.transactionCategoryFilter.set('');
+    this.transactionAccountFilter.set('');
+    this.reportLimit.set(10);
+  }
+
   protected showMoreTransactions(): void {
     this.recentLimit.update((limit) => limit + 5);
   }

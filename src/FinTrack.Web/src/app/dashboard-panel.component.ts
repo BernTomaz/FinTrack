@@ -76,15 +76,16 @@ import { Account, AccountType, Category, CategoryType, Dashboard, Transaction, T
             <h2>Despesas por categoria</h2>
             <button type="button" class="select-like">{{ monthLabel }}</button>
           </div>
-          <div class="category-card">
-            <div class="donut" [title]="expenseDonutTooltip()"><span>Total<br />{{ money(dashboard?.totalExpense ?? 0) }}</span></div>
-            <div class="list compact">
-              @for (item of dashboard?.expensesByCategory ?? []; track item.categoryName) {
-                <button type="button" class="line" style="background:transparent;color:inherit;text-align:left;width:100%" (click)="showTransactionsByCategory.emit(item.categoryName)" [title]="categoryExpenseTooltip(item)">
-                  <span>{{ item.categoryName }}</span>
-                  <strong>{{ money(item.total) }}</strong>
-                </button>
-              }
+          <div class="category-card category-card-centered">
+            <div class="donut-svg" [title]="expenseDonutTooltip()">
+              <svg viewBox="0 0 120 120" role="img" aria-label="Despesas por categoria">
+                @for (slice of expenseDonutSlices(); track slice.categoryName) {
+                  <path [attr.d]="slice.path" [attr.fill]="slice.color" (click)="showTransactionsByCategory.emit(slice.categoryName)">
+                    <title>{{ slice.tooltip }}</title>
+                  </path>
+                }
+              </svg>
+              <span>Total<br />{{ money(dashboard?.totalExpense ?? 0) }}</span>
             </div>
           </div>
         </article>
@@ -313,6 +314,54 @@ export class DashboardPanelComponent {
     const total = this.dashboard?.totalExpense ?? 0;
 
     return total > 0 ? `Total de despesas do mês: ${this.money(total)}` : 'Sem despesas neste mês';
+  }
+
+  expenseDonutSlices(): { categoryName: string; color: string; path: string; tooltip: string }[] {
+    const items = this.dashboard?.expensesByCategory ?? [];
+    const total = this.dashboard?.totalExpense ?? 0;
+    const colors = ['#2f80ed', '#35b66a', '#f59e0b', '#8b5cf6', '#22b8cf', '#f97316', '#98a2b3'];
+
+    if (total <= 0 || items.length === 0) {
+      return [];
+    }
+
+    let start = 0;
+    return items.map((item, index) => {
+      const end = start + (item.total / total) * 100;
+      const slice = {
+        categoryName: item.categoryName,
+        color: colors[index % colors.length],
+        path: this.donutSlicePath(start, end),
+        tooltip: this.categoryExpenseTooltip(item),
+      };
+      start = end;
+      return slice;
+    });
+  }
+
+  private donutSlicePath(startPercent: number, endPercent: number): string {
+    const center = 60;
+    const outer = 48;
+    const inner = 25;
+    const start = (startPercent / 100) * Math.PI * 2 - Math.PI / 2;
+    const end = (endPercent / 100) * Math.PI * 2 - Math.PI / 2;
+    const largeArc = endPercent - startPercent > 50 ? 1 : 0;
+    const point = (radius: number, angle: number) => ({
+      x: center + radius * Math.cos(angle),
+      y: center + radius * Math.sin(angle),
+    });
+    const outerStart = point(outer, start);
+    const outerEnd = point(outer, end);
+    const innerStart = point(inner, start);
+    const innerEnd = point(inner, end);
+
+    return [
+      `M ${outerStart.x} ${outerStart.y}`,
+      `A ${outer} ${outer} 0 ${largeArc} 1 ${outerEnd.x} ${outerEnd.y}`,
+      `L ${innerEnd.x} ${innerEnd.y}`,
+      `A ${inner} ${inner} 0 ${largeArc} 0 ${innerStart.x} ${innerStart.y}`,
+      'Z',
+    ].join(' ');
   }
 
   categoryExpenseTooltip(item: { categoryName: string; total: number }): string {

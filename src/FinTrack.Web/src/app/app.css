@@ -699,6 +699,44 @@ nav .active {
   grid-template-columns: minmax(160px, 190px) minmax(0, 1fr);
 }
 
+.category-card-centered {
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+
+.donut-svg {
+  align-items: center;
+  aspect-ratio: 1;
+  display: grid;
+  justify-content: center;
+  position: relative;
+  width: min(220px, 100%);
+}
+
+.donut-svg svg {
+  height: 100%;
+  width: 100%;
+}
+
+.donut-svg path {
+  cursor: pointer;
+}
+
+.donut-svg path:hover {
+  filter: brightness(1.12);
+}
+
+.donut-svg span {
+  align-items: center;
+  display: grid;
+  font-size: 0.9rem;
+  inset: 0;
+  justify-content: center;
+  pointer-events: none;
+  position: absolute;
+  text-align: center;
+}
+
 .donut {
   align-items: center;
   aspect-ratio: 1;

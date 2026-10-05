@@ -10,7 +10,10 @@ type TransactionSortField = 'date' | 'description' | 'category' | 'type' | 'amou
       <article class="panel settings-card" style="max-width:min(1180px, calc(100vw - 64px))">
         <div class="panel-head">
           <h2>Relatórios</h2>
-          <button type="button" class="ghost" (click)="back.emit()">Voltar</button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:end">
+            <button type="button" class="ghost" (click)="clearFilters.emit()">Limpar filtros</button>
+            <button type="button" class="ghost" (click)="back.emit()">Voltar</button>
+          </div>
         </div>
         <div class="form-grid">
           <label>Mês<input type="month" [value]="month" (change)="monthChange.emit($any($event.target).value)" /></label>
@@ -105,6 +108,7 @@ export class ReportsPanelComponent {
   @Output() delete = new EventEmitter<string>();
   @Output() showMore = new EventEmitter<void>();
   @Output() addTransaction = new EventEmitter<void>();
+  @Output() clearFilters = new EventEmitter<void>();
   @Output() back = new EventEmitter<void>();
 
   accountName(id: string): string {
