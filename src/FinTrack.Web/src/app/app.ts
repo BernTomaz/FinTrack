@@ -636,6 +636,15 @@ export class App {
     }[this.petColor()];
   }
 
+  protected petImageSrc(): string {
+    return {
+      green: 'fin-pig-green.png',
+      blue: 'fin-pig-blue.png',
+      orange: 'fin-pig-orange.png',
+      purple: 'fin-pig-purple.png',
+    }[this.petColor()];
+  }
+
   protected updatePetQuestion(value: string): void {
     this.petQuestion.set(value);
   }
