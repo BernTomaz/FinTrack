@@ -1311,6 +1311,31 @@ nav .active {
 }
 
 @media (min-width: 761px) and (max-width: 900px) {
+  .login-page {
+    gap: 28px;
+    grid-template-columns: 1fr;
+    padding: 28px 7vw;
+  }
+
+  .login-brand {
+    min-height: auto;
+  }
+
+  .login-copy {
+    margin-top: 72px;
+    max-width: 620px;
+  }
+
+  .ghost-chart {
+    display: none;
+  }
+
+  .auth-card {
+    justify-self: center;
+    max-width: 560px;
+    width: 100%;
+  }
+
   .content {
     padding-left: 14px;
     padding-right: 14px;
