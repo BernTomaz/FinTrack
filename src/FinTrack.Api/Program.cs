@@ -94,6 +94,7 @@ static async Task ApplyMigrations(WebApplication app)
         try
         {
             await db.Database.MigrateAsync();
+            await EnsureUserAdminColumns(db);
             return;
         }
         catch when (attempt < maxAttempts)
@@ -103,6 +104,21 @@ static async Task ApplyMigrations(WebApplication app)
     }
 
     await db.Database.MigrateAsync();
+    await EnsureUserAdminColumns(db);
+}
+
+static async Task EnsureUserAdminColumns(FinTrackDbContext db)
+{
+    await db.Database.ExecuteSqlRawAsync("""
+        IF COL_LENGTH('Users', 'FailedLoginAttempts') IS NULL
+            ALTER TABLE Users ADD FailedLoginAttempts int NOT NULL CONSTRAINT DF_Users_FailedLoginAttempts DEFAULT 0;
+
+        IF COL_LENGTH('Users', 'IsAdmin') IS NULL
+            ALTER TABLE Users ADD IsAdmin bit NOT NULL CONSTRAINT DF_Users_IsAdmin DEFAULT 0;
+
+        IF COL_LENGTH('Users', 'IsLocked') IS NULL
+            ALTER TABLE Users ADD IsLocked bit NOT NULL CONSTRAINT DF_Users_IsLocked DEFAULT 0;
+        """);
 }
 
 [ExcludeFromCodeCoverage]

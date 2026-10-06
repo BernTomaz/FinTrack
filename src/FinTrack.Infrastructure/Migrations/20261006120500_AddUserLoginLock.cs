@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -7,6 +8,7 @@ namespace FinTrack.Infrastructure.Migrations
 {
     /// <inheritdoc />
     [ExcludeFromCodeCoverage]
+    [Migration("20261006120500_AddUserLoginLock")]
     public partial class AddUserLoginLock : Migration
     {
         /// <inheritdoc />
