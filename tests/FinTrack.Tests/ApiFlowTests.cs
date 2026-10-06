@@ -366,6 +366,29 @@ public sealed class ApiFlowTests
     }
 
     [Fact]
+    public async Task Login_locks_user_after_three_wrong_passwords()
+    {
+        await using var app = new FinTrackApiFactory();
+        using var client = app.CreateClient();
+        await RegisterAndAuthorize(client);
+
+        client.DefaultRequestHeaders.Authorization = null;
+
+        for (var attempt = 0; attempt < 2; attempt++)
+        {
+            var response = await client.PostAsJsonAsync("/auth/login", new LoginRequest("bernardo@email.com", "errada"));
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        var locked = await client.PostAsJsonAsync("/auth/login", new LoginRequest("bernardo@email.com", "errada"));
+        Assert.Equal(HttpStatusCode.Locked, locked.StatusCode);
+        Assert.Equal("Conta bloqueada por excesso de tentativas. Entre em contato com o administrador para redefinir sua senha.", await locked.Content.ReadAsStringAsync());
+
+        var validPassword = await client.PostAsJsonAsync("/auth/login", new LoginRequest("bernardo@email.com", "Senha@123"));
+        Assert.Equal(HttpStatusCode.Locked, validPassword.StatusCode);
+    }
+
+    [Fact]
     public async Task Profile_and_password_can_be_updated()
     {
         await using var app = new FinTrackApiFactory();

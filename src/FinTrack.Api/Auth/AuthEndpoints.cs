@@ -9,6 +9,9 @@ namespace FinTrack.Api.Auth;
 
 public static class AuthEndpoints
 {
+    private const int MaxLoginAttempts = 3;
+    private const string LockedMessage = "Conta bloqueada por excesso de tentativas. Entre em contato com o administrador para redefinir sua senha.";
+
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/auth").WithTags("Auth");
@@ -86,10 +89,31 @@ public static class AuthEndpoints
 
             var user = await db.Users.SingleOrDefaultAsync(user => user.Email == email, cancellationToken);
 
-            if (user is null || !passwordHasher.Verify(request.Password, user.PasswordHash))
+            if (user is null)
             {
                 return Results.Unauthorized();
             }
+
+            if (user.IsLocked)
+            {
+                return Results.Text(LockedMessage, statusCode: StatusCodes.Status423Locked);
+            }
+
+            if (!passwordHasher.Verify(request.Password, user.PasswordHash))
+            {
+                user.RegisterFailedLogin(MaxLoginAttempts);
+                await db.SaveChangesAsync(cancellationToken);
+
+                if (user.IsLocked)
+                {
+                    return Results.Text(LockedMessage, statusCode: StatusCodes.Status423Locked);
+                }
+
+                return Results.Unauthorized();
+            }
+
+            user.ResetLoginAttempts();
+            await db.SaveChangesAsync(cancellationToken);
 
             return Results.Ok(ToResponse(user, tokenService));
         });

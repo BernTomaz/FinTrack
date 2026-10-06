@@ -234,9 +234,9 @@ export class App {
 
     this.api.login(this.loginForm.getRawValue()).subscribe({
       next: (auth) => this.startSession(auth),
-      error: () => {
+      error: (error) => {
         const attempts = Math.max(this.loginAttemptsRemaining() - 1, 0);
-        const text = `E-mail ou senha incorretos. Tentativas restantes: ${attempts}.`;
+        const text = this.api.errorMessage(error, `E-mail ou senha incorretos. Tentativas restantes: ${attempts}.`);
         this.loginAttemptsRemaining.set(attempts);
         this.loginError.set(text);
         this.showMessage(text, 'error');

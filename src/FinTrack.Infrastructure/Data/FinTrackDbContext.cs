@@ -18,6 +18,8 @@ public sealed class FinTrackDbContext(DbContextOptions<FinTrackDbContext> option
             entity.Property(user => user.Name).HasMaxLength(120).IsRequired();
             entity.Property(user => user.Email).HasMaxLength(180).IsRequired();
             entity.Property(user => user.PasswordHash).HasMaxLength(500).IsRequired();
+            entity.Property(user => user.FailedLoginAttempts).IsRequired();
+            entity.Property(user => user.IsLocked).IsRequired();
         });
 
         modelBuilder.Entity<Account>(entity =>
