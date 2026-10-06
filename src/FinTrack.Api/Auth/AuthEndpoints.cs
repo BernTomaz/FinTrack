@@ -61,7 +61,8 @@ public static class AuthEndpoints
                 return Results.Conflict("Este nome já está em uso.");
             }
 
-            var user = new User(name, email, passwordHasher.Hash(request.Password));
+            var isFirstUser = !await db.Users.AnyAsync(cancellationToken);
+            var user = new User(name, email, passwordHasher.Hash(request.Password), isFirstUser);
             db.Users.Add(user);
             await db.SaveChangesAsync(cancellationToken);
 
@@ -196,11 +197,68 @@ public static class AuthEndpoints
         })
         .RequireAuthorization();
 
+        group.MapGet("/admin/locked-users", async (
+            FinTrackDbContext db,
+            ClaimsPrincipal principal,
+            CancellationToken cancellationToken) =>
+        {
+            if (!await IsAdmin(db, principal, cancellationToken))
+            {
+                return Results.Forbid();
+            }
+
+            var users = await db.Users
+                .Where(user => user.IsLocked)
+                .OrderBy(user => user.Name)
+                .Select(user => new LockedUserResponse(user.Id, user.Name, user.Email, user.FailedLoginAttempts))
+                .ToListAsync(cancellationToken);
+
+            return Results.Ok(users);
+        })
+        .RequireAuthorization();
+
+        group.MapPost("/admin/users/{id:guid}/reset-password", async (
+            Guid id,
+            AdminResetPasswordRequest request,
+            FinTrackDbContext db,
+            PasswordHasher passwordHasher,
+            ClaimsPrincipal principal,
+            CancellationToken cancellationToken) =>
+        {
+            if (!await IsAdmin(db, principal, cancellationToken))
+            {
+                return Results.Forbid();
+            }
+
+            if (!IsStrongPassword(request.NewPassword))
+            {
+                return Results.BadRequest("A senha temporária deve ter de 8 a 100 caracteres, com letra maiúscula, letra minúscula, número e caractere especial.");
+            }
+
+            var user = await db.Users.SingleOrDefaultAsync(user => user.Id == id, cancellationToken);
+            if (user is null)
+            {
+                return Results.NotFound();
+            }
+
+            user.ResetBlockedPassword(passwordHasher.Hash(request.NewPassword));
+            await db.SaveChangesAsync(cancellationToken);
+
+            return Results.NoContent();
+        })
+        .RequireAuthorization();
+
         return app;
     }
 
     private static AuthResponse ToResponse(User user, JwtTokenService tokenService) =>
-        new(user.Id, user.Name, user.Email, tokenService.Create(user));
+        new(user.Id, user.Name, user.Email, user.IsAdmin, tokenService.Create(user));
+
+    private static async Task<bool> IsAdmin(FinTrackDbContext db, ClaimsPrincipal principal, CancellationToken cancellationToken)
+    {
+        var userId = principal.GetUserId();
+        return await db.Users.AnyAsync(user => user.Id == userId && user.IsAdmin, cancellationToken);
+    }
 
     private static bool IsValidEmail(string email)
     {

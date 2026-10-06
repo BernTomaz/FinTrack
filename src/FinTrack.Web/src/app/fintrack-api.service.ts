@@ -8,7 +8,15 @@ export type TransactionType = 'Income' | 'Expense';
 export interface AuthResponse {
   name: string;
   email: string;
+  isAdmin: boolean;
   token: string;
+}
+
+export interface LockedUser {
+  id: string;
+  name: string;
+  email: string;
+  failedLoginAttempts: number;
 }
 
 export interface Account {
@@ -65,6 +73,14 @@ export class FinTrackApiService {
 
   changePassword(token: string, request: { currentPassword: string; newPassword: string }) {
     return this.http.put(`${this.apiUrl}/auth/password`, request, this.options(token));
+  }
+
+  getLockedUsers(token: string) {
+    return this.http.get<LockedUser[]>(`${this.apiUrl}/auth/admin/locked-users`, this.options(token));
+  }
+
+  resetLockedPassword(token: string, id: string, request: { newPassword: string }) {
+    return this.http.post(`${this.apiUrl}/auth/admin/users/${id}/reset-password`, request, this.options(token));
   }
 
   getAccounts(token: string) {
@@ -131,12 +147,14 @@ export class FinTrackApiService {
     sessionStorage.setItem('fintrack.token', auth.token);
     sessionStorage.setItem('fintrack.name', auth.name);
     sessionStorage.setItem('fintrack.email', auth.email);
+    sessionStorage.setItem('fintrack.admin', String(auth.isAdmin));
   }
 
   clearSession(): void {
     sessionStorage.removeItem('fintrack.token');
     sessionStorage.removeItem('fintrack.name');
     sessionStorage.removeItem('fintrack.email');
+    sessionStorage.removeItem('fintrack.admin');
   }
 
   errorMessage(error: unknown, fallback: string): string {

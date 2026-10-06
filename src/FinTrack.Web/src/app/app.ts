@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ViewEncapsulation, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize, forkJoin } from 'rxjs';
-import { Account, AccountType, AuthResponse, Category, CategoryType, Dashboard, FinTrackApiService, Transaction, TransactionType } from './fintrack-api.service';
+import { Account, AccountType, AuthResponse, Category, CategoryType, Dashboard, FinTrackApiService, LockedUser, Transaction, TransactionType } from './fintrack-api.service';
 import { AccountsPanelComponent } from './accounts-panel.component';
 import { CategoriesPanelComponent } from './categories-panel.component';
 import { DashboardPanelComponent } from './dashboard-panel.component';
@@ -29,6 +29,7 @@ type View =
   | 'export'
   | 'profile'
   | 'password'
+  | 'admin'
   | 'preferences'
   | 'about';
 
@@ -60,6 +61,7 @@ export class App {
   protected readonly isEntering = signal((sessionStorage.getItem('fintrack.token') ?? '').length > 0);
   protected readonly userName = signal(sessionStorage.getItem('fintrack.name') ?? '');
   protected readonly userEmail = signal(sessionStorage.getItem('fintrack.email') ?? '');
+  protected readonly isAdmin = signal(sessionStorage.getItem('fintrack.admin') === 'true');
   protected readonly message = signal('');
   protected readonly messageKind = signal<'success' | 'error' | 'info'>('info');
   protected readonly loginError = signal('');
@@ -72,6 +74,7 @@ export class App {
   protected readonly accounts = signal<Account[]>([]);
   protected readonly categories = signal<Category[]>([]);
   protected readonly transactions = signal<Transaction[]>([]);
+  protected readonly lockedUsers = signal<LockedUser[]>([]);
   protected readonly dashboard = signal<Dashboard | null>(null);
   protected readonly userMenuOpen = signal(false);
   protected readonly sidebarHidden = signal(false);
@@ -214,6 +217,10 @@ export class App {
     confirmPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
   });
 
+  protected readonly adminResetForm = this.fb.nonNullable.group({
+    newPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
+  });
+
   constructor() {
     if (this.isLoggedIn()) {
       this.theme.set(this.savedThemeFor(this.userEmail()));
@@ -335,6 +342,7 @@ export class App {
     this.token.set('');
     this.userName.set('');
     this.userEmail.set('');
+    this.isAdmin.set(false);
     this.message.set('');
     this.isMessageLeaving.set(false);
     this.userMenuOpen.set(false);
@@ -742,8 +750,17 @@ export class App {
   }
 
   protected openView(view: View): void {
+    if (view === 'admin' && !this.isAdmin()) {
+      this.showMessage('Apenas administradores podem acessar esta tela.', 'error');
+      return;
+    }
+
     this.activeView.set(view);
     this.userMenuOpen.set(false);
+
+    if (view === 'admin') {
+      this.loadLockedUsers();
+    }
 
     if (view === 'income' || view === 'expense') {
       this.editingTransactionId.set('');
@@ -798,6 +815,7 @@ export class App {
       export: 'Exportação CSV',
       profile: 'Meu perfil',
       password: 'Alterar senha',
+      admin: 'Administração',
       preferences: 'Preferências',
       about: 'Sobre',
     };
@@ -835,6 +853,13 @@ export class App {
 
   protected refreshData(): void {
     this.loadAll('Dados atualizados.');
+  }
+
+  protected loadLockedUsers(): void {
+    this.api.getLockedUsers(this.token()).subscribe({
+      next: (users) => this.lockedUsers.set(users),
+      error: (error) => this.showMessage(this.api.errorMessage(error, 'Não foi possível carregar usuários bloqueados.'), 'error'),
+    });
   }
 
   protected saveProfile(): void {
@@ -880,6 +905,24 @@ export class App {
         this.showMessage('Senha alterada com sucesso.', 'success');
       },
       error: (error) => this.showMessage(this.api.errorMessage(error, 'Não foi possível alterar a senha.'), 'error'),
+    });
+  }
+
+  protected resetLockedPassword(user: LockedUser): void {
+    const newPassword = this.adminResetForm.controls.newPassword.value;
+    if (!this.isStrongPassword(newPassword)) {
+      this.adminResetForm.markAllAsTouched();
+      this.showMessage('Informe uma senha temporária forte.', 'error');
+      return;
+    }
+
+    this.api.resetLockedPassword(this.token(), user.id, { newPassword }).subscribe({
+      next: () => {
+        this.adminResetForm.reset({ newPassword: '' });
+        this.loadLockedUsers();
+        this.showMessage(`Senha de ${user.name} redefinida e conta desbloqueada.`, 'success');
+      },
+      error: (error) => this.showMessage(this.api.errorMessage(error, 'Não foi possível redefinir a senha.'), 'error'),
     });
   }
 
@@ -932,6 +975,7 @@ export class App {
     this.token.set(auth.token);
     this.userName.set(auth.name);
     this.userEmail.set(auth.email);
+    this.isAdmin.set(auth.isAdmin);
     this.theme.set(this.savedThemeFor(auth.email));
     this.profileForm.patchValue({ name: auth.name });
     this.message.set('');

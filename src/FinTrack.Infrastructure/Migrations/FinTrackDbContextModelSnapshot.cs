@@ -151,6 +151,9 @@ namespace FinTrack.Infrastructure.Migrations
                     b.Property<int>("FailedLoginAttempts")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsLocked")
                         .HasColumnType("bit");
 

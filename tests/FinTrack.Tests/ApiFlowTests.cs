@@ -389,6 +389,66 @@ public sealed class ApiFlowTests
     }
 
     [Fact]
+    public async Task First_registered_user_is_admin()
+    {
+        await using var app = new FinTrackApiFactory();
+        using var client = app.CreateClient();
+
+        var first = await client.PostAsJsonAsync("/auth/register", new RegisterRequest("Admin", "admin@email.com", "Senha@123"));
+        var firstAuth = await first.Content.ReadFromJsonAsync<AuthResponse>();
+        Assert.NotNull(firstAuth);
+        Assert.True(firstAuth.IsAdmin);
+
+        var second = await client.PostAsJsonAsync("/auth/register", new RegisterRequest("Usuario", "usuario@email.com", "Senha@123"));
+        var secondAuth = await second.Content.ReadFromJsonAsync<AuthResponse>();
+        Assert.NotNull(secondAuth);
+        Assert.False(secondAuth.IsAdmin);
+    }
+
+    [Fact]
+    public async Task Admin_can_reset_blocked_user_password()
+    {
+        await using var app = new FinTrackApiFactory();
+        using var userClient = app.CreateClient();
+        await RegisterAndAuthorize(userClient);
+        userClient.DefaultRequestHeaders.Authorization = null;
+
+        for (var attempt = 0; attempt < 3; attempt++)
+        {
+            await userClient.PostAsJsonAsync("/auth/login", new LoginRequest("bernardo@email.com", "errada"));
+        }
+
+        var forbidden = await userClient.GetAsync("/auth/admin/locked-users");
+        Assert.Equal(HttpStatusCode.Unauthorized, forbidden.StatusCode);
+
+        using var adminClient = app.CreateClient();
+        var admin = await RegisterAndAuthorize(adminClient, "Admin", "admin@email.com");
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<FinTrackDbContext>();
+            var adminUser = await db.Users.SingleAsync(user => user.Id == admin.UserId);
+            db.Entry(adminUser).Property(nameof(FinTrack.Domain.Entities.User.IsAdmin)).CurrentValue = true;
+            await db.SaveChangesAsync();
+        }
+
+        var adminLogin = await adminClient.PostAsJsonAsync("/auth/login", new LoginRequest("admin@email.com", "Senha@123"));
+        var adminAuth = await adminLogin.Content.ReadFromJsonAsync<AuthResponse>();
+        Assert.NotNull(adminAuth);
+        adminClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminAuth.Token);
+
+        var lockedUsers = await adminClient.GetFromJsonAsync<List<LockedUserResponse>>("/auth/admin/locked-users");
+        Assert.NotNull(lockedUsers);
+        var lockedUser = Assert.Single(lockedUsers);
+
+        var reset = await adminClient.PostAsJsonAsync($"/auth/admin/users/{lockedUser.Id}/reset-password", new AdminResetPasswordRequest("Nova@123"));
+        Assert.Equal(HttpStatusCode.NoContent, reset.StatusCode);
+
+        var login = await userClient.PostAsJsonAsync("/auth/login", new LoginRequest("bernardo@email.com", "Nova@123"));
+        Assert.Equal(HttpStatusCode.OK, login.StatusCode);
+    }
+
+    [Fact]
     public async Task Profile_and_password_can_be_updated()
     {
         await using var app = new FinTrackApiFactory();

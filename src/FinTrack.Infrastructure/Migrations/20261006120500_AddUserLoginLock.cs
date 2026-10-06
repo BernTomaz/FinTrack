@@ -20,6 +20,13 @@ namespace FinTrack.Infrastructure.Migrations
                 defaultValue: 0);
 
             migrationBuilder.AddColumn<bool>(
+                name: "IsAdmin",
+                table: "Users",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.AddColumn<bool>(
                 name: "IsLocked",
                 table: "Users",
                 type: "bit",
@@ -32,6 +39,10 @@ namespace FinTrack.Infrastructure.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "FailedLoginAttempts",
+                table: "Users");
+
+            migrationBuilder.DropColumn(
+                name: "IsAdmin",
                 table: "Users");
 
             migrationBuilder.DropColumn(

@@ -2,11 +2,12 @@ namespace FinTrack.Domain.Entities;
 
 public sealed class User
 {
-    public User(string name, string email, string passwordHash)
+    public User(string name, string email, string passwordHash, bool isAdmin = false)
     {
         Name = Required(name);
         Email = Required(email);
         PasswordHash = Required(passwordHash);
+        IsAdmin = isAdmin;
     }
 
     public Guid Id { get; init; } = Guid.NewGuid();
@@ -15,6 +16,7 @@ public sealed class User
     public string PasswordHash { get; private set; }
     public int FailedLoginAttempts { get; private set; }
     public bool IsLocked { get; private set; }
+    public bool IsAdmin { get; private set; }
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
 
     public void UpdateName(string name)
@@ -41,6 +43,13 @@ public sealed class User
     public void ResetLoginAttempts()
     {
         FailedLoginAttempts = 0;
+    }
+
+    public void ResetBlockedPassword(string passwordHash)
+    {
+        PasswordHash = Required(passwordHash);
+        ResetLoginAttempts();
+        IsLocked = false;
     }
 
     private static string Required(string value) =>

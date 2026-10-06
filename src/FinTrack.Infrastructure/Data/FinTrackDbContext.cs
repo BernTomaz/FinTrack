@@ -20,6 +20,7 @@ public sealed class FinTrackDbContext(DbContextOptions<FinTrackDbContext> option
             entity.Property(user => user.PasswordHash).HasMaxLength(500).IsRequired();
             entity.Property(user => user.FailedLoginAttempts).IsRequired();
             entity.Property(user => user.IsLocked).IsRequired();
+            entity.Property(user => user.IsAdmin).IsRequired();
         });
 
         modelBuilder.Entity<Account>(entity =>

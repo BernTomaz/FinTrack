@@ -150,6 +150,9 @@
         <button type="button" [class.active]="activeView() === 'reports'" (click)="openView('reports')"><span>▥</span> Relatórios</button>
         <button type="button" [class.active]="activeView() === 'categorySummary'" (click)="openCategorySummary()"><span>▤</span> Resumo por categoria</button>
         <button type="button" [class.active]="activeView() === 'export'" (click)="openView('export')"><span>⇩</span> Exportação CSV</button>
+        @if (isAdmin()) {
+          <button type="button" [class.active]="activeView() === 'admin'" (click)="openView('admin')"><span>⚙</span> Administração</button>
+        }
       </nav>
 
       <div class="safe-note">
@@ -182,6 +185,9 @@
                 <strong>{{ userName() }}</strong>
                 <button type="button" [style.--menu-hover]="theme() === 'dark' ? '#1e293b' : '#f8fafc'" [style.color]="theme() === 'dark' ? '#dbe7f5' : null" (click)="openView('profile')">Meu perfil</button>
                 <button type="button" [style.--menu-hover]="theme() === 'dark' ? '#1e293b' : '#f8fafc'" [style.color]="theme() === 'dark' ? '#dbe7f5' : null" (click)="openView('password')">Alterar senha</button>
+                @if (isAdmin()) {
+                  <button type="button" [style.--menu-hover]="theme() === 'dark' ? '#1e293b' : '#f8fafc'" [style.color]="theme() === 'dark' ? '#dbe7f5' : null" (click)="openView('admin')">Administração</button>
+                }
                 <button type="button" [style.--menu-hover]="theme() === 'dark' ? '#1e293b' : '#f8fafc'" [style.color]="theme() === 'dark' ? '#dbe7f5' : null" (click)="openView('preferences')">Preferências</button>
                 <button type="button" [style.--menu-hover]="theme() === 'dark' ? '#1e293b' : '#f8fafc'" [style.color]="theme() === 'dark' ? '#dbe7f5' : null" (click)="openView('about')">Sobre</button>
                 <button type="button" class="danger" [style.--menu-hover]="theme() === 'dark' ? '#1e293b' : '#f8fafc'" [style.color]="theme() === 'dark' ? '#f87171' : null" (click)="logout()">Sair</button>
@@ -210,6 +216,37 @@
           [form]="passwordForm"
           (save)="changePassword()"
           (back)="openView('dashboard')" />
+      }
+
+      @if (activeView() === 'admin') {
+        <section class="settings-page" style="place-items:start center">
+          <article class="panel settings-card" style="max-width:min(920px, calc(100vw - 64px))">
+            <div class="panel-head">
+              <h2>Usuários bloqueados</h2>
+              <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
+            </div>
+            <label>
+              Senha temporária
+              <input type="password" [formControl]="adminResetForm.controls.newPassword" autocomplete="new-password" placeholder="Ex.: Temporaria@123" />
+            </label>
+            <div class="list">
+              @for (user of lockedUsers(); track user.id) {
+                <div class="line">
+                  <span>
+                    <strong>{{ user.name }}</strong>
+                    <small>{{ user.email }} · {{ user.failedLoginAttempts }} tentativas</small>
+                  </span>
+                  <button type="button" class="primary" (click)="resetLockedPassword(user)">Redefinir</button>
+                </div>
+              } @empty {
+                <div class="empty-state">
+                  <strong>Nenhum usuário bloqueado</strong>
+                  <span>Contas bloqueadas aparecerão aqui.</span>
+                </div>
+              }
+            </div>
+          </article>
+        </section>
       }
 
       @if (activeView() === 'preferences') {
