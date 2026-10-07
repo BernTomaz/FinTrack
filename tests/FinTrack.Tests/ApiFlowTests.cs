@@ -21,6 +21,22 @@ namespace FinTrack.Tests;
 public sealed class ApiFlowTests
 {
     [Fact]
+    public async Task Health_check_returns_database_status_and_correlation_id()
+    {
+        await using var app = new FinTrackApiFactory();
+        using var client = app.CreateClient();
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/health");
+        request.Headers.Add("X-Correlation-Id", "test-correlation-id");
+
+        var response = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("test-correlation-id", response.Headers.GetValues("X-Correlation-Id").Single());
+        Assert.Contains("\"database\":\"Healthy\"", await response.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
     public async Task Auth_accounts_and_categories_flow_works()
     {
         await using var app = new FinTrackApiFactory();

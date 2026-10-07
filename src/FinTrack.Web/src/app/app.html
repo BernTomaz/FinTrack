@@ -150,9 +150,6 @@
         <button type="button" [class.active]="activeView() === 'reports'" (click)="openView('reports')"><span>▥</span> Relatórios</button>
         <button type="button" [class.active]="activeView() === 'categorySummary'" (click)="openCategorySummary()"><span>▤</span> Resumo por categoria</button>
         <button type="button" [class.active]="activeView() === 'export'" (click)="openView('export')"><span>⇩</span> Exportação CSV</button>
-        @if (isAdmin()) {
-          <button type="button" [class.active]="activeView() === 'admin'" (click)="openView('admin')"><span>⚙</span> Administração</button>
-        }
       </nav>
 
       <div class="safe-note">
@@ -188,6 +185,7 @@
                 @if (isAdmin()) {
                   <button type="button" [style.--menu-hover]="theme() === 'dark' ? '#1e293b' : '#f8fafc'" [style.color]="theme() === 'dark' ? '#dbe7f5' : null" (click)="openView('admin')">Administração</button>
                 }
+                <button type="button" [style.--menu-hover]="theme() === 'dark' ? '#1e293b' : '#f8fafc'" [style.color]="theme() === 'dark' ? '#dbe7f5' : null" (click)="openView('status')">Status do sistema</button>
                 <button type="button" [style.--menu-hover]="theme() === 'dark' ? '#1e293b' : '#f8fafc'" [style.color]="theme() === 'dark' ? '#dbe7f5' : null" (click)="openView('preferences')">Preferências</button>
                 <button type="button" [style.--menu-hover]="theme() === 'dark' ? '#1e293b' : '#f8fafc'" [style.color]="theme() === 'dark' ? '#dbe7f5' : null" (click)="openView('about')">Sobre</button>
                 <button type="button" class="danger" [style.--menu-hover]="theme() === 'dark' ? '#1e293b' : '#f8fafc'" [style.color]="theme() === 'dark' ? '#f87171' : null" (click)="logout()">Sair</button>
@@ -245,6 +243,48 @@
                 </div>
               }
             </div>
+          </article>
+        </section>
+      }
+
+      @if (activeView() === 'status') {
+        <section class="settings-page" style="place-items:start center">
+          <article class="panel settings-card" style="max-width:min(720px, calc(100vw - 64px))">
+            <div class="panel-head">
+              <h2>Status do sistema</h2>
+              <button type="button" class="ghost" (click)="loadSystemStatus()">Atualizar</button>
+            </div>
+            @if (healthStatus(); as health) {
+              <div class="list">
+                <div class="line">
+                  <span>
+                    <strong>API</strong>
+                    <small>Serviço principal</small>
+                  </span>
+                  <strong class="positive">{{ health.status }}</strong>
+                </div>
+                <div class="line">
+                  <span>
+                    <strong>Banco de dados</strong>
+                    <small>Conexão da API</small>
+                  </span>
+                  <strong class="positive">{{ health.database }}</strong>
+                </div>
+                <div class="line">
+                  <span>
+                    <strong>Última checagem</strong>
+                    <small>{{ healthCheckedAt() || 'Ainda não consultado' }}</small>
+                    <small>ID: {{ healthCorrelationId() || 'indisponível' }}</small>
+                  </span>
+                  <button type="button" class="ghost" (click)="openView('dashboard')">Voltar</button>
+                </div>
+              </div>
+            } @else {
+              <div class="empty-state">
+                <strong>Status indisponível</strong>
+                <span>Tente atualizar novamente.</span>
+              </div>
+            }
           </article>
         </section>
       }

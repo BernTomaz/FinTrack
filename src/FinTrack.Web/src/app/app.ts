@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ViewEncapsulation, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize, forkJoin } from 'rxjs';
-import { Account, AccountType, AuthResponse, Category, CategoryType, Dashboard, FinTrackApiService, LockedUser, Transaction, TransactionType } from './fintrack-api.service';
+import { Account, AccountType, AuthResponse, Category, CategoryType, Dashboard, FinTrackApiService, HealthStatus, LockedUser, Transaction, TransactionType } from './fintrack-api.service';
 import { AccountsPanelComponent } from './accounts-panel.component';
 import { CategoriesPanelComponent } from './categories-panel.component';
 import { DashboardPanelComponent } from './dashboard-panel.component';
@@ -30,6 +30,7 @@ type View =
   | 'profile'
   | 'password'
   | 'admin'
+  | 'status'
   | 'preferences'
   | 'about';
 
@@ -76,6 +77,9 @@ export class App {
   protected readonly transactions = signal<Transaction[]>([]);
   protected readonly lockedUsers = signal<LockedUser[]>([]);
   protected readonly dashboard = signal<Dashboard | null>(null);
+  protected readonly healthStatus = signal<HealthStatus | null>(null);
+  protected readonly healthCorrelationId = signal('');
+  protected readonly healthCheckedAt = signal('');
   protected readonly userMenuOpen = signal(false);
   protected readonly sidebarHidden = signal(false);
   protected readonly petOpen = signal(false);
@@ -762,6 +766,10 @@ export class App {
       this.loadLockedUsers();
     }
 
+    if (view === 'status') {
+      this.loadSystemStatus();
+    }
+
     if (view === 'income' || view === 'expense') {
       this.editingTransactionId.set('');
       this.transactionForm.patchValue({ type: view === 'income' ? 'Income' : 'Expense' });
@@ -816,6 +824,7 @@ export class App {
       profile: 'Meu perfil',
       password: 'Alterar senha',
       admin: 'Administração',
+      status: 'Status do sistema',
       preferences: 'Preferências',
       about: 'Sobre',
     };
@@ -859,6 +868,22 @@ export class App {
     this.api.getLockedUsers(this.token()).subscribe({
       next: (users) => this.lockedUsers.set(users),
       error: (error) => this.showMessage(this.api.errorMessage(error, 'Não foi possível carregar usuários bloqueados.'), 'error'),
+    });
+  }
+
+  protected loadSystemStatus(): void {
+    this.api.getHealth().subscribe({
+      next: (response) => {
+        this.healthStatus.set(response.body);
+        this.healthCorrelationId.set(response.headers.get('X-Correlation-Id') ?? '');
+        this.healthCheckedAt.set(new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'medium' }).format(new Date()));
+      },
+      error: (error) => {
+        this.healthStatus.set(null);
+        this.healthCorrelationId.set(error.headers?.get('X-Correlation-Id') ?? '');
+        this.healthCheckedAt.set(new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'medium' }).format(new Date()));
+        this.showMessage(this.api.errorMessage(error, 'Não foi possível consultar o status do sistema.'), 'error');
+      },
     });
   }
 

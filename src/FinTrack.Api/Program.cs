@@ -28,7 +28,8 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins("http://localhost:4200", "http://127.0.0.1:4200", "http://localhost:4201", "http://127.0.0.1:4201")
             .AllowAnyHeader()
-            .AllowAnyMethod());
+            .AllowAnyMethod()
+            .WithExposedHeaders("X-Correlation-Id"));
 });
 builder.Services.AddInfrastructure(connectionString);
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
@@ -62,10 +63,44 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("Frontend");
+app.Use(async (context, next) =>
+{
+    var correlationId = context.Request.Headers["X-Correlation-Id"].FirstOrDefault();
+    if (string.IsNullOrWhiteSpace(correlationId))
+    {
+        correlationId = context.TraceIdentifier;
+    }
+
+    context.Response.Headers["X-Correlation-Id"] = correlationId;
+
+    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+    using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+    {
+        try
+        {
+            await next(context);
+            logger.LogInformation(
+                "Request {Method} {Path} completed {StatusCode}. CorrelationId: {CorrelationId}",
+                context.Request.Method,
+                context.Request.Path,
+                context.Response.StatusCode,
+                correlationId);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Unhandled error while processing {Method} {Path}. CorrelationId: {CorrelationId}", context.Request.Method, context.Request.Path, correlationId);
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            await context.Response.WriteAsJsonAsync(new { message = "Erro interno ao processar a solicitação.", correlationId });
+        }
+    }
+});
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }))
+app.MapGet("/health", async (FinTrackDbContext db, CancellationToken cancellationToken) =>
+    await db.Database.CanConnectAsync(cancellationToken)
+        ? Results.Ok(new { status = "Healthy", database = "Healthy" })
+        : Results.Problem("Banco de dados indisponível.", statusCode: StatusCodes.Status503ServiceUnavailable))
     .WithName("HealthCheck");
 app.MapAuthEndpoints();
 app.MapAccountEndpoints();

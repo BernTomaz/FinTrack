@@ -786,6 +786,11 @@ nav .active {
   overflow-wrap: anywhere;
 }
 
+.line span strong,
+.line span small {
+  display: block;
+}
+
 .compact .line:first-child,
 .account-line:first-child {
   border-top: 0;

@@ -51,6 +51,11 @@ export interface Dashboard {
   expensesByCategory: { categoryName: string; total: number }[];
 }
 
+export interface HealthStatus {
+  status: string;
+  database: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class FinTrackApiService {
   private readonly http = inject(HttpClient);
@@ -141,6 +146,10 @@ export class FinTrackApiService {
       responseType: 'blob',
       observe: 'response',
     });
+  }
+
+  getHealth() {
+    return this.http.get<HealthStatus>(`${this.apiUrl}/health`, { observe: 'response' });
   }
 
   saveSession(auth: AuthResponse): void {

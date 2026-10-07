@@ -21,8 +21,10 @@ public static class AuthEndpoints
             FinTrackDbContext db,
             PasswordHasher passwordHasher,
             JwtTokenService tokenService,
+            ILoggerFactory loggerFactory,
             CancellationToken cancellationToken) =>
         {
+            var logger = loggerFactory.CreateLogger("FinTrack.Auth");
             var name = request.Name.Trim();
             var email = request.Email.Trim().ToLowerInvariant();
 
@@ -65,6 +67,7 @@ public static class AuthEndpoints
             var user = new User(name, email, passwordHasher.Hash(request.Password), isFirstUser);
             db.Users.Add(user);
             await db.SaveChangesAsync(cancellationToken);
+            logger.LogInformation("User registered. UserId: {UserId}, IsAdmin: {IsAdmin}", user.Id, user.IsAdmin);
 
             return Results.Created($"/users/{user.Id}", ToResponse(user, tokenService));
         });
@@ -74,8 +77,10 @@ public static class AuthEndpoints
             FinTrackDbContext db,
             PasswordHasher passwordHasher,
             JwtTokenService tokenService,
+            ILoggerFactory loggerFactory,
             CancellationToken cancellationToken) =>
         {
+            var logger = loggerFactory.CreateLogger("FinTrack.Auth");
             if (string.IsNullOrWhiteSpace(request.Email) ||
                 string.IsNullOrWhiteSpace(request.Password))
             {
@@ -92,11 +97,13 @@ public static class AuthEndpoints
 
             if (user is null)
             {
+                logger.LogWarning("Login failed for unknown email.");
                 return Results.Unauthorized();
             }
 
             if (user.IsLocked)
             {
+                logger.LogWarning("Login blocked for locked user. UserId: {UserId}", user.Id);
                 return Results.Text(LockedMessage, statusCode: StatusCodes.Status423Locked);
             }
 
@@ -107,14 +114,17 @@ public static class AuthEndpoints
 
                 if (user.IsLocked)
                 {
+                    logger.LogWarning("User locked after failed login attempts. UserId: {UserId}", user.Id);
                     return Results.Text(LockedMessage, statusCode: StatusCodes.Status423Locked);
                 }
 
+                logger.LogWarning("Login failed. UserId: {UserId}, FailedAttempts: {FailedAttempts}", user.Id, user.FailedLoginAttempts);
                 return Results.Unauthorized();
             }
 
             user.ResetLoginAttempts();
             await db.SaveChangesAsync(cancellationToken);
+            logger.LogInformation("Login succeeded. UserId: {UserId}", user.Id);
 
             return Results.Ok(ToResponse(user, tokenService));
         });
@@ -223,8 +233,10 @@ public static class AuthEndpoints
             FinTrackDbContext db,
             PasswordHasher passwordHasher,
             ClaimsPrincipal principal,
+            ILoggerFactory loggerFactory,
             CancellationToken cancellationToken) =>
         {
+            var logger = loggerFactory.CreateLogger("FinTrack.Auth");
             if (!await IsAdmin(db, principal, cancellationToken))
             {
                 return Results.Forbid();
@@ -243,6 +255,7 @@ public static class AuthEndpoints
 
             user.ResetBlockedPassword(passwordHasher.Hash(request.NewPassword));
             await db.SaveChangesAsync(cancellationToken);
+            logger.LogInformation("Admin reset password for locked user. AdminUserId: {AdminUserId}, UserId: {UserId}", principal.GetUserId(), user.Id);
 
             return Results.NoContent();
         })
