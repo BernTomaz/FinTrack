@@ -38,12 +38,8 @@
 ## Fora do MVP
 
 - Integração bancária.
-- Pagamento online.
 - IA.
 - OCR.
-- Upload de comprovantes.
-- Notificações por e-mail.
 - App mobile.
 - Multi-moeda.
-- Compartilhamento de contas.
 - Assinatura paga.

@@ -83,6 +83,8 @@ async function main() {
   await shot(page, 'login', '001-login');
   await page.getByRole('button', { name: /criar conta grátis/i }).click();
   await page.waitForTimeout(400);
+  await page.getByPlaceholder('Crie sua senha').fill('Senha@123');
+  await page.waitForTimeout(400);
   await shot(page, 'login', '002-register');
   await page.getByRole('button', { name: /voltar para login/i }).click();
   await page.waitForTimeout(400);
@@ -112,6 +114,29 @@ async function main() {
   await page.getByRole('button', { name: /Relatórios/ }).first().click();
   await page.waitForTimeout(500);
   await shot(page, 'accounts', '003-reports');
+
+  await prepare('settings');
+  await page.getByTitle('Menu do usuário').click();
+  await page.waitForTimeout(400);
+  await shot(page, 'settings', '001-user-menu');
+  await page.getByRole('button', { name: 'Meu perfil' }).click();
+  await page.waitForTimeout(500);
+  await shot(page, 'settings', '002-profile');
+  await page.getByTitle('Menu do usuário').click();
+  await page.getByRole('button', { name: 'Alterar senha' }).click();
+  await page.waitForTimeout(500);
+  await shot(page, 'settings', '003-password');
+  await page.getByTitle('Menu do usuário').click();
+  await page.getByRole('button', { name: 'Preferências' }).click();
+  await page.waitForTimeout(500);
+  await shot(page, 'settings', '004-preferences');
+  await page.getByTitle('Menu do usuário').click();
+  await page.getByRole('button', { name: 'Status do sistema' }).click();
+  await page.waitForTimeout(800);
+  await shot(page, 'settings', '005-status');
+  await page.getByRole('button', { name: /Exportação CSV/ }).first().click();
+  await page.waitForTimeout(500);
+  await shot(page, 'settings', '006-export');
 
   await browser.close();
 }

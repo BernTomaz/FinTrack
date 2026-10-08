@@ -52,20 +52,20 @@ O MVP contém apenas o necessário para o sistema funcionar bem.
 - Bloqueio de exclusão de contas e categorias com lançamentos vinculados
 - Perfil editável
 - Alteração de senha
+- Bloqueio de login após tentativas inválidas
+- Painel admin para redefinir senha de usuários bloqueados
+- Status do sistema
+- Preferências locais
 
 ## Fora do MVP
 
 Não implementar agora:
 
 - Integração bancária
-- Pagamento online
 - IA
 - OCR
-- Upload de comprovantes
-- Notificações por e-mail
 - App mobile
 - Multi-moeda
-- Compartilhamento de contas entre usuários
 - Assinatura paga
 
 Esses recursos podem ser pensados depois do MVP.
@@ -83,12 +83,17 @@ Campos:
 - Email
 - PasswordHash
 - CreatedAt
+- IsAdmin
+- FailedLoginAttempts
+- IsLocked
 
 Regras:
 
 - E-mail deve ser único
 - Senha deve ser armazenada como hash
 - Usuário só pode acessar os próprios dados
+- Primeiro usuário cadastrado é administrador
+- Login é bloqueado após excesso de tentativas inválidas
 
 ### Account
 
@@ -232,6 +237,8 @@ POST /auth/login
 GET /auth/me
 PUT /auth/me
 PUT /auth/password
+GET /auth/admin/locked-users
+POST /auth/admin/users/{id}/reset-password
 ```
 
 ### Accounts
@@ -308,22 +315,20 @@ FinTrack/
 
 Responsável por:
 
-- Controllers
+- Endpoints Minimal API
 - Autenticação
 - Configuração da API
 - Swagger
 - Health check
 
-Endpoints devem manter a lógica de negócio nos services.
+Endpoints devem manter a lógica direta e simples, sem camadas extras enquanto o MVP não pedir.
 
 ### FinTrack.Application
 
 Responsável por:
 
-- Services
 - DTOs
-- Validações de caso de uso
-- Regras de aplicação
+- Contratos usados pela API
 
 ### FinTrack.Domain
 
@@ -339,7 +344,6 @@ Responsável por:
 
 - DbContext
 - Migrations
-- Repositórios, se forem necessários
 - Configuração do Entity Framework
 
 ## DTOs principais
@@ -515,7 +519,7 @@ Testes mínimos:
 ### 11. Testes
 
 - Testes de regras de negócio
-- Testes de services principais
+- Testes de fluxos principais
 
 ### 12. Finalização
 

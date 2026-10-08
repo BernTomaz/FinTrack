@@ -8,7 +8,14 @@ Responsabilidades:
 
 - Identificar o dono dos dados financeiros.
 - Armazenar nome, e-mail e hash de senha.
+- Registrar se é administrador.
+- Controlar tentativas inválidas e bloqueio de login.
 - Isolar contas, categorias e lançamentos por usuário.
+
+Regras:
+
+- O primeiro usuário cadastrado é administrador.
+- Usuário bloqueado não consegue fazer login até um reset admin de senha.
 
 ## Account
 

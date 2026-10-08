@@ -18,6 +18,10 @@ Tela de contas mostrando saldo inicial e data de início, usados no cálculo do 
 
 ![Contas do FinTrack](docs/assets/fintrack-accounts.gif)
 
+Menu do usuário com perfil, alteração de senha, preferências, status do sistema e exportação CSV.
+
+![Configurações do FinTrack](docs/assets/fintrack-settings.gif)
+
 ## Documentação
 
 - [Wiki do projeto](docs/wiki.md)
@@ -96,6 +100,12 @@ FinTrack/
 - Exportação CSV de lançamentos por mês ou intervalo
 - Exclusão de lançamentos
 - Bloqueio de exclusão de contas e categorias com lançamentos vinculados
+- Perfil editável com e-mail somente leitura
+- Alteração de senha autenticada
+- Bloqueio de login após tentativas inválidas
+- Painel admin para redefinir senha de usuários bloqueados
+- Status do sistema com health check da API e do banco
+- Preferências locais de tema, mês, cursor e pet Fin
 
 ## Modo de desenvolvimento
 
@@ -105,7 +115,7 @@ A solução .NET usa o formato `.slnx`.
 
 ## Status
 
-MVP funcional validado localmente. O projeto já possui autenticação, contas, categorias, lançamentos, dashboard mensal, exportação CSV, frontend Angular e testes principais.
+MVP funcional validado localmente. O projeto já possui autenticação, contas, categorias, lançamentos, dashboard mensal, exportação CSV, perfil, alteração de senha, preferências locais, status do sistema, frontend Angular e testes principais.
 
 Contas e categorias com lançamentos vinculados não podem ser excluídas diretamente. Para removê-las, exclua primeiro os lançamentos relacionados.
 

@@ -10,6 +10,8 @@ Garantir que o MVP funcione e seja simples de executar localmente.
 - Conferir fluxo manual do MVP
 - Atualizar README
 - Validar Docker
+- Atualizar Wiki
+- Revisar prints dinâmicos
 - Registrar próximos passos
 
 ## Critério de pronto
@@ -18,6 +20,7 @@ Garantir que o MVP funcione e seja simples de executar localmente.
 - CRUDs principais funcionando
 - Dashboard calculando corretamente
 - CSV exportando
+- Perfil, senha, bloqueio de login e reset admin funcionando
 - Testes principais passando
-- README com comandos reais
+- README e Wiki com comandos reais e prints atualizados
 

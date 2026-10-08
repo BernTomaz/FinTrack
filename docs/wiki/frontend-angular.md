@@ -16,6 +16,10 @@ O frontend do FinTrack é uma aplicação Angular 20 focada no fluxo principal d
 - Exportação
 - Perfil
 - Alteração de senha
+- Administração de usuários bloqueados
+- Status do sistema
+- Preferências
+- Sobre
 
 ## Componentes
 
@@ -30,6 +34,8 @@ Os painéis principais foram separados em componentes para manter o arquivo prin
 - `profile-panel`
 - `password-panel`
 
+As telas de administração, status, preferências e sobre ficam no componente principal porque são simples e não justificam um componente próprio agora.
+
 ## API e Sessão
 
 O serviço Angular centraliza:
@@ -38,6 +44,7 @@ O serviço Angular centraliza:
 - Token JWT.
 - Dados do usuário autenticado.
 - URL base da API.
+- Indicador de administrador.
 
 ## Responsividade
 

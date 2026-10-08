@@ -12,6 +12,8 @@ O FinTrack usa autenticação JWT para proteger os dados financeiros do usuário
 4. O frontend envia o token nas chamadas protegidas.
 5. A API identifica o usuário e filtra os dados pelo dono autenticado.
 
+O primeiro usuário cadastrado recebe perfil de administrador.
+
 ## Perfil
 
 O usuário pode:
@@ -21,6 +23,15 @@ O usuário pode:
 - Alterar a senha em `/auth/password`.
 
 O e-mail fica somente leitura depois do cadastro.
+
+## Bloqueio de Login
+
+Após 3 tentativas inválidas, a conta fica bloqueada e o login retorna `423 Locked`.
+
+Um administrador pode:
+
+- Listar usuários bloqueados em `/auth/admin/locked-users`.
+- Redefinir uma senha temporária em `/auth/admin/users/{id}/reset-password`.
 
 ## Isolamento de Dados
 
@@ -32,3 +43,4 @@ Contas, categorias, lançamentos, dashboard e exportação CSV sempre usam o usu
 - JWT assinado pela chave configurada no ambiente.
 - Chave JWT e senhas locais fora do versionamento.
 - Alteração de senha exige a senha atual.
+- Redefinição admin exige senha temporária forte.

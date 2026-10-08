@@ -12,10 +12,18 @@ Criar a interface web do MVP.
 - Contas
 - Categorias
 - Lançamentos
+- Relatórios
+- Exportação
+- Perfil
+- Alteração de senha
+- Administração de usuários bloqueados
+- Status do sistema
+- Preferências
+- Sobre
 
 ## Fluxo
 
-Usuário entra, faz login, acessa dashboard e gerencia suas informacoes financeiras.
+Usuário entra, faz login, acessa dashboard, gerencia suas informações financeiras e ajusta opções da própria sessão.
 
 ## Decisão de interface
 
@@ -36,4 +44,10 @@ Primeira versão funcional concluída.
 - Categorias
 - Lançamentos
 - Exportação CSV
+- Relatórios e filtros
+- Perfil editável
+- Alteração de senha
+- Administração de usuários bloqueados para admin
+- Status do sistema
+- Preferências locais de tema, mês, cursor e pet
 - Layout responsivo inicial

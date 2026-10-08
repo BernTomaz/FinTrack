@@ -63,6 +63,12 @@ MVP funcional validado localmente.
 - Script de seed/demo por API
 - Feedback de carregamento no frontend
 - Limite de descrição de lançamento alinhado entre API e banco
+- Bloqueio de login por tentativas inválidas
+- Primeiro usuário cadastrado como administrador
+- Tela admin para redefinir senha de usuários bloqueados
+- Status do sistema no frontend
+- Preferências locais de tema, mês, cursor e pet
+- Tela Sobre com autoria e link do GitHub
 
 ## Em aberto
 

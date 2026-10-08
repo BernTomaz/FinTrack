@@ -27,9 +27,9 @@ JWT permite autenticar requisições HTTP de forma stateless e integrar frontend
 
 A arquitetura em camadas separa responsabilidades e facilita manutenção, testes e evolução do projeto.
 
-## Por que services diretos?
+## Por que endpoints diretos?
 
-Services diretos e DTOs simples mantêm o MVP legível. Abstrações novas só devem entrar quando houver repetição real ou ganho claro.
+Endpoints diretos e DTOs simples mantêm o MVP legível. Services e abstrações novas só devem entrar quando houver repetição real ou ganho claro.
 
 ## Por que `.slnx`?
 

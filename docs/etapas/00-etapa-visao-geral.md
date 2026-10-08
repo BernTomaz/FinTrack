@@ -16,8 +16,13 @@ Permitir que o usuário registre contas, categorias e lançamentos, acompanhe o 
 - Usuário filtra lançamentos
 - Usuário acompanha dashboard mensal
 - Usuário exporta lançamentos em CSV
+- Usuário edita perfil e altera senha
+- Sistema bloqueia login após tentativas inválidas
+- Administrador redefine senha de usuários bloqueados
+- Usuário ajusta preferências locais
+- Usuário consulta status do sistema
 
 ## Critério de pronto
 
-O MVP termina quando os fluxos principais funcionarem de ponta a ponta com testes principais passando.
+O MVP termina quando os fluxos principais funcionarem de ponta a ponta, com testes principais passando, README/Wiki atualizados e prints dinâmicos revisados.
 

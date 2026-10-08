@@ -20,11 +20,9 @@ Responsável pelas regras centrais do negócio:
 
 ### Application
 
-Responsável pelos casos de uso da aplicação:
+Responsável pelos contratos simples compartilhados pela API:
 
-- Services
 - DTOs
-- Validações de fluxo
 - Contratos usados pela API
 
 ### Infrastructure
@@ -66,6 +64,6 @@ Web -> Api
 
 ## Decisão Arquitetural
 
-O projeto começa com services diretos e DTOs simples. Repositórios e abstrações novas só entram se reduzirem repetição real.
+O projeto começa com endpoints diretos e DTOs simples. Services, repositórios e abstrações novas só entram se reduzirem repetição real.
 
 A solução .NET usa `FinTrack.slnx`.

@@ -18,13 +18,11 @@ Responsabilidades:
 
 ### FinTrack.Application
 
-Casos de uso da aplicação.
+Contratos simples compartilhados pela API.
 
 Responsabilidades:
 
-- Services
 - DTOs
-- Validações de fluxo
 - Contratos usados pela API
 
 ### FinTrack.Domain
@@ -72,6 +70,6 @@ Web -> Api
 
 ## Decisão arquitetural
 
-Começar com services diretos e DTOs simples. Repositórios só entram se o acesso a dados começar a repetir lógica real.
+Começar com endpoints diretos e DTOs simples. Services e repositórios só entram se reduzirem repetição real.
 
 A solução .NET usa `FinTrack.slnx`, não `.sln`.

@@ -8,12 +8,17 @@ POST /auth/login
 GET /auth/me
 PUT /auth/me
 PUT /auth/password
+GET /auth/admin/locked-users
+POST /auth/admin/users/{id}/reset-password
 ```
 
 Observações:
 
 - `PUT /auth/me` atualiza o nome do usuário autenticado e retorna um novo JWT com os dados atualizados.
 - `PUT /auth/password` valida a senha atual antes de salvar o novo hash de senha.
+- `POST /auth/login` retorna `423 Locked` após excesso de tentativas inválidas.
+- O primeiro usuário cadastrado é administrador.
+- `GET /auth/admin/locked-users` e `POST /auth/admin/users/{id}/reset-password` exigem administrador.
 
 ## Accounts
 

@@ -51,6 +51,7 @@ docker/sqlserver/fintrack-migrations.sql
 
 ## Regras Persistidas
 
+- Usuários possuem flags de administrador, bloqueio e contador de tentativas inválidas.
 - Contas possuem saldo inicial e data de início.
 - Lançamentos possuem descrição com limite alinhado entre API e banco.
 - Contas e categorias com lançamentos vinculados não devem ser removidas diretamente.

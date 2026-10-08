@@ -15,6 +15,10 @@
 - Cadastro e login
 - Perfil editável
 - Alteração de senha
+- Bloqueio de login por tentativas inválidas
+- Reset admin de senha para usuários bloqueados
+- Status do sistema
+- Preferências locais
 - Contas financeiras
 - Categorias
 - Lançamentos
@@ -49,12 +53,8 @@
 ## Fora do MVP
 
 - Integração bancária
-- Pagamento online
 - IA
 - OCR
-- Upload de comprovantes
-- Notificações por e-mail
 - App mobile
 - Multi-moeda
-- Compartilhamento de contas
 - Assinatura paga

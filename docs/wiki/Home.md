@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-FinTrack é um sistema web para controle financeiro pessoal, com cadastro de usuários, login, contas financeiras, categorias, lançamentos, dashboard mensal, gráfico de fluxo de caixa e exportação CSV.
+FinTrack é um sistema web para controle financeiro pessoal, com cadastro de usuários, login, contas financeiras, categorias, lançamentos, dashboard mensal, gráfico de fluxo de caixa, exportação CSV, perfil e preferências locais.
 
 ## Status Atual
 
@@ -51,6 +51,9 @@ Próximas etapas:
 ## Segurança Atual
 
 - Cadastro e login com hash de senha.
+- Bloqueio de login após excesso de tentativas inválidas.
+- Primeiro usuário cadastrado é administrador.
+- Administrador pode listar usuários bloqueados e redefinir senha temporária.
 - JWT para proteger endpoints do usuário autenticado.
 - E-mail do perfil somente leitura.
 - Alteração de senha exige a senha atual.

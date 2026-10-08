@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-A API expõe endpoints REST para autenticação, perfil, contas, categorias, lançamentos, dashboard e exportação CSV.
+A API expõe endpoints REST para autenticação, perfil, administração básica, contas, categorias, lançamentos, dashboard, status e exportação CSV.
 
 ## Endpoints Principais
 
@@ -12,6 +12,8 @@ A API expõe endpoints REST para autenticação, perfil, contas, categorias, lan
 | Login | POST `/auth/login` |
 | Perfil | GET, PUT `/auth/me` |
 | Senha | PUT `/auth/password` |
+| Usuários bloqueados | GET `/auth/admin/locked-users` |
+| Reset admin de senha | POST `/auth/admin/users/{id}/reset-password` |
 | Contas | GET, POST `/accounts` |
 | Conta por Id | GET, PUT, DELETE `/accounts/{id}` |
 | Categorias | GET, POST `/categories` |
@@ -44,3 +46,6 @@ Sem intervalo livre, a exportação usa o mês selecionado. Com `startDate` ou `
 - `POST /transactions` e `PUT /transactions/{id}` rejeitam data anterior ao início da conta.
 - `PUT /auth/me` retorna um novo JWT com os dados atualizados.
 - `PUT /auth/password` valida a senha atual antes de salvar a nova senha.
+- `POST /auth/login` retorna `423 Locked` quando a conta excede o limite de tentativas inválidas.
+- Endpoints `/auth/admin/*` exigem usuário administrador.
+- O primeiro usuário cadastrado vira administrador.

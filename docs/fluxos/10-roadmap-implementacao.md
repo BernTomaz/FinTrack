@@ -20,6 +20,9 @@
 - Login
 - JWT
 - Usuário logado
+- Perfil e alteração de senha
+- Bloqueio por tentativas inválidas
+- Reset admin de usuários bloqueados
 
 ## 4. Financeiro
 
@@ -39,6 +42,9 @@
 - Dashboard
 - CRUDs
 - Filtros
+- Relatórios
+- Perfil e senha
+- Preferências e status
 - Responsividade mobile-first
 
 ## 7. Fechamento
@@ -56,3 +62,4 @@
 - Bloqueio de exclusão de contas e categorias com lançamentos vinculados.
 - Mensagens de erro temporárias com saída suave.
 - Documentação final de status, endpoints, testes e fluxos.
+- README, Wiki e GIFs dinâmicos revisados.

@@ -9,6 +9,7 @@ GIFS = {
     "login": "fintrack-login.gif",
     "dashboard": "fintrack-dashboard.gif",
     "accounts": "fintrack-accounts.gif",
+    "settings": "fintrack-settings.gif",
 }
 
 
