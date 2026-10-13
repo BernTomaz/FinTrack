@@ -142,14 +142,14 @@
       </div>
 
       <nav aria-label="Menu principal">
-        <button type="button" [class.active]="activeView() === 'dashboard'" (click)="openView('dashboard')"><span>⌂</span> Dashboard</button>
-        <button type="button" [class.active]="activeView() === 'income'" (click)="openView('income')"><span>↗</span> Receitas</button>
-        <button type="button" [class.active]="activeView() === 'expense'" (click)="openView('expense')"><span>↘</span> Despesas</button>
-        <button type="button" [class.active]="activeView() === 'accounts'" (click)="openView('accounts')"><span>▣</span> Contas</button>
-        <button type="button" [class.active]="activeView() === 'categories'" (click)="openView('categories')"><span>◇</span> Categorias</button>
-        <button type="button" [class.active]="activeView() === 'reports'" (click)="openView('reports')"><span>▥</span> Relatórios</button>
-        <button type="button" [class.active]="activeView() === 'categorySummary'" (click)="openCategorySummary()"><span>▤</span> Resumo por categoria</button>
-        <button type="button" [class.active]="activeView() === 'export'" (click)="openView('export')"><span>⇩</span> Exportação CSV</button>
+        <button type="button" title="Dashboard" [class.active]="activeView() === 'dashboard'" (click)="openView('dashboard')"><span class="nav-icon" aria-hidden="true">⌂</span><span class="nav-label">Dashboard</span></button>
+        <button type="button" title="Receitas" [class.active]="activeView() === 'income'" (click)="openView('income')"><span class="nav-icon" aria-hidden="true">↗</span><span class="nav-label">Receitas</span></button>
+        <button type="button" title="Despesas" [class.active]="activeView() === 'expense'" (click)="openView('expense')"><span class="nav-icon" aria-hidden="true">↘</span><span class="nav-label">Despesas</span></button>
+        <button type="button" title="Contas" [class.active]="activeView() === 'accounts'" (click)="openView('accounts')"><span class="nav-icon" aria-hidden="true">▣</span><span class="nav-label">Contas</span></button>
+        <button type="button" title="Categorias" [class.active]="activeView() === 'categories'" (click)="openView('categories')"><span class="nav-icon" aria-hidden="true">◇</span><span class="nav-label">Categorias</span></button>
+        <button type="button" title="Relatórios" [class.active]="activeView() === 'reports'" (click)="openView('reports')"><span class="nav-icon" aria-hidden="true">▥</span><span class="nav-label">Relatórios</span></button>
+        <button type="button" title="Resumo por categoria" [class.active]="activeView() === 'categorySummary'" (click)="openCategorySummary()"><span class="nav-icon" aria-hidden="true">▤</span><span class="nav-label">Resumo por categoria</span></button>
+        <button type="button" title="Exportação CSV" [class.active]="activeView() === 'export'" (click)="openView('export')"><span class="nav-icon" aria-hidden="true">⇩</span><span class="nav-label">Exportação CSV</span></button>
       </nav>
 
       <div class="safe-note">
@@ -164,9 +164,6 @@
     <section class="content">
       <header class="topbar">
         <div class="brand-row">
-          @if (sidebarHidden()) {
-            <button type="button" class="icon" title="Mostrar menu lateral" (click)="toggleSidebar()">☰</button>
-          }
           <h1>{{ pageTitle() }}</h1>
         </div>
         <div class="top-actions">
@@ -194,6 +191,21 @@
           </div>
         </div>
       </header>
+
+      @if (sidebarHidden()) {
+        <nav class="compact-nav" aria-label="Menu principal compacto">
+          <span class="brand-mark compact-brand" aria-hidden="true">FT</span>
+          <button type="button" class="icon compact-toggle" title="Mostrar menu lateral" (click)="toggleSidebar()">☰</button>
+          <button type="button" title="Dashboard" [class.active]="activeView() === 'dashboard'" (click)="openView('dashboard')"><span class="nav-icon" aria-hidden="true">⌂</span></button>
+          <button type="button" title="Receitas" [class.active]="activeView() === 'income'" (click)="openView('income')"><span class="nav-icon" aria-hidden="true">↗</span></button>
+          <button type="button" title="Despesas" [class.active]="activeView() === 'expense'" (click)="openView('expense')"><span class="nav-icon" aria-hidden="true">↘</span></button>
+          <button type="button" title="Contas" [class.active]="activeView() === 'accounts'" (click)="openView('accounts')"><span class="nav-icon" aria-hidden="true">▣</span></button>
+          <button type="button" title="Categorias" [class.active]="activeView() === 'categories'" (click)="openView('categories')"><span class="nav-icon" aria-hidden="true">◇</span></button>
+          <button type="button" title="Relatórios" [class.active]="activeView() === 'reports'" (click)="openView('reports')"><span class="nav-icon" aria-hidden="true">▥</span></button>
+          <button type="button" title="Resumo por categoria" [class.active]="activeView() === 'categorySummary'" (click)="openCategorySummary()"><span class="nav-icon" aria-hidden="true">▤</span></button>
+          <button type="button" title="Exportação CSV" [class.active]="activeView() === 'export'" (click)="openView('export')"><span class="nav-icon" aria-hidden="true">⇩</span></button>
+        </nav>
+      }
 
       @if (isLoading()) {
         <div class="loading-strip">Carregando dados...</div>

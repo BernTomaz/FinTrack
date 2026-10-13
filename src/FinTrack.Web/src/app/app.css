@@ -314,7 +314,7 @@ select {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   min-height: 100vh;
-  transition: 220ms ease;
+  transition: grid-template-columns 460ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .app-shell.dark-theme,
@@ -369,8 +369,19 @@ select {
   min-width: 0;
   overflow: hidden;
   padding: 28px 24px;
-  transition: 220ms ease;
+  transition:
+    width 460ms cubic-bezier(0.16, 1, 0.3, 1),
+    padding 460ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 300ms ease,
+    border-color 300ms ease;
   width: 300px;
+}
+
+.sidebar > * {
+  transition:
+    opacity 280ms ease,
+    transform 420ms cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 280ms ease;
 }
 
 nav {
@@ -400,6 +411,67 @@ nav .active {
   font-weight: 800;
 }
 
+.nav-icon {
+  flex: 0 0 20px;
+  text-align: center;
+}
+
+.nav-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compact-nav {
+  align-items: stretch;
+  animation: compact-nav-enter 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  border-right: 1px solid #e5e7eb;
+  bottom: 0;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  left: 0;
+  overflow-y: auto;
+  padding: 16px 10px 14px;
+  position: fixed;
+  scrollbar-width: thin;
+  top: 0;
+  width: 72px;
+  z-index: 10;
+}
+
+@keyframes compact-nav-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.compact-brand {
+  margin-bottom: 10px;
+}
+
+.compact-toggle {
+  margin-bottom: 8px;
+}
+
+.compact-nav button {
+  justify-content: center;
+  min-height: 42px;
+  padding: 0;
+  width: 48px;
+}
+
+.compact-nav .active {
+  border-left-width: 0;
+  box-shadow: inset 4px 0 0 #16a34a;
+}
+
 .safe-note {
   align-items: center;
   border-top: 1px solid #e5e7eb;
@@ -425,6 +497,7 @@ nav .active {
   align-content: start;
   gap: 14px;
   padding: 0 28px 28px;
+  transition: padding 460ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .topbar {
@@ -1716,11 +1789,27 @@ nav .active {
 }
 
 .sidebar-hidden .sidebar > * {
+  opacity: 0;
+  transform: translateX(-6px);
   visibility: hidden;
 }
 
+.sidebar-hidden .content {
+  padding-left: 100px;
+}
+
 @media (max-width: 760px) {
-  .sidebar-hidden .sidebar > * {
-    visibility: visible;
+  .sidebar-hidden .content {
+    padding-left: 76px;
+  }
+
+  .compact-nav {
+    padding: 12px 8px;
+    width: 56px;
+  }
+
+  .compact-nav button {
+    min-height: 40px;
+    width: 40px;
   }
 }
