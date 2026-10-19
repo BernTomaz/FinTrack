@@ -22,6 +22,8 @@ O deploy público fica fora do MVP, mas o projeto já deve estar pronto para uma
 
 ## Antes de publicar
 
+Procedimento: [Preparação para produção](producao.md).
+
 - Configurar variáveis de ambiente.
 - Configurar `fintrack-api-url` no frontend para a URL real da API.
 - Usar uma chave JWT forte.
