@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Data.SqlClient;
 
 namespace FinTrack.Tests;
 
@@ -139,6 +140,92 @@ public sealed class ApiFlowTests
         Assert.NotNull(dashboard);
         Assert.Equal(10, dashboard.TotalExpense);
         Assert.Equal(40, dashboard.CurrentBalance);
+    }
+
+    [Fact]
+    public async Task Dashboard_preserves_history_month_boundaries_and_user_isolation()
+    {
+        await using var app = new FinTrackApiFactory();
+        using var client = app.CreateClient();
+        await VerifyDashboardPeriods(app, client);
+    }
+
+    private static async Task VerifyDashboardPeriods(WebApplicationFactory<Program> app, HttpClient client)
+    {
+        await RegisterAndAuthorize(client);
+        var account = await CreateAccount(client, "Conta", 50, new DateOnly(2024, 1, 1));
+        await CreateAccount(client, "Futura", 9999, new DateOnly(2024, 3, 1));
+        var income = await CreateCategory(client, "Salário", CategoryType.Income);
+        var expense = await CreateCategory(client, "Mercado", CategoryType.Expense);
+        var sameName = await CreateCategory(client, "Mercado", CategoryType.Expense);
+        await CreateTransaction(client, account.Id, income.Id, TransactionType.Income, 100, new DateOnly(2024, 1, 31), null);
+        await CreateTransaction(client, account.Id, expense.Id, TransactionType.Expense, 20, new DateOnly(2024, 1, 31), null);
+        await CreateTransaction(client, account.Id, income.Id, TransactionType.Income, 200, new DateOnly(2024, 2, 1), null);
+        await CreateTransaction(client, account.Id, expense.Id, TransactionType.Expense, 30, new DateOnly(2024, 2, 29), null);
+        await CreateTransaction(client, account.Id, expense.Id, TransactionType.Expense, 5, new DateOnly(2024, 2, 29), null);
+        await CreateTransaction(client, account.Id, sameName.Id, TransactionType.Expense, 10, new DateOnly(2024, 2, 15), null);
+        await CreateTransaction(client, account.Id, income.Id, TransactionType.Income, 999, new DateOnly(2024, 3, 1), null);
+        using var other = app.CreateClient();
+        await RegisterAndAuthorize(other, "Outro", "outro@email.com");
+        var otherAccount = await CreateAccount(other, "Outra conta", 8888, new DateOnly(2024, 1, 1));
+        var otherCategory = await CreateCategory(other, "Outra categoria", CategoryType.Expense);
+        await CreateTransaction(other, otherAccount.Id, otherCategory.Id, TransactionType.Expense, 888, new DateOnly(2024, 2, 1), null);
+
+        var dashboard = await client.GetFromJsonAsync<MonthlyDashboardResponse>("/dashboard/monthly?year=2024&month=2");
+        Assert.NotNull(dashboard);
+        Assert.Equal(200, dashboard.TotalIncome);
+        Assert.Equal(45, dashboard.TotalExpense);
+        Assert.Equal(155, dashboard.MonthBalance);
+        Assert.Equal(285, dashboard.CurrentBalance);
+        Assert.Equal(new decimal[] { 35, 10 }, dashboard.ExpensesByCategory.Select(item => item.Total));
+        Assert.Equal(4, dashboard.LatestTransactions.Count);
+        Assert.All(dashboard.LatestTransactions, item => Assert.Equal(2, item.Date.Month));
+        var empty = await client.GetFromJsonAsync<MonthlyDashboardResponse>("/dashboard/monthly?year=2023&month=12");
+        Assert.NotNull(empty);
+        Assert.Equal(0, empty.TotalIncome);
+        Assert.Equal(0, empty.TotalExpense);
+        Assert.Equal(0, empty.CurrentBalance);
+        Assert.Empty(empty.ExpensesByCategory);
+        Assert.Empty(empty.LatestTransactions);
+    }
+
+    [SqlServerFact]
+    public async Task Dashboard_queries_work_on_sql_server()
+    {
+        var connection = new SqlConnectionStringBuilder(Environment.GetEnvironmentVariable("FINTRACK_TEST_SQLSERVER"))
+        {
+            InitialCatalog = $"FinTrackTests_{Guid.NewGuid():N}"
+        }.ConnectionString;
+        await using var app = new FinTrackApiFactory(connection);
+        try
+        {
+            using var client = app.CreateClient();
+            var registrations = await Task.WhenAll(
+                client.PostAsJsonAsync("/auth/register", new RegisterRequest("Concorrente A", "parallel-a@fintrack.local", "Senha@123")),
+                client.PostAsJsonAsync("/auth/register", new RegisterRequest("Concorrente B", "parallel-b@fintrack.local", "Senha@123")));
+            Assert.All(registrations, response => Assert.Equal(HttpStatusCode.Created, response.StatusCode));
+            var users = await Task.WhenAll(registrations.Select(response => response.Content.ReadFromJsonAsync<AuthResponse>()));
+            Assert.Single(users, user => user!.IsAdmin);
+            await VerifyDashboardPeriods(app, client);
+            var accounts = await client.GetFromJsonAsync<List<AccountResponse>>("/accounts");
+            var categories = await client.GetFromJsonAsync<List<CategoryResponse>>("/categories");
+            Assert.NotNull(accounts);
+            Assert.NotNull(categories);
+            var account = accounts.Single(item => item.Name == "Conta");
+            var category = categories.First(item => item.Type == CategoryType.Expense);
+            var accountEdit = await client.PutAsJsonAsync($"/accounts/{account.Id}",
+                new AccountRequest(account.Name, account.Type, account.InitialBalance, new DateOnly(2024, 2, 1)));
+            Assert.Equal(HttpStatusCode.Conflict, accountEdit.StatusCode);
+            var categoryEdit = await client.PutAsJsonAsync($"/categories/{category.Id}",
+                new CategoryRequest(category.Name, CategoryType.Income));
+            Assert.Equal(HttpStatusCode.Conflict, categoryEdit.StatusCode);
+        }
+        finally
+        {
+            await using var db = new FinTrackDbContext(new DbContextOptionsBuilder<FinTrackDbContext>()
+                .UseSqlServer(connection).Options);
+            await db.Database.EnsureDeletedAsync();
+        }
     }
 
     [Fact]
@@ -769,13 +856,18 @@ public sealed class ApiFlowTests
         return transaction;
     }
 
-    private sealed class FinTrackApiFactory : WebApplicationFactory<Program>
+    private sealed class FinTrackApiFactory(string? sqlConnection = null) : WebApplicationFactory<Program>
     {
         private readonly string _databaseName = Guid.NewGuid().ToString();
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.ConfigureLogging(logging => logging.ClearProviders());
+            if (sqlConnection is not null)
+            {
+                builder.UseSetting("ConnectionStrings:DefaultConnection", sqlConnection);
+                return;
+            }
             builder.ConfigureTestServices(services =>
             {
                 services.RemoveAll<DbContextOptions<FinTrackDbContext>>();
@@ -806,5 +898,16 @@ public sealed class ApiFlowTests
 
         private static bool ContainsSqlServer(Type? type) =>
             type?.FullName?.Contains("SqlServer", StringComparison.OrdinalIgnoreCase) == true;
+    }
+}
+
+internal sealed class SqlServerFactAttribute : FactAttribute
+{
+    public SqlServerFactAttribute()
+    {
+        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINTRACK_TEST_SQLSERVER")))
+        {
+            Skip = "Defina FINTRACK_TEST_SQLSERVER para testar em um banco SQL Server temporário.";
+        }
     }
 }

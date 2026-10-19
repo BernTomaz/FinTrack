@@ -34,38 +34,42 @@ public static class DashboardEndpoints
                     transaction.Date >= periodStart &&
                     transaction.Date <= periodEnd);
 
-            var totalIncome = await monthTransactions
-                .Where(transaction => transaction.Type == TransactionType.Income)
-                .SumAsync(transaction => (decimal?)transaction.Amount, cancellationToken) ?? 0;
-            var totalExpense = await monthTransactions
-                .Where(transaction => transaction.Type == TransactionType.Expense)
-                .SumAsync(transaction => (decimal?)transaction.Amount, cancellationToken) ?? 0;
-            var currentIncome = await db.Transactions
-                .Where(transaction => transaction.UserId == userId && transaction.Type == TransactionType.Income && transaction.Date <= periodEnd)
-                .SumAsync(transaction => (decimal?)transaction.Amount, cancellationToken) ?? 0;
-            var currentExpense = await db.Transactions
-                .Where(transaction => transaction.UserId == userId && transaction.Type == TransactionType.Expense && transaction.Date <= periodEnd)
-                .SumAsync(transaction => (decimal?)transaction.Amount, cancellationToken) ?? 0;
+            var totals = await db.Transactions
+                .Where(transaction => transaction.UserId == userId && transaction.Date <= periodEnd)
+                .GroupBy(transaction => transaction.Type)
+                .Select(group => new
+                {
+                    Type = group.Key,
+                    Current = group.Sum(transaction => transaction.Amount),
+                    Monthly = group.Sum(transaction => transaction.Date >= periodStart ? transaction.Amount : 0)
+                })
+                .ToListAsync(cancellationToken);
+            var income = totals.SingleOrDefault(total => total.Type == TransactionType.Income);
+            var expense = totals.SingleOrDefault(total => total.Type == TransactionType.Expense);
+            var totalIncome = income?.Monthly ?? 0;
+            var totalExpense = expense?.Monthly ?? 0;
             var initialBalance = await db.Accounts
                 .Where(account => account.UserId == userId && account.OpeningDate <= periodEnd)
                 .SumAsync(account => (decimal?)account.InitialBalance, cancellationToken) ?? 0;
 
-            var expenseRows = await monthTransactions
+            var categoryTotals = await monthTransactions
                 .Where(transaction => transaction.Type == TransactionType.Expense)
-                .Join(
-                    db.Categories,
-                    transaction => transaction.CategoryId,
-                    category => category.Id,
-                    (transaction, category) => new { transaction, category })
+                .GroupBy(transaction => transaction.CategoryId)
+                .Select(group => new { CategoryId = group.Key, Total = group.Sum(transaction => transaction.Amount) })
+                .OrderByDescending(total => total.Total)
+                .ToListAsync(cancellationToken);
+            // Buscar nomes separadamente evita o plano lento do join em históricos grandes.
+            var categories = await db.Categories
+                .Where(category => category.UserId == userId)
+                .Select(category => new { category.Id, category.Name })
                 .ToListAsync(cancellationToken);
 
-            var expensesByCategory = expenseRows
-                .GroupBy(item => new { item.category.Id, item.category.Name })
-                .Select(group => new CategoryExpenseResponse(
-                    group.Key.Id,
-                    group.Key.Name,
-                    group.Sum(item => item.transaction.Amount)))
-                .OrderByDescending(item => item.Total)
+            var expensesByCategory = categoryTotals
+                .Join(
+                    categories,
+                    total => total.CategoryId,
+                    category => category.Id,
+                    (total, category) => new CategoryExpenseResponse(category.Id, category.Name, total.Total))
                 .ToList();
 
             var latestTransactions = await monthTransactions
@@ -86,7 +90,7 @@ public static class DashboardEndpoints
                 totalIncome,
                 totalExpense,
                 totalIncome - totalExpense,
-                initialBalance + currentIncome - currentExpense,
+                initialBalance + (income?.Current ?? 0) - (expense?.Current ?? 0),
                 expensesByCategory,
                 latestTransactions));
         });
