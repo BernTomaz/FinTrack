@@ -32,7 +32,8 @@ DELETE /accounts/{id}
 
 Observações:
 
-- `POST /accounts` e `PUT /accounts/{id}` aceitam `openingDate`. Quando não informado, a data atual é usada.
+- `POST /accounts` e `PUT /accounts/{id}` aceitam `openingDate`. Quando não informado, o cadastro usa a data atual e a edição mantém a data existente.
+- `PUT /accounts/{id}` retorna `409 Conflict` se a nova data de início for posterior a algum lançamento da conta.
 - `DELETE /accounts/{id}` retorna `404 Not Found` quando a conta não existe ou não pertence ao usuário autenticado.
 - `DELETE /accounts/{id}` retorna `409 Conflict` quando a conta possui lançamentos vinculados.
 - Para excluir uma conta com lançamentos, exclua primeiro os lançamentos relacionados.
@@ -49,6 +50,7 @@ DELETE /categories/{id}
 
 Observações:
 
+- `PUT /categories/{id}` retorna `409 Conflict` se o novo tipo for incompatível com lançamentos vinculados. Renomear a categoria continua permitido.
 - `DELETE /categories/{id}` retorna `404 Not Found` quando a categoria não existe ou não pertence ao usuário autenticado.
 - `DELETE /categories/{id}` retorna `409 Conflict` quando a categoria possui lançamentos vinculados.
 - Para excluir uma categoria com lançamentos, exclua primeiro os lançamentos relacionados.

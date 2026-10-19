@@ -40,13 +40,13 @@ public static class TransactionEndpoints
             if (year is not null && month is not null)
             {
                 var (periodStart, periodEnd) = DateRanges.Month(year.Value, month.Value);
-                query = query.Where(transaction => transaction.Date >= periodStart && transaction.Date < periodEnd);
+                query = query.Where(transaction => transaction.Date >= periodStart && transaction.Date <= periodEnd);
             }
             else if (year is not null)
             {
                 var yearStart = new DateOnly(year.Value, 1, 1);
-                var yearEnd = yearStart.AddYears(1);
-                query = query.Where(transaction => transaction.Date >= yearStart && transaction.Date < yearEnd);
+                var yearEnd = new DateOnly(year.Value, 12, 31);
+                query = query.Where(transaction => transaction.Date >= yearStart && transaction.Date <= yearEnd);
             }
             else if (month is not null)
             {

@@ -2,6 +2,7 @@ using System.Security.Claims;
 using FinTrack.Api.Auth;
 using FinTrack.Application.DTOs.Categories;
 using FinTrack.Domain.Entities;
+using FinTrack.Domain.Enums;
 using FinTrack.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -67,6 +68,14 @@ public static class CategoryEndpoints
                 return Results.NotFound();
             }
 
+            var transactionType = (TransactionType)request.Type;
+            if (request.Type != category.Type && await db.Transactions.AnyAsync(
+                transaction => transaction.CategoryId == id && transaction.Type != transactionType,
+                cancellationToken))
+            {
+                return Results.Conflict("O tipo da categoria deve ser compatível com os lançamentos vinculados.");
+            }
+
             category.Update(request.Name, request.Type);
             await db.SaveChangesAsync(cancellationToken);
 
@@ -104,7 +113,7 @@ public static class CategoryEndpoints
 
     private static IResult? ValidateRequest(CategoryRequest request)
     {
-        var name = request.Name.Trim();
+        var name = request.Name?.Trim() ?? string.Empty;
         if (name.Length == 0)
         {
             return Results.BadRequest("Name is required.");

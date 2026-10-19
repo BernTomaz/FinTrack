@@ -21,6 +21,92 @@ namespace FinTrack.Tests;
 public sealed class ApiFlowTests
 {
     [Fact]
+    public async Task Edits_preserve_existing_transaction_rules()
+    {
+        await using var app = new FinTrackApiFactory();
+        using var client = app.CreateClient();
+        await RegisterAndAuthorize(client);
+        var account = await CreateAccount(client, "Conta", 50);
+        var category = await CreateCategory(client, "Mercado", CategoryType.Expense);
+        var date = new DateOnly(2026, 8, 2);
+        await CreateTransaction(client, account.Id, category.Id, TransactionType.Expense, 10, date, null);
+
+        var invalidAccount = await client.PutAsJsonAsync($"/accounts/{account.Id}",
+            new AccountRequest("Nome rejeitado", AccountType.Savings, 999, date.AddDays(1)));
+        Assert.Equal(HttpStatusCode.Conflict, invalidAccount.StatusCode);
+        var unchangedAccount = await client.GetFromJsonAsync<AccountResponse>($"/accounts/{account.Id}");
+        Assert.Equal(account, unchangedAccount);
+
+        var validAccount = await client.PutAsJsonAsync($"/accounts/{account.Id}",
+            new AccountRequest(account.Name, account.Type, account.InitialBalance, date));
+        Assert.Equal(HttpStatusCode.OK, validAccount.StatusCode);
+
+        var invalidCategory = await client.PutAsJsonAsync($"/categories/{category.Id}",
+            new CategoryRequest("Nome rejeitado", CategoryType.Income));
+        Assert.Equal(HttpStatusCode.Conflict, invalidCategory.StatusCode);
+        Assert.Equal(category, await client.GetFromJsonAsync<CategoryResponse>($"/categories/{category.Id}"));
+
+        var rename = await client.PutAsJsonAsync($"/categories/{category.Id}",
+            new CategoryRequest("Alimentação", CategoryType.Expense));
+        Assert.Equal(HttpStatusCode.OK, rename.StatusCode);
+        var dashboard = await client.GetFromJsonAsync<MonthlyDashboardResponse>("/dashboard/monthly?year=2026&month=8");
+        Assert.NotNull(dashboard);
+        Assert.Equal(40, dashboard.CurrentBalance);
+        Assert.Equal("Alimentação", Assert.Single(dashboard.ExpensesByCategory).CategoryName);
+    }
+
+    [Fact]
+    public async Task Null_required_fields_return_bad_request()
+    {
+        await using var app = new FinTrackApiFactory();
+        using var client = app.CreateClient();
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsJsonAsync("/auth/register",
+            new { name = (string?)null, email = "valid@email.com", password = "Senha@123" })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsJsonAsync("/auth/register",
+            new { name = "Nome", email = (string?)null, password = "Senha@123" })).StatusCode);
+        await RegisterAndAuthorize(client);
+        var account = await CreateAccount(client, "Conta");
+        var category = await CreateCategory(client, "Categoria", CategoryType.Expense);
+        foreach (var path in new[] { "/accounts", "/categories" })
+        {
+            Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsJsonAsync(path,
+                new { name = (string?)null, type = 0 })).StatusCode);
+        }
+        foreach (var path in new[] { "/auth/me", $"/accounts/{account.Id}", $"/categories/{category.Id}" })
+        {
+            Assert.Equal(HttpStatusCode.BadRequest, (await client.PutAsJsonAsync(path,
+                new { name = (string?)null, type = 0 })).StatusCode);
+        }
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsJsonAsync($"/auth/admin/users/{Guid.NewGuid()}/reset-password",
+            new { newPassword = (string?)null })).StatusCode);
+    }
+
+    [Fact]
+    public async Task Maximum_year_includes_last_day_in_dashboard_filters_and_export()
+    {
+        await using var app = new FinTrackApiFactory();
+        using var client = app.CreateClient();
+        await RegisterAndAuthorize(client);
+        var account = await CreateAccount(client, "Conta", 50, DateOnly.MaxValue);
+        var category = await CreateCategory(client, "Categoria", CategoryType.Expense);
+        await CreateTransaction(client, account.Id, category.Id, TransactionType.Expense, 10, DateOnly.MaxValue, "Último dia");
+
+        foreach (var filter in new[] { "year=9999", "year=9999&month=12" })
+        {
+            var transactions = await client.GetFromJsonAsync<List<TransactionResponse>>($"/transactions?{filter}");
+            Assert.NotNull(transactions);
+            Assert.Equal(DateOnly.MaxValue, Assert.Single(transactions).Date);
+            var csv = await client.GetAsync($"/exports/transactions.csv?{filter}");
+            Assert.Equal(HttpStatusCode.OK, csv.StatusCode);
+            Assert.Contains("9999-12-31,Expense,10.00", await csv.Content.ReadAsStringAsync());
+        }
+        var dashboard = await client.GetFromJsonAsync<MonthlyDashboardResponse>("/dashboard/monthly?year=9999&month=12");
+        Assert.NotNull(dashboard);
+        Assert.Equal(10, dashboard.TotalExpense);
+        Assert.Equal(40, dashboard.CurrentBalance);
+    }
+
+    [Fact]
     public async Task Health_check_returns_database_status_and_correlation_id()
     {
         await using var app = new FinTrackApiFactory();

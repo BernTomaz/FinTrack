@@ -66,7 +66,15 @@ public static class AccountEndpoints
                 return Results.NotFound();
             }
 
-            account.Update(request.Name, request.Type, request.InitialBalance, request.OpeningDate ?? account.OpeningDate);
+            var openingDate = request.OpeningDate ?? account.OpeningDate;
+            if (openingDate > account.OpeningDate && await db.Transactions.AnyAsync(
+                transaction => transaction.AccountId == id && transaction.Date < openingDate,
+                cancellationToken))
+            {
+                return Results.Conflict("A data de início não pode ser posterior aos lançamentos desta conta.");
+            }
+
+            account.Update(request.Name, request.Type, request.InitialBalance, openingDate);
             await db.SaveChangesAsync(cancellationToken);
 
             return Results.Ok(ToResponse(account));
@@ -103,7 +111,7 @@ public static class AccountEndpoints
 
     private static IResult? ValidateRequest(AccountRequest request)
     {
-        var name = request.Name.Trim();
+        var name = request.Name?.Trim() ?? string.Empty;
         if (name.Length == 0)
         {
             return Results.BadRequest("Name is required.");

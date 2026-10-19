@@ -25,8 +25,8 @@ public static class AuthEndpoints
             CancellationToken cancellationToken) =>
         {
             var logger = loggerFactory.CreateLogger("FinTrack.Auth");
-            var name = request.Name.Trim();
-            var email = request.Email.Trim().ToLowerInvariant();
+            var name = request.Name?.Trim() ?? string.Empty;
+            var email = request.Email?.Trim().ToLowerInvariant() ?? string.Empty;
 
             if (string.IsNullOrWhiteSpace(name) ||
                 string.IsNullOrWhiteSpace(email) ||
@@ -145,7 +145,7 @@ public static class AuthEndpoints
             JwtTokenService tokenService,
             CancellationToken cancellationToken) =>
         {
-            var name = request.Name.Trim();
+            var name = request.Name?.Trim() ?? string.Empty;
             if (name.Length < 2 || name.Length > 80)
             {
                 return Results.BadRequest("Name must have between 2 and 80 characters.");
@@ -285,8 +285,8 @@ public static class AuthEndpoints
         }
     }
 
-    private static bool IsStrongPassword(string password) =>
-        password.Length is >= 8 and <= 100 &&
+    private static bool IsStrongPassword(string? password) =>
+        password is { Length: >= 8 and <= 100 } &&
         password.Any(char.IsUpper) &&
         password.Any(char.IsLower) &&
         password.Any(char.IsDigit) &&

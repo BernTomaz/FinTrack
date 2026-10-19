@@ -32,7 +32,7 @@ public static class DashboardEndpoints
                 .Where(transaction =>
                     transaction.UserId == userId &&
                     transaction.Date >= periodStart &&
-                    transaction.Date < periodEnd);
+                    transaction.Date <= periodEnd);
 
             var totalIncome = await monthTransactions
                 .Where(transaction => transaction.Type == TransactionType.Income)
@@ -41,13 +41,13 @@ public static class DashboardEndpoints
                 .Where(transaction => transaction.Type == TransactionType.Expense)
                 .SumAsync(transaction => (decimal?)transaction.Amount, cancellationToken) ?? 0;
             var currentIncome = await db.Transactions
-                .Where(transaction => transaction.UserId == userId && transaction.Type == TransactionType.Income && transaction.Date < periodEnd)
+                .Where(transaction => transaction.UserId == userId && transaction.Type == TransactionType.Income && transaction.Date <= periodEnd)
                 .SumAsync(transaction => (decimal?)transaction.Amount, cancellationToken) ?? 0;
             var currentExpense = await db.Transactions
-                .Where(transaction => transaction.UserId == userId && transaction.Type == TransactionType.Expense && transaction.Date < periodEnd)
+                .Where(transaction => transaction.UserId == userId && transaction.Type == TransactionType.Expense && transaction.Date <= periodEnd)
                 .SumAsync(transaction => (decimal?)transaction.Amount, cancellationToken) ?? 0;
             var initialBalance = await db.Accounts
-                .Where(account => account.UserId == userId && account.OpeningDate < periodEnd)
+                .Where(account => account.UserId == userId && account.OpeningDate <= periodEnd)
                 .SumAsync(account => (decimal?)account.InitialBalance, cancellationToken) ?? 0;
 
             var expenseRows = await monthTransactions
