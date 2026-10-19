@@ -357,10 +357,6 @@ select {
   color: #a7f3c7;
 }
 
-.app-shell.dark-theme .donut::after {
-  background: #111b2d;
-}
-
 .sidebar {
   border-right: 1px solid #e5e7eb;
   display: grid;
@@ -808,31 +804,6 @@ nav .active {
   pointer-events: none;
   position: absolute;
   text-align: center;
-}
-
-.donut {
-  align-items: center;
-  aspect-ratio: 1;
-  background: conic-gradient(#2f80ed 0 28%, #35b66a 28% 48%, #f59e0b 48% 64%, #8b5cf6 64% 76%, #22b8cf 76% 86%, #f97316 86% 93%, #98a2b3 93% 100%);
-  border-radius: 50%;
-  display: grid;
-  justify-content: center;
-  position: relative;
-}
-
-.donut::after {
-  background: #fff;
-  border-radius: 50%;
-  content: "";
-  inset: 44px;
-  position: absolute;
-}
-
-.donut span {
-  font-size: 0.9rem;
-  position: relative;
-  text-align: center;
-  z-index: 1;
 }
 
 .list {
@@ -1357,10 +1328,6 @@ nav .active {
     grid-template-columns: 140px minmax(0, 1fr);
   }
 
-  .donut::after {
-    inset: 34px;
-  }
-
   .forms-grid,
   .form-grid {
     gap: 12px;
@@ -1485,6 +1452,10 @@ nav .active {
     padding: 24px;
   }
 
+  .auth-card::before {
+    inset: 0;
+  }
+
   .topbar,
   .panel-head,
   .form-line {
@@ -1527,6 +1498,11 @@ nav .active {
     min-width: 82px;
     padding: 0 10px;
     white-space: nowrap;
+  }
+
+  .topbar .top-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
   }
 
   .label-short {

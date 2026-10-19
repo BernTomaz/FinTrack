@@ -94,6 +94,10 @@ button:active {
     padding: 0 12px 90px !important;
   }
 
+  .sidebar-hidden .content {
+    padding-left: 76px !important;
+  }
+
   .sidebar {
     padding: 14px !important;
   }

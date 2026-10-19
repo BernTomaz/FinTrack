@@ -340,6 +340,10 @@ export class DashboardPanelComponent {
   }
 
   private donutSlicePath(startPercent: number, endPercent: number): string {
+    if (endPercent - startPercent >= 100) {
+      // Um arco SVG com início e fim iguais não desenha uma circunferência completa.
+      return 'M 60 12 A 48 48 0 1 1 60 108 A 48 48 0 1 1 60 12 L 60 35 A 25 25 0 1 0 60 85 A 25 25 0 1 0 60 35 Z';
+    }
     const center = 60;
     const outer = 48;
     const inner = 25;
