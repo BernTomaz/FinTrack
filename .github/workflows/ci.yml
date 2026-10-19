@@ -53,3 +53,7 @@ jobs:
       - name: Build
         working-directory: src/FinTrack.Web
         run: npm run build
+
+      - name: Test
+        working-directory: src/FinTrack.Web
+        run: npm test -- --watch=false --browsers=ChromeHeadless
