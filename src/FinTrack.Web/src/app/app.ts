@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewEncapsulation, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, ViewEncapsulation, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { finalize, forkJoin } from 'rxjs';
+import { Subscription, finalize, forkJoin, of } from 'rxjs';
 import { Account, AccountType, AuthResponse, Category, CategoryType, Dashboard, FinTrackApiService, HealthStatus, LockedUser, Transaction, TransactionType } from './fintrack-api.service';
 import { AccountsPanelComponent } from './accounts-panel.component';
 import { CategoriesPanelComponent } from './categories-panel.component';
@@ -52,11 +52,13 @@ type View =
   styleUrl: './app.css',
   encapsulation: ViewEncapsulation.None,
 })
-export class App {
+export class App implements OnDestroy {
   private readonly api = inject(FinTrackApiService);
   private readonly fb = inject(FormBuilder);
   private messageTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private messageClearTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private loadSubscription?: Subscription;
+  private catalogsLoaded = false;
 
   protected readonly token = signal(sessionStorage.getItem('fintrack.token') ?? '');
   protected readonly isEntering = signal((sessionStorage.getItem('fintrack.token') ?? '').length > 0);
@@ -342,6 +344,12 @@ export class App {
   }
 
   protected logout(): void {
+    this.loadSubscription?.unsubscribe();
+    this.catalogsLoaded = false;
+    this.accounts.set([]);
+    this.categories.set([]);
+    this.transactions.set([]);
+    this.dashboard.set(null);
     this.api.clearSession();
     this.token.set('');
     this.userName.set('');
@@ -427,7 +435,7 @@ export class App {
     requests[target.type].subscribe({
       next: () => {
         this.deleteTarget.set(null);
-        this.loadAll();
+        this.loadAll(undefined, target.type !== 'transaction');
         this.showMessage(labels[target.type], 'success');
       },
       error: (error) => {
@@ -492,7 +500,7 @@ export class App {
       next: () => {
         this.editingTransactionId.set('');
         this.transactionForm.patchValue({ amount: 0, description: '' });
-        this.loadAll();
+        this.loadAll(undefined, false);
         this.showMessage(id ? 'Lançamento atualizado com sucesso.' : 'Lançamento salvo com sucesso.', 'success');
       },
       error: () => this.showMessage('Não foi possível salvar o lançamento.', 'error'),
@@ -802,7 +810,7 @@ export class App {
     this.recentLimit.set(5);
 
     if (this.isLoggedIn()) {
-      this.loadAll();
+      this.loadAll(undefined, false);
     }
   }
 
@@ -838,16 +846,24 @@ export class App {
     this.theme.set(nextTheme);
   }
 
-  protected loadAll(successMessage?: string): void {
+  ngOnDestroy(): void {
+    this.loadSubscription?.unsubscribe();
+  }
+
+  protected loadAll(successMessage?: string, reloadCatalogs = true): void {
     const token = this.token();
+    reloadCatalogs ||= !this.catalogsLoaded;
+    if (reloadCatalogs) this.catalogsLoaded = false;
+    this.loadSubscription?.unsubscribe();
     this.isLoading.set(true);
-    forkJoin({
-      accounts: this.api.getAccounts(token),
-      categories: this.api.getCategories(token),
+    this.loadSubscription = forkJoin({
+      accounts: reloadCatalogs ? this.api.getAccounts(token) : of(this.accounts()),
+      categories: reloadCatalogs ? this.api.getCategories(token) : of(this.categories()),
       transactions: this.api.getTransactions(token, this.selectedYear(), this.selectedMonthNumber()),
       dashboard: this.api.getDashboard(token, this.selectedYear(), this.selectedMonthNumber()),
     }).pipe(finalize(() => this.isLoading.set(false))).subscribe({
       next: ({ accounts, categories, transactions, dashboard }) => {
+        this.catalogsLoaded = true;
         this.accounts.set(accounts);
         this.categories.set(categories);
         this.transactions.set(transactions);
