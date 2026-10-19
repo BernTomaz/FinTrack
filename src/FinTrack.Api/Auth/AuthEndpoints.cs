@@ -50,6 +50,15 @@ public static class AuthEndpoints
                 return Results.BadRequest("A senha deve ter de 8 a 100 caracteres, com letra maiúscula, letra minúscula, número e caractere especial.");
             }
 
+            await using var registrationTransaction = db.Database.IsSqlServer()
+                ? await db.Database.BeginTransactionAsync(cancellationToken)
+                : null;
+            if (registrationTransaction is not null)
+            {
+                // Serializa cadastros entre instâncias para que apenas o primeiro usuário seja administrador.
+                await db.Database.ExecuteSqlRawAsync("SELECT TOP (1) 1 FROM [Users] WITH (TABLOCKX, HOLDLOCK)", cancellationToken);
+            }
+
             var emailExists = await db.Users.AnyAsync(user => user.Email == email, cancellationToken);
             if (emailExists)
             {
@@ -67,6 +76,10 @@ public static class AuthEndpoints
             var user = new User(name, email, passwordHasher.Hash(request.Password), isFirstUser);
             db.Users.Add(user);
             await db.SaveChangesAsync(cancellationToken);
+            if (registrationTransaction is not null)
+            {
+                await registrationTransaction.CommitAsync(cancellationToken);
+            }
             logger.LogInformation("User registered. UserId: {UserId}, IsAdmin: {IsAdmin}", user.Id, user.IsAdmin);
 
             return Results.Created($"/users/{user.Id}", ToResponse(user, tokenService));

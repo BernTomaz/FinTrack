@@ -8,6 +8,7 @@ using FinTrack.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
 var jwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()
     ?? throw new InvalidOperationException("JWT options are not configured.");
+jwtOptions.Validate(builder.Environment.IsDevelopment());
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -26,7 +28,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
         policy
-            .WithOrigins("http://localhost:4200", "http://127.0.0.1:4200", "http://localhost:4201", "http://127.0.0.1:4201")
+            .WithOrigins(builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ??
+                (builder.Environment.IsDevelopment()
+                    ? ["http://localhost:4200", "http://127.0.0.1:4200", "http://localhost:4201", "http://127.0.0.1:4201"]
+                    : []))
             .AllowAnyHeader()
             .AllowAnyMethod()
             .WithExposedHeaders("X-Correlation-Id"));
@@ -51,6 +56,7 @@ builder.Services
         };
     });
 builder.Services.AddAuthorization();
+builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
 
 var app = builder.Build();
 
@@ -60,6 +66,12 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+else
+{
+    app.UseForwardedHeaders(new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedProto });
+    app.UseHsts();
+    app.UseHttpsRedirection();
 }
 
 app.UseCors("Frontend");

@@ -8,6 +8,24 @@ namespace FinTrack.Tests;
 
 public sealed class AuthTests
 {
+    [Theory]
+    [InlineData("", true)]
+    [InlineData("curta", true)]
+    [InlineData("dev-only-change-this-key-before-production-123456", false)]
+    public void JwtOptionsRejectsInvalidOrProductionDevelopmentKeys(string key, bool isDevelopment)
+    {
+        Assert.Throws<InvalidOperationException>(() => new JwtOptions { Key = key }.Validate(isDevelopment));
+    }
+
+    [Fact]
+    public void JwtOptionsAcceptsConfiguredKeyAndRejectsMissingIssuerOrExpiration()
+    {
+        const string key = "test-key-with-more-than-32-characters";
+        new JwtOptions { Key = key }.Validate(false);
+        Assert.Throws<InvalidOperationException>(() => new JwtOptions { Key = key, Issuer = "" }.Validate(false));
+        Assert.Throws<InvalidOperationException>(() => new JwtOptions { Key = key, Audience = "" }.Validate(false));
+        Assert.Throws<InvalidOperationException>(() => new JwtOptions { Key = key, ExpirationMinutes = 0 }.Validate(false));
+    }
     [Fact]
     public void PasswordHasherVerifiesOnlyTheOriginalPassword()
     {
