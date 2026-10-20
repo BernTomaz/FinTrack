@@ -51,6 +51,13 @@ export interface Dashboard {
   expensesByCategory: { categoryName: string; total: number }[];
 }
 
+export interface TransactionPage {
+  items: Transaction[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}
+
 export interface HealthStatus {
   status: string;
   database: string;
@@ -120,8 +127,8 @@ export class FinTrackApiService {
     return this.http.delete(`${this.apiUrl}/categories/${id}`, this.options(token));
   }
 
-  getTransactions(token: string, year: number, month: number) {
-    return this.http.get<Transaction[]>(`${this.apiUrl}/transactions?year=${year}&month=${month}`, this.options(token));
+  getTransactions(token: string, year: number, month: number, filters = new URLSearchParams()) {
+    return this.http.get<TransactionPage>(`${this.apiUrl}/transactions?year=${year}&month=${month}&${filters}`, this.options(token));
   }
 
   createTransaction(token: string, request: Omit<Transaction, 'id'>) {

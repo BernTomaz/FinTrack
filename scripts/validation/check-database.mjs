@@ -57,7 +57,10 @@ for (const endpoint of ['/dashboard/monthly?year=2026&month=12', '/transactions?
       assert.equal(dashboard.totalIncome, 50050);
       assert.equal(dashboard.totalExpense, 75075);
       assert.equal(dashboard.currentBalance, -299800);
-    } else if (endpoint.startsWith('/transactions')) assert.equal(JSON.parse(body).length, 10000);
+    } else if (endpoint.startsWith('/transactions')) {
+      assert.equal(JSON.parse(body).totalCount, 10000);
+      assert.equal(JSON.parse(body).items.length, 50);
+    }
     else assert.equal(body.trim().split(/\r?\n/).length, 10001);
   }
   durations.sort((a, b) => a - b);

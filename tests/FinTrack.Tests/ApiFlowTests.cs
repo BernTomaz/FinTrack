@@ -129,9 +129,9 @@ public sealed class ApiFlowTests
 
         foreach (var filter in new[] { "year=9999", "year=9999&month=12" })
         {
-            var transactions = await client.GetFromJsonAsync<List<TransactionResponse>>($"/transactions?{filter}");
+            var transactions = await client.GetFromJsonAsync<TransactionPageResponse>($"/transactions?{filter}");
             Assert.NotNull(transactions);
-            Assert.Equal(DateOnly.MaxValue, Assert.Single(transactions).Date);
+            Assert.Equal(DateOnly.MaxValue, Assert.Single(transactions.Items).Date);
             var csv = await client.GetAsync($"/exports/transactions.csv?{filter}");
             Assert.Equal(HttpStatusCode.OK, csv.StatusCode);
             Assert.Contains("9999-12-31,Expense,10.00", await csv.Content.ReadAsStringAsync());
@@ -219,6 +219,7 @@ public sealed class ApiFlowTests
             var categoryEdit = await client.PutAsJsonAsync($"/categories/{category.Id}",
                 new CategoryRequest(category.Name, CategoryType.Income));
             Assert.Equal(HttpStatusCode.Conflict, categoryEdit.StatusCode);
+            await VerifyTransactionPages(client);
         }
         finally
         {
@@ -337,22 +338,22 @@ public sealed class ApiFlowTests
         Assert.NotNull(created);
         Assert.Equal("Mercado", created.Description);
 
-        var all = await client.GetFromJsonAsync<List<TransactionResponse>>("/transactions");
+        var all = await client.GetFromJsonAsync<TransactionPageResponse>("/transactions");
         Assert.NotNull(all);
-        Assert.Single(all);
+        Assert.Single(all.Items);
 
-        var filtered = await client.GetFromJsonAsync<List<TransactionResponse>>(
+        var filtered = await client.GetFromJsonAsync<TransactionPageResponse>(
             $"/transactions?year=2026&month=8&type=Expense&accountId={account.Id}&categoryId={expenseCategory.Id}");
         Assert.NotNull(filtered);
-        Assert.Single(filtered);
+        Assert.Single(filtered.Items);
 
-        var byYear = await client.GetFromJsonAsync<List<TransactionResponse>>("/transactions?year=2026");
+        var byYear = await client.GetFromJsonAsync<TransactionPageResponse>("/transactions?year=2026");
         Assert.NotNull(byYear);
-        Assert.Single(byYear);
+        Assert.Single(byYear.Items);
 
-        var byMonth = await client.GetFromJsonAsync<List<TransactionResponse>>("/transactions?month=8");
+        var byMonth = await client.GetFromJsonAsync<TransactionPageResponse>("/transactions?month=8");
         Assert.NotNull(byMonth);
-        Assert.Single(byMonth);
+        Assert.Single(byMonth.Items);
 
         var byId = await client.GetFromJsonAsync<TransactionResponse>($"/transactions/{created.Id}");
         Assert.NotNull(byId);
@@ -797,6 +798,63 @@ public sealed class ApiFlowTests
 
         var deleteCategory = await client.DeleteAsync($"/categories/{Guid.NewGuid()}");
         Assert.Equal(HttpStatusCode.NotFound, deleteCategory.StatusCode);
+    }
+
+    [Fact]
+    public async Task Transactions_are_paged_filtered_sorted_and_isolated()
+    {
+        await using var app = new FinTrackApiFactory();
+        using var client = app.CreateClient();
+        await VerifyTransactionPages(client);
+    }
+
+    private static async Task VerifyTransactionPages(HttpClient client)
+    {
+        await RegisterAndAuthorize(client, name: "Paginação", email: "pages@fintrack.local");
+        var account = await CreateAccount(client, "Conta paginada");
+        var category = await CreateCategory(client, "Categoria paginada", CategoryType.Expense);
+        var date = new DateOnly(2026, 8, 16);
+        for (var i = 1; i <= 55; i++)
+            await CreateTransaction(client, account.Id, category.Id, TransactionType.Expense, i, date, $"Item {i:D2}");
+
+        var first = await client.GetFromJsonAsync<TransactionPageResponse>("/transactions?year=2026&month=8&sort=amount&direction=asc");
+        var second = await client.GetFromJsonAsync<TransactionPageResponse>("/transactions?year=2026&month=8&sort=amount&direction=asc&page=2");
+        Assert.NotNull(first);
+        Assert.NotNull(second);
+        Assert.Equal(55, first.TotalCount);
+        Assert.Equal(50, first.Items.Count);
+        Assert.Equal(1, first.Items[0].Amount);
+        Assert.Equal(5, second.Items.Count);
+        Assert.Equal(51, second.Items[0].Amount);
+        Assert.Empty(first.Items.Select(t => t.Id).Intersect(second.Items.Select(t => t.Id)));
+        var empty = await client.GetFromJsonAsync<TransactionPageResponse>("/transactions?page=3");
+        Assert.NotNull(empty);
+        Assert.Empty(empty.Items);
+        Assert.Equal(55, empty.TotalCount);
+        foreach (var term in new[] { "item 55", "conta paginada", "categoria paginada", "2026-08-16" })
+        {
+            var result = await client.GetFromJsonAsync<TransactionPageResponse>($"/transactions?search={Uri.EscapeDataString(term)}&pageSize=1");
+            Assert.NotNull(result);
+            Assert.Single(result.Items);
+            Assert.Equal(term == "item 55" ? 1 : 55, result.TotalCount);
+        }
+        foreach (var sort in new[] { "date", "description", "category", "type", "amount" })
+        {
+            var response = await client.GetAsync($"/transactions?sort={sort}&direction=desc&pageSize=2&type=Expense&accountId={account.Id}&categoryId={category.Id}");
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+        foreach (var invalid in new[] { "page=0", "page=-1", "pageSize=0", "pageSize=101", "page=2147483647", "sort=invalid", "direction=invalid", "type=999", $"search={new string('a', 161)}" })
+            Assert.Equal(HttpStatusCode.BadRequest, (await client.GetAsync($"/transactions?{invalid}")).StatusCode);
+        var dashboard = await client.GetFromJsonAsync<MonthlyDashboardResponse>("/dashboard/monthly?year=2026&month=8");
+        Assert.NotNull(dashboard);
+        Assert.Equal(1540, dashboard.TotalExpense);
+        var csv = await client.GetStringAsync("/exports/transactions.csv?year=2026&month=8");
+        Assert.Equal(56, csv.Trim().Split('\n').Length);
+        await RegisterAndAuthorize(client, name: "Outro usuário paginado", email: "other-pages@fintrack.local");
+        var other = await client.GetFromJsonAsync<TransactionPageResponse>("/transactions?search=Item");
+        Assert.NotNull(other);
+        Assert.Empty(other.Items);
+        Assert.Equal(0, other.TotalCount);
     }
 
     private static async Task<AuthResponse> RegisterAndAuthorize(

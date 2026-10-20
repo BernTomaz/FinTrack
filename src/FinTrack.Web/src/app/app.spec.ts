@@ -1,6 +1,6 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { App } from './app';
 import { FinTrackApiService } from './fintrack-api.service';
 
@@ -24,7 +24,7 @@ describe('App', () => {
 
   function flushPeriod(month: string): void {
     const [year, number] = month.split('-').map(Number);
-    http.expectOne((request) => request.url.endsWith(`/transactions?year=${year}&month=${number}`)).flush([transaction]);
+    http.expectOne((request) => request.url.includes(`/transactions?year=${year}&month=${number}&`)).flush({ items: [transaction], totalCount: 1, page: 1, pageSize: 5 });
     http.expectOne((request) => request.url.endsWith(`/dashboard/monthly?year=${year}&month=${number}`)).flush(dashboard);
   }
 
@@ -79,7 +79,7 @@ describe('App', () => {
     expect(deletion.request.method).toBe('DELETE');
     deletion.flush(null);
     http.expectNone((request) => request.url.endsWith('/accounts') || request.url.endsWith('/categories'));
-    http.expectOne((request) => request.url.includes('/transactions?')).flush([]);
+    http.expectOne((request) => request.url.includes('/transactions?')).flush({ items: [], totalCount: 0, page: 1, pageSize: 5 });
     http.expectOne((request) => request.url.includes('/dashboard/monthly?')).flush({ ...dashboard, totalExpense: 0, monthBalance: 0, currentBalance: 50 });
     expect(app['transactions']()).toEqual([]);
     expect(app['dashboard']()?.currentBalance).toBe(50);
@@ -149,4 +149,39 @@ describe('App', () => {
     expect(app['dashboard']()).toBeNull();
     expect(app['isLoggedIn']()).toBeFalse();
   });
+
+  it('loads report pages on the server and resets pagination when filtering or sorting', fakeAsync(() => {
+    const app = loadedApp();
+    app['openView']('reports');
+    const first = http.expectOne(request => request.url.includes('page=1&pageSize=50'));
+    first.flush({ items: [transaction], totalCount: 51, page: 1, pageSize: 50 });
+    app['changeReportPage'](2);
+    http.expectOne(request => request.url.includes('page=2&pageSize=50')).flush({ items: [{ ...transaction, id: 'last' }], totalCount: 51, page: 2, pageSize: 50 });
+    expect(app['reportTransactions']()[0].id).toBe('last');
+    app['updateTransactionSearch']('Mercado');
+    tick(250);
+    const filtered = http.expectOne(request => request.url.includes('page=1&pageSize=50') && request.url.includes('search=Mercado'));
+    filtered.flush({ items: [transaction], totalCount: 1, page: 1, pageSize: 50 });
+    expect(app['reportPage']()).toBe(1);
+    expect(app['reportPageCount']()).toBe(1);
+    app['sortTransactions']('amount');
+    http.expectOne(request => request.url.includes('sort=amount&direction=desc')).flush({ items: [transaction], totalCount: 1, page: 1, pageSize: 50 });
+    expect(app['chartMonths']()[0].expenseAmount).toBe(10);
+  }));
+
+  it('cancels stale report requests and pending searches on logout', fakeAsync(() => {
+    const app = loadedApp();
+    app['openView']('reports');
+    const old = http.expectOne(request => request.url.includes('pageSize=50'));
+    app['updateTransactionTypeFilter']('Expense');
+    expect(old.cancelled).toBeTrue();
+    const filtered = http.expectOne(request => request.url.includes('type=Expense'));
+    app['updateTransactionSearch']('Mercado');
+    expect(filtered.cancelled).toBeTrue();
+    app['logout']();
+    tick(250);
+    http.expectNone(request => request.url.includes('/transactions?'));
+    expect(app['reportTransactions']()).toEqual([]);
+    expect(app['reportLoading']()).toBeFalse();
+  }));
 });

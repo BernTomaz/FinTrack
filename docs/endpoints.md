@@ -77,6 +77,13 @@ Filtros:
 GET /transactions?year=2026&month=8&type=Expense&categoryId=1&accountId=2
 ```
 
+A listagem retorna `{ items, totalCount, page, pageSize }`. O padrão é `page=1` e `pageSize=50`, com limite de 100 itens por página. Páginas além do fim retornam `items: []`.
+
+Use `search` (até 160 caracteres) para descrição, nome de conta/categoria ou data exata no formato `yyyy-MM-dd`; `sort=date|description|category|type|amount` e `direction=asc|desc` para ordenar antes da paginação. O padrão é data decrescente, com desempate por criação e identificador. Filtros e contagem respeitam o usuário autenticado.
+
+Desde 20/10/2026, clientes que esperavam um array devem ler `items` e percorrer as páginas. A exportação CSV continua retornando todos os lançamentos dos filtros, sem paginação.
+
+
 ## Dashboard
 
 ```text

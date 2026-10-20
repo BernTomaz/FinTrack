@@ -2,6 +2,12 @@ using FinTrack.Domain.Enums;
 
 namespace FinTrack.Application.DTOs.Transactions;
 
+public sealed record TransactionPageResponse(
+    IReadOnlyList<TransactionResponse> Items,
+    int TotalCount,
+    int Page,
+    int PageSize);
+
 public sealed record TransactionRequest(
     Guid AccountId,
     Guid CategoryId,

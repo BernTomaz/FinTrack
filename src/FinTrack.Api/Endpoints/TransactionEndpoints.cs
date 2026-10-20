@@ -20,6 +20,11 @@ public static class TransactionEndpoints
             TransactionType? type,
             Guid? accountId,
             Guid? categoryId,
+            int? page,
+            int? pageSize,
+            string? search,
+            string? sort,
+            string? direction,
             FinTrackDbContext db,
             ClaimsPrincipal user,
             CancellationToken cancellationToken) =>
@@ -35,6 +40,14 @@ public static class TransactionEndpoints
             }
 
             var userId = user.GetUserId();
+            var currentPage = page ?? 1;
+            var size = pageSize ?? 50;
+            if (currentPage < 1 || size is < 1 or > 100 || (long)(currentPage - 1) * size > int.MaxValue)
+                return Results.BadRequest("Page must be positive and pageSize between 1 and 100.");
+            if (sort is not (null or "date" or "description" or "category" or "type" or "amount") || direction is not (null or "asc" or "desc"))
+                return Results.BadRequest("Invalid sort or direction.");
+            if (search?.Length > 160 || (type is not null && !Enum.IsDefined(type.Value)))
+                return Results.BadRequest("Invalid search or type.");
             var query = db.Transactions.Where(transaction => transaction.UserId == userId);
 
             if (year is not null && month is not null)
@@ -68,9 +81,35 @@ public static class TransactionEndpoints
                 query = query.Where(transaction => transaction.CategoryId == categoryId);
             }
 
-            var transactions = await query
-                .OrderByDescending(transaction => transaction.Date)
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.Trim().ToLower();
+                var accountIds = db.Accounts.Where(account => account.UserId == userId && account.Name.ToLower().Contains(term)).Select(account => account.Id);
+                var categoryIds = db.Categories.Where(category => category.UserId == userId && category.Name.ToLower().Contains(term)).Select(category => category.Id);
+                var hasDate = DateOnly.TryParseExact(term, "yyyy-MM-dd", out var date);
+                query = query.Where(transaction =>
+                    (transaction.Description != null && transaction.Description.ToLower().Contains(term)) ||
+                    accountIds.Contains(transaction.AccountId) || categoryIds.Contains(transaction.CategoryId) ||
+                    (hasDate && transaction.Date == date));
+            }
+
+            var totalCount = await query.CountAsync(cancellationToken);
+            var ascending = direction == "asc";
+            var ordered = (sort ?? "date") switch
+            {
+                "amount" => ascending ? query.OrderBy(t => t.Amount) : query.OrderByDescending(t => t.Amount),
+                "description" => ascending ? query.OrderBy(t => t.Description) : query.OrderByDescending(t => t.Description),
+                "type" => ascending ? query.OrderBy(t => t.Type) : query.OrderByDescending(t => t.Type),
+                "category" => ascending
+                    ? query.OrderBy(t => db.Categories.Where(c => c.Id == t.CategoryId && c.UserId == userId).Select(c => c.Name).FirstOrDefault())
+                    : query.OrderByDescending(t => db.Categories.Where(c => c.Id == t.CategoryId && c.UserId == userId).Select(c => c.Name).FirstOrDefault()),
+                _ => ascending ? query.OrderBy(t => t.Date) : query.OrderByDescending(t => t.Date)
+            };
+            var transactions = await ordered
                 .ThenByDescending(transaction => transaction.CreatedAt)
+                .ThenBy(transaction => transaction.Id)
+                .Skip((currentPage - 1) * size)
+                .Take(size)
                 .Select(transaction => new TransactionResponse(
                     transaction.Id,
                     transaction.AccountId,
@@ -82,7 +121,7 @@ public static class TransactionEndpoints
                     transaction.CreatedAt))
                 .ToListAsync(cancellationToken);
 
-            return Results.Ok(transactions);
+            return Results.Ok(new TransactionPageResponse(transactions, totalCount, currentPage, size));
         });
 
         group.MapGet("/{id:guid}", async (Guid id, FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>

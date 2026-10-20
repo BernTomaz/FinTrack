@@ -17,7 +17,7 @@ type TransactionSortField = 'date' | 'description' | 'category' | 'type' | 'amou
         </div>
         <div class="form-grid">
           <label>Mês<input type="month" [value]="month" (change)="monthChange.emit($any($event.target).value)" /></label>
-          <label>Buscar<input type="search" [value]="search" (input)="searchChange.emit($any($event.target).value)" placeholder="Descrição, conta ou categoria" /></label>
+          <label>Buscar<input type="search" maxlength="160" [value]="search" (input)="searchChange.emit($any($event.target).value)" placeholder="Descrição, conta ou categoria" /></label>
           <label>Tipo
             <select [value]="typeFilter" (change)="typeFilterChange.emit($any($event.target).value)">
               <option value="">Todos</option>
@@ -71,16 +71,22 @@ type TransactionSortField = 'date' | 'description' | 'category' | 'type' | 'amou
               </span>
             </div>
           } @empty {
-            <div class="empty-state">
+            <div class="empty-state" role="status">
+              @if (loading) {
+                <strong>Carregando lançamentos...</strong>
+              } @else {
               <strong>Nenhum lançamento encontrado</strong>
               <span>Ajuste os filtros ou cadastre receitas e despesas para acompanhar seus relatórios.</span>
               <button type="button" class="primary" style="justify-self:center" (click)="addTransaction.emit()">Adicionar lançamento</button>
+              }
             </div>
           }
         </div>
-        @if (hasMore) {
-          <button type="button" class="ghost" style="justify-self:center" (click)="showMore.emit()">Ver mais</button>
-        }
+        <div role="navigation" class="pagination" aria-label="Páginas de lançamentos">
+          <button type="button" class="ghost" [disabled]="loading || page <= 1" (click)="pageChange.emit(page - 1)">Anterior</button>
+          <span role="status">Página {{ page }} de {{ pageCount }} · {{ total }} lançamentos</span>
+          <button type="button" class="ghost" [disabled]="loading || page >= pageCount" (click)="pageChange.emit(page + 1)">Próxima</button>
+        </div>
       </article>
     </section>
   `,
@@ -97,7 +103,10 @@ export class ReportsPanelComponent {
   @Input() accountFilter = '';
   @Input() sortField: TransactionSortField = 'date';
   @Input() sortDirection: 'asc' | 'desc' = 'desc';
-  @Input() hasMore = false;
+  @Input() page = 1;
+  @Input() pageCount = 1;
+  @Input() total = 0;
+  @Input() loading = false;
   @Output() monthChange = new EventEmitter<string>();
   @Output() searchChange = new EventEmitter<string>();
   @Output() typeFilterChange = new EventEmitter<string>();
@@ -106,7 +115,7 @@ export class ReportsPanelComponent {
   @Output() sort = new EventEmitter<TransactionSortField>();
   @Output() edit = new EventEmitter<Transaction>();
   @Output() delete = new EventEmitter<string>();
-  @Output() showMore = new EventEmitter<void>();
+  @Output() pageChange = new EventEmitter<number>();
   @Output() addTransaction = new EventEmitter<void>();
   @Output() clearFilters = new EventEmitter<void>();
   @Output() back = new EventEmitter<void>();

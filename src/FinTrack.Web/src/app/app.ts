@@ -59,6 +59,8 @@ export class App implements OnDestroy {
   private messageClearTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private loadSubscription?: Subscription;
   private catalogsLoaded = false;
+  private reportSubscription?: Subscription;
+  private searchTimeout?: ReturnType<typeof setTimeout>;
 
   protected readonly token = signal(sessionStorage.getItem('fintrack.token') ?? '');
   protected readonly isEntering = signal((sessionStorage.getItem('fintrack.token') ?? '').length > 0);
@@ -96,8 +98,12 @@ export class App implements OnDestroy {
   protected readonly transactionAccountFilter = signal('');
   protected readonly transactionSortField = signal<TransactionSortField>('date');
   protected readonly transactionSortDirection = signal<'asc' | 'desc'>('desc');
-  protected readonly recentLimit = signal(5);
-  protected readonly reportLimit = signal(10);
+  protected readonly transactionCount = signal(0);
+  protected readonly reportTransactions = signal<Transaction[]>([]);
+  protected readonly reportTotal = signal(0);
+  protected readonly reportPage = signal(1);
+  protected readonly reportLoading = signal(false);
+  protected readonly reportPageCount = computed(() => Math.max(1, Math.ceil(this.reportTotal() / 50)));
   protected readonly exportStartDate = signal('');
   protected readonly exportEndDate = signal('');
   protected readonly editingAccountId = signal('');
@@ -111,21 +117,8 @@ export class App implements OnDestroy {
   protected readonly isLoggedIn = computed(() => this.token().length > 0);
   protected readonly selectedYear = computed(() => Number(this.selectedMonth().slice(0, 4)));
   protected readonly selectedMonthNumber = computed(() => Number(this.selectedMonth().slice(5, 7)));
-  protected readonly filteredTransactions = computed(() => {
-    const search = this.transactionSearch().trim().toLowerCase();
-    const type = this.transactionTypeFilter();
-    const categoryId = this.transactionCategoryFilter();
-    const accountId = this.transactionAccountFilter();
-
-    return this.transactions().filter((transaction) => {
-      const searchable = `${transaction.date} ${transaction.description ?? ''} ${this.categoryName(transaction.categoryId)} ${this.accountName(transaction.accountId)}`.toLowerCase();
-      return (!search || searchable.includes(search)) && (!type || transaction.type === type) && (!categoryId || transaction.categoryId === categoryId) && (!accountId || transaction.accountId === accountId);
-    }).sort((left, right) => this.compareTransactions(left, right));
-  });
-  protected readonly recentTransactions = computed(() => this.transactions().slice(0, this.recentLimit()));
-  protected readonly hasMoreTransactions = computed(() => this.transactions().length > this.recentLimit());
-  protected readonly reportTransactions = computed(() => this.filteredTransactions().slice(0, this.reportLimit()));
-  protected readonly hasMoreReportTransactions = computed(() => this.filteredTransactions().length > this.reportLimit());
+  protected readonly recentTransactions = computed(() => this.transactions());
+  protected readonly hasMoreTransactions = computed(() => this.transactionCount() > this.transactions().length);
   protected readonly categorySummary = computed(() => {
     const total = this.dashboard()?.totalExpense ?? 0;
 
@@ -147,29 +140,12 @@ export class App implements OnDestroy {
   protected readonly categoryTypes: CategoryType[] = ['Income', 'Expense'];
   protected readonly transactionTypes: TransactionType[] = ['Income', 'Expense'];
   protected readonly chartMonths = computed(() => {
-    const monthTotals = new Map<string, { label: string; incomeAmount: number; expenseAmount: number }>();
-
-    for (const transaction of this.transactions()) {
-      const date = new Date(`${transaction.date}T00:00:00`);
-      const key = transaction.date.slice(0, 7);
-      const current = monthTotals.get(key) ?? {
-        label: this.shortMonthLabel(date),
-        incomeAmount: 0,
-        expenseAmount: 0,
-      };
-
-      if (transaction.type === 'Income') {
-        current.incomeAmount += transaction.amount;
-      } else {
-        current.expenseAmount += transaction.amount;
-      }
-
-      monthTotals.set(key, current);
-    }
-
-    const rows = [...monthTotals.entries()]
-      .sort(([left], [right]) => left.localeCompare(right))
-      .map(([, value]) => value);
+    const dashboard = this.dashboard();
+    const rows = dashboard && this.transactionCount() > 0 ? [{
+      label: this.shortMonthLabel(new Date(this.selectedYear(), this.selectedMonthNumber() - 1, 1)),
+      incomeAmount: dashboard.totalIncome,
+      expenseAmount: dashboard.totalExpense,
+    }] : [];
     const maxAmount = Math.max(...rows.flatMap((month) => [month.incomeAmount, month.expenseAmount]), 0);
 
     return rows.map((month) => ({
@@ -349,6 +325,11 @@ export class App implements OnDestroy {
     this.accounts.set([]);
     this.categories.set([]);
     this.transactions.set([]);
+    this.transactionCount.set(0);
+    this.cancelReportLoad();
+    this.reportTransactions.set([]);
+    this.reportTotal.set(0);
+    this.reportPage.set(1);
     this.dashboard.set(null);
     this.api.clearSession();
     this.token.set('');
@@ -594,11 +575,13 @@ export class App implements OnDestroy {
   protected sortTransactions(field: TransactionSortField): void {
     if (this.transactionSortField() === field) {
       this.transactionSortDirection.update((direction) => direction === 'asc' ? 'desc' : 'asc');
+      this.loadReport();
       return;
     }
 
     this.transactionSortField.set(field);
     this.transactionSortDirection.set(field === 'amount' ? 'desc' : 'asc');
+    this.loadReport();
   }
 
   protected sortLabel(field: TransactionSortField): string {
@@ -671,22 +654,24 @@ export class App implements OnDestroy {
 
   protected updateTransactionSearch(value: string): void {
     this.transactionSearch.set(value);
-    this.reportLimit.set(10);
+    this.cancelReportLoad();
+    this.reportTransactions.set([]);
+    this.searchTimeout = setTimeout(() => this.loadReport(), 250);
   }
 
   protected updateTransactionTypeFilter(value: string): void {
     this.transactionTypeFilter.set(value);
-    this.reportLimit.set(10);
+    this.loadReport();
   }
 
   protected updateTransactionCategoryFilter(value: string): void {
     this.transactionCategoryFilter.set(value);
-    this.reportLimit.set(10);
+    this.loadReport();
   }
 
   protected updateTransactionAccountFilter(value: string): void {
     this.transactionAccountFilter.set(value);
-    this.reportLimit.set(10);
+    this.loadReport();
   }
 
   protected clearTransactionFilters(): void {
@@ -694,15 +679,15 @@ export class App implements OnDestroy {
     this.transactionTypeFilter.set('');
     this.transactionCategoryFilter.set('');
     this.transactionAccountFilter.set('');
-    this.reportLimit.set(10);
+    this.loadReport();
   }
 
   protected showMoreTransactions(): void {
-    this.recentLimit.update((limit) => limit + 5);
+    this.showAllTransactions();
   }
 
-  protected showMoreReportTransactions(): void {
-    this.reportLimit.update((limit) => limit + 10);
+  protected changeReportPage(page: number): void {
+    if (!this.reportLoading() && page >= 1 && page <= this.reportPageCount()) this.loadReport(page);
   }
 
   protected updateExportStartDate(value: string): void {
@@ -755,7 +740,7 @@ export class App implements OnDestroy {
       const topCategory = dashboard.expensesByCategory[0];
       this.petAnswer.set(topCategory ? `A principal categoria é ${topCategory.categoryName}: ${this.money(topCategory.total)}.` : 'Ainda não há despesas por categoria.');
     } else if (question.includes('lançamento') || question.includes('transa')) {
-      this.petAnswer.set(`Encontrei ${this.transactions().length} lançamentos neste mês.`);
+      this.petAnswer.set(`Encontrei ${this.transactionCount()} lançamentos neste mês.`);
     } else {
       this.petAnswer.set('Por enquanto eu respondo sobre saldo, receitas, despesas, categorias e lançamentos.');
     }
@@ -767,7 +752,9 @@ export class App implements OnDestroy {
       return;
     }
 
+    if (view !== 'reports') this.cancelReportLoad();
     this.activeView.set(view);
+    if (view === 'reports') this.loadReport();
     this.userMenuOpen.set(false);
 
     if (view === 'admin') {
@@ -807,7 +794,7 @@ export class App implements OnDestroy {
     }
 
     this.selectedMonth.set(month);
-    this.recentLimit.set(5);
+    this.cancelReportLoad();
 
     if (this.isLoggedIn()) {
       this.loadAll(undefined, false);
@@ -848,9 +835,11 @@ export class App implements OnDestroy {
 
   ngOnDestroy(): void {
     this.loadSubscription?.unsubscribe();
+    this.cancelReportLoad();
   }
 
   protected loadAll(successMessage?: string, reloadCatalogs = true): void {
+    this.cancelReportLoad();
     const token = this.token();
     reloadCatalogs ||= !this.catalogsLoaded;
     if (reloadCatalogs) this.catalogsLoaded = false;
@@ -859,15 +848,17 @@ export class App implements OnDestroy {
     this.loadSubscription = forkJoin({
       accounts: reloadCatalogs ? this.api.getAccounts(token) : of(this.accounts()),
       categories: reloadCatalogs ? this.api.getCategories(token) : of(this.categories()),
-      transactions: this.api.getTransactions(token, this.selectedYear(), this.selectedMonthNumber()),
+      transactions: this.api.getTransactions(token, this.selectedYear(), this.selectedMonthNumber(), new URLSearchParams({ pageSize: '5' })),
       dashboard: this.api.getDashboard(token, this.selectedYear(), this.selectedMonthNumber()),
     }).pipe(finalize(() => this.isLoading.set(false))).subscribe({
       next: ({ accounts, categories, transactions, dashboard }) => {
         this.catalogsLoaded = true;
         this.accounts.set(accounts);
         this.categories.set(categories);
-        this.transactions.set(transactions);
+        this.transactions.set(transactions.items);
+        this.transactionCount.set(transactions.totalCount);
         this.dashboard.set(dashboard);
+        if (this.activeView() === 'reports') this.loadReport();
         if (successMessage) {
           this.showMessage(successMessage, 'success');
         }
@@ -968,7 +959,6 @@ export class App implements OnDestroy {
   }
 
   protected showAllTransactions(): void {
-    this.loadAll();
     this.transactionSearch.set('');
     this.transactionTypeFilter.set('');
     this.transactionCategoryFilter.set('');
@@ -1224,15 +1214,38 @@ export class App implements OnDestroy {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   }
 
-  private compareTransactions(left: Transaction, right: Transaction): number {
-    const field = this.transactionSortField();
-    const direction = this.transactionSortDirection() === 'asc' ? 1 : -1;
-    const leftValue = field === 'category' ? this.categoryName(left.categoryId) : field === 'amount' ? left.amount : left[field] ?? '';
-    const rightValue = field === 'category' ? this.categoryName(right.categoryId) : field === 'amount' ? right.amount : right[field] ?? '';
+  private cancelReportLoad(): void {
+    clearTimeout(this.searchTimeout);
+    this.reportSubscription?.unsubscribe();
+  }
 
-    return (typeof leftValue === 'number' && typeof rightValue === 'number'
-      ? leftValue - rightValue
-      : String(leftValue).localeCompare(String(rightValue), 'pt-BR')) * direction;
+  private loadReport(page = 1): void {
+    this.cancelReportLoad();
+    if (!this.isLoggedIn()) return;
+    const filters = new URLSearchParams({
+      page: String(page), pageSize: '50',
+      sort: this.transactionSortField(), direction: this.transactionSortDirection(),
+    });
+    if (this.transactionSearch().trim()) filters.set('search', this.transactionSearch().trim());
+    if (this.transactionTypeFilter()) filters.set('type', this.transactionTypeFilter());
+    if (this.transactionCategoryFilter()) filters.set('categoryId', this.transactionCategoryFilter());
+    if (this.transactionAccountFilter()) filters.set('accountId', this.transactionAccountFilter());
+    this.reportTransactions.set([]);
+    this.reportPage.set(page);
+    this.reportLoading.set(true);
+    this.reportSubscription = this.api.getTransactions(this.token(), this.selectedYear(), this.selectedMonthNumber(), filters)
+      .pipe(finalize(() => this.reportLoading.set(false))).subscribe({
+        next: (result) => {
+          this.reportTransactions.set(result.items);
+          this.reportTotal.set(result.totalCount);
+          if (page > 1 && result.items.length === 0) this.loadReport(Math.max(1, Math.ceil(result.totalCount / 50)));
+        },
+        error: (error) => {
+          this.reportTotal.set(0);
+          this.reportPage.set(1);
+          this.showMessage(this.api.errorMessage(error, 'Não foi possível carregar os lançamentos.'), 'error');
+        },
+      });
   }
 
   private requestDelete(type: DeleteTarget['type'], id: string, title: string, description: string): void {
