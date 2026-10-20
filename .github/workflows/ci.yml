@@ -11,7 +11,20 @@ on:
 jobs:
   backend:
     name: Backend
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: Y
+          MSSQL_SA_PASSWORD: FinTrack_CI_Only_2026!
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'FinTrack_CI_Only_2026!' -C -Q 'SELECT 1' -b"
+          --health-interval 10s --health-timeout 5s --health-retries 20
+    env:
+      FINTRACK_TEST_SQLSERVER: Server=localhost,1433;User Id=sa;Password=FinTrack_CI_Only_2026!;Encrypt=False;TrustServerCertificate=True
 
     steps:
       - name: Checkout
