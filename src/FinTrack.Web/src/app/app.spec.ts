@@ -1,6 +1,7 @@
+import { vi } from 'vitest';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { App } from './app';
 import { FinTrackApiService } from './fintrack-api.service';
 
@@ -20,7 +21,7 @@ describe('App', () => {
     http = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => http.verify());
+  afterEach(() => { http.verify(); vi.useRealTimers(); });
 
   function flushPeriod(month: string): void {
     const [year, number] = month.split('-').map(Number);
@@ -59,7 +60,7 @@ describe('App', () => {
     flushPeriod('2026-08');
     expect(app['accounts']()[0].name).toBe('Conta');
     expect(app['categories']()[0].name).toBe('Mercado');
-    expect(app['isLoading']()).toBeFalse();
+    expect(app['isLoading']()).toBe(false);
   });
 
   it('reloads catalogs on explicit refresh', () => {
@@ -105,9 +106,9 @@ describe('App', () => {
     const transactions = http.expectOne((request) => request.url.includes('/transactions?'));
     const monthly = http.expectOne((request) => request.url.includes('/dashboard/monthly?'));
     transactions.flush('Unavailable', { status: 503, statusText: 'Unavailable' });
-    expect(monthly.cancelled).toBeTrue();
+    expect(monthly.cancelled).toBe(true);
     expect(app['dashboard']()?.currentBalance).toBe(40);
-    expect(app['isLoading']()).toBeFalse();
+    expect(app['isLoading']()).toBe(false);
     expect(app['message']()).toContain('Unavailable');
   });
 
@@ -117,8 +118,8 @@ describe('App', () => {
     const oldTransactions = http.expectOne((request) => request.url.includes('/transactions?'));
     const oldDashboard = http.expectOne((request) => request.url.includes('/dashboard/monthly?'));
     app['setCurrentMonth']('2026-09');
-    expect(oldTransactions.cancelled).toBeTrue();
-    expect(oldDashboard.cancelled).toBeTrue();
+    expect(oldTransactions.cancelled).toBe(true);
+    expect(oldDashboard.cancelled).toBe(true);
     flushPeriod('2026-09');
     expect(app['selectedMonth']()).toBe('2026-09');
   });
@@ -130,7 +131,7 @@ describe('App', () => {
     const old = http.match(() => true);
     expect(old.length).toBe(4);
     app['setCurrentMonth']('2026-08');
-    expect(old.every((request) => request.cancelled)).toBeTrue();
+    expect(old.every((request) => request.cancelled)).toBe(true);
     http.expectOne((request) => request.url.endsWith('/accounts')).flush([account]);
     http.expectOne((request) => request.url.endsWith('/categories')).flush([category]);
     flushPeriod('2026-08');
@@ -142,15 +143,16 @@ describe('App', () => {
     app['setCurrentMonth']('2026-08');
     const pending = http.match(() => true);
     app['logout']();
-    expect(pending.every((request) => request.cancelled)).toBeTrue();
+    expect(pending.every((request) => request.cancelled)).toBe(true);
     expect(app['accounts']()).toEqual([]);
     expect(app['categories']()).toEqual([]);
     expect(app['transactions']()).toEqual([]);
     expect(app['dashboard']()).toBeNull();
-    expect(app['isLoggedIn']()).toBeFalse();
+    expect(app['isLoggedIn']()).toBe(false);
   });
 
-  it('loads report pages on the server and resets pagination when filtering or sorting', fakeAsync(() => {
+  it('loads report pages on the server and resets pagination when filtering or sorting', () => {
+    vi.useFakeTimers();
     const app = loadedApp();
     app['openView']('reports');
     const first = http.expectOne(request => request.url.includes('page=1&pageSize=50'));
@@ -159,7 +161,7 @@ describe('App', () => {
     http.expectOne(request => request.url.includes('page=2&pageSize=50')).flush({ items: [{ ...transaction, id: 'last' }], totalCount: 51, page: 2, pageSize: 50 });
     expect(app['reportTransactions']()[0].id).toBe('last');
     app['updateTransactionSearch']('Mercado');
-    tick(250);
+    vi.advanceTimersByTime(250);
     const filtered = http.expectOne(request => request.url.includes('page=1&pageSize=50') && request.url.includes('search=Mercado'));
     filtered.flush({ items: [transaction], totalCount: 1, page: 1, pageSize: 50 });
     expect(app['reportPage']()).toBe(1);
@@ -167,21 +169,22 @@ describe('App', () => {
     app['sortTransactions']('amount');
     http.expectOne(request => request.url.includes('sort=amount&direction=desc')).flush({ items: [transaction], totalCount: 1, page: 1, pageSize: 50 });
     expect(app['chartMonths']()[0].expenseAmount).toBe(10);
-  }));
+  });
 
-  it('cancels stale report requests and pending searches on logout', fakeAsync(() => {
+  it('cancels stale report requests and pending searches on logout', () => {
+    vi.useFakeTimers();
     const app = loadedApp();
     app['openView']('reports');
     const old = http.expectOne(request => request.url.includes('pageSize=50'));
     app['updateTransactionTypeFilter']('Expense');
-    expect(old.cancelled).toBeTrue();
+    expect(old.cancelled).toBe(true);
     const filtered = http.expectOne(request => request.url.includes('type=Expense'));
     app['updateTransactionSearch']('Mercado');
-    expect(filtered.cancelled).toBeTrue();
+    expect(filtered.cancelled).toBe(true);
     app['logout']();
-    tick(250);
+    vi.advanceTimersByTime(250);
     http.expectNone(request => request.url.includes('/transactions?'));
     expect(app['reportTransactions']()).toEqual([]);
-    expect(app['reportLoading']()).toBeFalse();
-  }));
+    expect(app['reportLoading']()).toBe(false);
+  });
 });

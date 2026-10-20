@@ -67,10 +67,32 @@ for (const endpoint of ['/dashboard/monthly?year=2026&month=12', '/transactions?
   measurements.push({ endpoint, samples: durations.length, medianMs: Math.round(durations[3]), maxMs: Math.round(durations.at(-1)), bytes });
 }
 
+const concurrency = [];
+for (const endpoint of ['/dashboard/monthly?year=2026&month=12', '/transactions?year=2026&month=12']) {
+  const durations = [];
+  const started = performance.now();
+  await Promise.all(Array.from({ length: 8 }, async () => {
+    for (let i = 0; i < 5; i++) {
+      const start = performance.now();
+      const response = await fetch(`${api}${endpoint}`, { headers: { Authorization: `Bearer ${auth.token}` } });
+      assert(response.ok, `${endpoint}: ${response.status}`);
+      const result = await response.json();
+      if (endpoint.startsWith('/transactions')) {
+        assert.equal(result.totalCount, 10000);
+        assert.equal(result.items.length, 50);
+      } else assert.equal(result.currentBalance, -299800);
+      durations.push(performance.now() - start);
+    }
+  }));
+  const elapsedMs = performance.now() - started;
+  durations.sort((a, b) => a - b);
+  assert.equal(durations.length, 40);
+  concurrency.push({ endpoint, workers: 8, requests: 40, medianMs: Math.round(durations[20]), p95Ms: Math.round(durations[37]), requestsPerSecond: Math.round(40000 / elapsedMs) });
+}
 const restored = `${database}_Restore`;
 console.log(JSON.stringify({ rows: 120000, measurements }));
 await fs.mkdir('out/validation', { recursive: true });
-await fs.writeFile('out/validation/performance-result.json', JSON.stringify({ rows: 120000, monthRows: 10000, measurements }, null, 2));
+await fs.writeFile('out/validation/performance-result.json', JSON.stringify({ rows: 120000, monthRows: 10000, measurements, concurrency }, null, 2));
 if (reuse) process.exit(0);
 const backupDirectory = sql("SELECT CONVERT(nvarchar(4000), SERVERPROPERTY('InstanceDefaultBackupPath'))", 'master');
 assert(backupDirectory && backupDirectory !== 'NULL');

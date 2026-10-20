@@ -10,6 +10,8 @@ const apiUrl = process.env.FINTRACK_API_URL;
 assert(apiUrl, 'Informe FINTRACK_API_URL apontando para a API com banco descartável.');
 assert(['localhost', '127.0.0.1'].includes(new URL(apiUrl).hostname), 'Use uma API local de validação.');
 const root = path.resolve('src/FinTrack.Web/dist/FinTrack.Web/browser');
+const webPort = Number(process.env.FINTRACK_WEB_PORT ?? 4201);
+assert(Number.isInteger(webPort) && webPort >= 1024 && webPort <= 65535, 'Porta de validação inválida.');
 const output = path.resolve('out/validation/ui');
 await fs.mkdir(output, { recursive: true });
 const server = http.createServer(async (request, response) => {
@@ -25,7 +27,7 @@ const server = http.createServer(async (request, response) => {
     response.writeHead(404).end();
   }
 });
-await new Promise((resolve) => server.listen(4201, '127.0.0.1', resolve));
+await new Promise((resolve) => server.listen(webPort, '127.0.0.1', resolve));
 const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_BROWSER_PATH, headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, acceptDownloads: true });
 const errors = [];
@@ -37,6 +39,9 @@ const password = 'Teste@12345';
 
 async function nav(title) {
   await page.locator('.app-shell.sidebar-hidden .compact-nav, .app-shell:not(.sidebar-hidden) .sidebar nav').getByTitle(title, { exact: true }).click();
+  await page.locator('.topbar h1').filter({ hasText: title }).waitFor({ state: 'attached' });
+  if (title === 'Contas') await page.locator('app-accounts-panel').waitFor();
+  if (title === 'Categorias') await page.locator('app-categories-panel').waitFor();
 }
 async function save(name, endpoint, expectedStatus) {
   const result = page.waitForResponse((response) => response.url().includes(endpoint) && ['POST', 'PUT'].includes(response.request().method()));
@@ -63,7 +68,7 @@ async function screenshot(name) {
 }
 
 try {
-  await page.goto('http://localhost:4201', { waitUntil: 'networkidle' });
+  await page.goto(`http://localhost:${webPort}`, { waitUntil: 'networkidle' });
   await screenshot('desktop-login');
   await page.getByRole('button', { name: 'Criar conta grátis', exact: true }).click();
   await page.getByPlaceholder('Seu nome', { exact: true }).fill(`Validação ${id}`);

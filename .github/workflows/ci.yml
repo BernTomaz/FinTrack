@@ -108,6 +108,13 @@ jobs:
         working-directory: src/FinTrack.Web
         run: npm run build
 
+      - name: Install test browser
+        working-directory: src/FinTrack.Web
+        run: npx playwright install chromium
+
       - name: Test
         working-directory: src/FinTrack.Web
-        run: npm test -- --watch=false --browsers=ChromeHeadless
+        env:
+          # Usar o Chromium instalado pelo Playwright, sem sobrescrita do runner.
+          CHROME_BIN: ''
+        run: npm test -- --watch=false --browsers=ChromiumHeadless

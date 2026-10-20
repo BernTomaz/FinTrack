@@ -49,7 +49,7 @@ type View =
     TransactionFormPanelComponent,
   ],
   templateUrl: './app.html',
-  styleUrl: './app.css',
+  styleUrls: ['./app.css', './app-responsive.css'],
   encapsulation: ViewEncapsulation.None,
 })
 export class App implements OnDestroy {
