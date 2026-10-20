@@ -2,7 +2,8 @@
 
 ## Agora
 
-- Implementar melhorias pós-MVP pequenas antes do deploy.
+- Confirmar no GitHub o CI atualizado com SQL Server e fluxo no navegador.
+- Revisar os alertas das dependências existentes do frontend antes do deploy.
 - Revisar deploy público.
 
 ## MVP concluído
@@ -34,6 +35,9 @@
 
 - Edição de contas.
 - Edição de categorias.
+- Paginação dos relatórios com filtros e ordenação no servidor.
+- SQL Server e validação de navegador configurados no CI.
+- Revisão de CSS e documentação em 20/10/2026.
 
 ## Fora do MVP
 

@@ -70,6 +70,10 @@ MVP funcional validado localmente.
 - Preferências locais de tema, mês, cursor e pet
 - Tela Sobre com autoria e link do GitHub
 
+- Paginação de lançamentos na API e nos relatórios, com filtros e ordenação no servidor
+- SQL Server real configurado no CI
+- Fluxo no navegador e verificação de larguras mobile configurados no CI
+
 ## Em aberto
 
 - Preencher manualmente o painel About do GitHub.
@@ -87,15 +91,17 @@ MVP funcional validado localmente.
 
 ## Última validação automatizada
 
-- Data: 16/09/2026.
-- Backend: `dotnet test tests\FinTrack.Tests\FinTrack.Tests.csproj --no-restore -m:1`.
-- Resultado backend: testes aprovados.
-- Frontend: `npm run build`.
-- Resultado frontend: build de produção aprovado.
+- Data: 20/10/2026.
+- Backend: 54 testes aprovados, nenhum ignorado, incluindo SQL Server real e paginação.
+- Frontend: 14 testes aprovados no Chrome sem interface.
+- Build de produção aprovado; permanece o aviso de orçamento do CSS principal.
+- CI atualizado para executar o teste SQL e o fluxo no navegador; execução hospedada pendente de envio ao GitHub.
 
 ## Última validação ponta a ponta
 
-- Data: 16/09/2026.
-- Ambiente: Docker Compose com SQL Server, API e frontend.
-- Fluxo validado: cadastro, conta, categoria, lançamento, dashboard mensal e exportação CSV.
-- Resultado: aprovado.
+- Data: 20/10/2026.
+- Ambiente: API local, SQL Server com banco descartável e frontend com build de produção.
+- Fluxo: cadastro, login, contas, categorias, receitas, despesas, edição, filtros, dashboard e CSV completo.
+- Paginação: 55 lançamentos em duas páginas, busca fora da primeira página e totais independentes da página.
+- 42 capturas com verificações de largura entre 320 e 1440 pixels, incluindo tema escuro e menu compacto.
+- Detalhes e pendências em [Validação de 20/10/2026](operacao/validacao-2026-10-20.md).

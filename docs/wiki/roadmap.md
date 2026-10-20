@@ -22,6 +22,8 @@
 - Contas financeiras
 - Categorias
 - Lançamentos
+- Paginação de relatórios com filtros e ordenação no servidor
+- SQL Server e fluxo de navegador configurados no CI
 - Filtros de lançamentos
 - Dashboard mensal
 - Gráfico de fluxo de caixa com dados reais
