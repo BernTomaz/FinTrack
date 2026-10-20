@@ -44,6 +44,47 @@ jobs:
       - name: Test
         run: dotnet test FinTrack.slnx --no-build -m:1
 
+      - name: Setup Node for browser validation
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: src/FinTrack.Web/package-lock.json
+
+      - name: Build frontend and install browser
+        working-directory: src/FinTrack.Web
+        run: |
+          npm ci
+          npm run build
+          npx playwright install --with-deps chromium
+
+      - name: Validate browser flow and mobile layouts
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
+          ASPNETCORE_URLS: http://127.0.0.1:5081
+          ConnectionStrings__DefaultConnection: Server=localhost,1433;Database=FinTrackValidation_CI;User Id=sa;Password=FinTrack_CI_Only_2026!;Encrypt=False;TrustServerCertificate=True
+          FINTRACK_API_URL: http://127.0.0.1:5081
+        run: |
+          mkdir -p out/validation
+          dotnet src/FinTrack.Api/bin/Debug/net10.0/FinTrack.Api.dll --contentRoot "$GITHUB_WORKSPACE/src/FinTrack.Api" > out/validation/api.log 2>&1 &
+          api_pid=$!
+          trap 'kill "$api_pid" 2>/dev/null || true' EXIT
+          node --input-type=module -e '
+            for (let attempt = 0; attempt < 60; attempt++) {
+              try { if ((await fetch(process.env.FINTRACK_API_URL + "/health")).ok) process.exit(0); } catch {}
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            throw new Error("API did not become healthy");'
+          node scripts/validation/check-ui.mjs
+
+      - name: Upload browser validation results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-validation
+          path: out/validation
+          if-no-files-found: ignore
+
   frontend:
     name: Frontend
     runs-on: windows-latest

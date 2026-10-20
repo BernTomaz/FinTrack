@@ -4,7 +4,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
-const require = createRequire(import.meta.url);
+const require = createRequire(new URL('../../src/FinTrack.Web/package.json', import.meta.url));
 const { chromium } = require(process.env.PLAYWRIGHT_PATH ?? 'playwright');
 const apiUrl = process.env.FINTRACK_API_URL;
 assert(apiUrl, 'Informe FINTRACK_API_URL apontando para a API com banco descartável.');
@@ -26,7 +26,7 @@ const server = http.createServer(async (request, response) => {
   }
 });
 await new Promise((resolve) => server.listen(4201, '127.0.0.1', resolve));
-const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_BROWSER_PATH ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
+const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_BROWSER_PATH, headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, acceptDownloads: true });
 const errors = [];
 const layouts = [];
@@ -50,13 +50,14 @@ async function screenshot(name) {
   const layout = await page.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
   layouts.push({ name, ...layout });
   assert(layout.scrollWidth <= layout.width + 1, `${name}: página transborda (${layout.scrollWidth}/${layout.width})`);
+  assert.match(await page.locator('.app-shell, .login-page').evaluate(element => getComputedStyle(element).fontFamily), /Segoe UI/, `${name}: fonte principal ausente`);
   for (const button of await page.locator('.topbar .top-actions > button').all()) {
     const box = await button.boundingBox();
     assert(box && box.x >= 0 && box.x + box.width <= layout.width + 1, `${name}: botão do cabeçalho cortado`);
   }
   if (await page.locator('.compact-nav').count()) {
     const menu = await page.locator('.compact-nav').boundingBox();
-    const metric = await page.locator('.metric').first().boundingBox();
+    const metric = await page.locator('.metric, app-reports-panel .panel').first().boundingBox();
     assert(metric && metric.x >= menu.x + menu.width, `${name}: menu compacto cobre o conteúdo`);
   }
 }
@@ -119,6 +120,7 @@ try {
   assert.match(await page.locator('.message').innerText(), /compatível/);
   await nav('Relatórios');
   await page.getByPlaceholder('Descrição, conta ou categoria').fill('Despesa validada');
+  await page.getByText('Página 1 de 1 · 1 lançamentos', { exact: true }).waitFor();
   assert.equal(await page.locator('.table-row:not(.table-head)').count(), 1);
   await page.getByRole('button', { name: 'Limpar filtros', exact: true }).click();
   await nav('Dashboard');
@@ -149,6 +151,39 @@ try {
   const csvPath = path.join(output, 'export.csv');
   await download.saveAs(csvPath);
   assert.match(await fs.readFile(csvPath, 'utf8'), /Despesa validada/);
+  const token = await page.evaluate(() => sessionStorage.getItem('fintrack.token'));
+  const headers = { Authorization: `Bearer ${token}` };
+  const accounts = await (await page.request.get(`${apiUrl}/accounts`, { headers })).json();
+  const categories = await (await page.request.get(`${apiUrl}/categories`, { headers })).json();
+  for (let i = 1; i <= 53; i++) {
+    const response = await page.request.post(`${apiUrl}/transactions`, { headers, data: {
+      accountId: accounts[0].id, categoryId: categories.find(category => category.name === 'Mercado teste').id,
+      type: 'Expense', amount: 1, date: '2026-10-10', description: `Página teste ${String(i).padStart(2, '0')}`,
+    } });
+    assert.equal(response.status(), 201);
+  }
+  await nav('Relatórios');
+  await page.getByText('Página 1 de 2 · 55 lançamentos', { exact: true }).waitFor();
+  assert.equal(await page.locator('.table-row:not(.table-head)').count(), 50);
+  await page.getByRole('button', { name: 'Próxima', exact: true }).click();
+  await page.getByText('Página 2 de 2 · 55 lançamentos', { exact: true }).waitFor();
+  await page.getByText('Receita validada', { exact: true }).waitFor();
+  assert.equal(await page.locator('.table-row:not(.table-head)').count(), 5);
+  await screenshot('mobile-report-page-2');
+  await page.getByPlaceholder('Descrição, conta ou categoria').fill('Página teste 53');
+  await page.getByText('Página 1 de 1 · 1 lançamentos', { exact: true }).waitFor();
+  await page.getByText('Página teste 53', { exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Limpar filtros', exact: true }).click();
+  await page.getByText('Página 1 de 2 · 55 lançamentos', { exact: true }).waitFor();
+  await nav('Dashboard');
+  await page.locator('.topbar').getByRole('button', { name: 'Atualizar', exact: true }).click();
+  await page.getByText(/1\.247,00/).first().waitFor();
+  assert.match(await page.locator('.bar-group').getAttribute('title'), /253,00/);
+  await nav('Exportação CSV');
+  const fullDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Baixar CSV', exact: true }).click();
+  await (await fullDownload).saveAs(csvPath);
+  assert.equal((await fs.readFile(csvPath, 'utf8')).trim().split(/\r?\n/).length, 56);
   await page.getByTitle('Menu do usuário', { exact: true }).click();
   await page.getByRole('button', { name: 'Sair', exact: true }).click();
   await page.setViewportSize({ width: 320, height: 900 });
@@ -159,6 +194,7 @@ try {
   await page.locator('.app-shell').waitFor();
   assert.deepEqual(errors, []);
   await fs.writeFile(path.join(output, 'result.json'), JSON.stringify({ passed: true, layouts, errors }, null, 2));
+  await Promise.all(['failure.png', 'failure.txt'].map(file => fs.rm(path.join(output, file), { force: true })));
   console.log(JSON.stringify({ passed: true, screenshots: layouts.length, errors }));
 } catch (error) {
   await page.screenshot({ path: path.join(output, 'failure.png'), fullPage: true });
