@@ -114,4 +114,7 @@ jobs:
 
       - name: Test
         working-directory: src/FinTrack.Web
+        env:
+          # Usar o Chromium instalado pelo Playwright, sem sobrescrita do runner.
+          CHROME_BIN: ''
         run: npm test -- --watch=false --browsers=ChromiumHeadless

@@ -41,4 +41,6 @@ O backup com checksum também foi restaurado em outro banco temporário e as qua
 
 A [execução 39437244264](https://github.com/BernTomaz/FinTrack/actions/runs/39437244264) passou nos testes SQL/backend e nos testes/build frontend, mas falhou no script do navegador: após clicar em Contas, o dashboard ainda continha dois campos Nome. O script agora espera o título e o componente de destino antes de preencher formulários. A instalação do Chromium e o comando do executor frontend foram atualizados no workflow.
 
-A confirmação da nova execução hospedada será registrada após o envio dos commits. A validação em aparelho físico permanece pendente de acesso a um dispositivo real.
+A [execução 39442487590](https://github.com/BernTomaz/FinTrack/actions/runs/39442487590) aprovou backend e fluxo completo, mas o executor frontend registrou timeout de uma sessão do navegador mesmo com os 14 testes aprovados. A falha não se reproduziu localmente, inclusive com `CI=true`. O workflow agora limpa `CHROME_BIN` na etapa de teste para usar o Chromium instalado pelo Playwright, sem substituição pelo Chrome do runner. A nova execução hospedada será acompanhada antes de considerar o CI concluído.
+
+A validação em aparelho físico permanece pendente de acesso a um dispositivo real.
