@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-O frontend do FinTrack é uma aplicação Angular 20 focada no fluxo principal do MVP.
+O frontend do FinTrack é uma aplicação Angular 21 focada no fluxo principal do MVP.
 
 ## Telas
 

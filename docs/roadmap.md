@@ -2,8 +2,8 @@
 
 ## Agora
 
-- Confirmar no GitHub o CI atualizado com SQL Server e fluxo no navegador.
-- Revisar os alertas das dependências existentes do frontend antes do deploy.
+- Acompanhar o CI das correções de segurança e sincronização dos testes.
+- Validar em aparelho físico antes da publicação.
 - Revisar deploy público.
 
 ## MVP concluído
@@ -38,6 +38,8 @@
 - Paginação dos relatórios com filtros e ordenação no servidor.
 - SQL Server e validação de navegador configurados no CI.
 - Revisão de CSS e documentação em 20/10/2026.
+- Dependências atualizadas e testes migrados para Vitest: auditorias sem alertas conhecidos.
+- Medição com 120 mil lançamentos e oito consultas simultâneas.
 
 ## Fora do MVP
 

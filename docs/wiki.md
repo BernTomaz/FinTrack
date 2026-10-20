@@ -36,7 +36,7 @@ Próximas etapas:
 
 ### Frontend
 
-- Angular 20
+- Angular 21
 - TypeScript
 - Reactive Forms
 - HttpClient

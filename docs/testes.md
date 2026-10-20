@@ -35,11 +35,11 @@ As regressões também verificam alterações de contas e categorias com lançam
 ```powershell
 dotnet test FinTrack.slnx -m:1
 cd src/FinTrack.Web
-npm test -- --watch=false --browsers=ChromeHeadless
+npm test -- --watch=false --browsers=ChromiumHeadless
 npm run build
 ```
 
-Os testes Angular verificam carregamento inicial, reaproveitamento de contas e categorias, atualização após edição e exclusão, falhas de carregamento, troca rápida de mês e limpeza dos dados ao sair. O CI executa os testes do backend e do frontend, configura SQL Server 2022 em um serviço temporário e executa o fluxo no navegador.
+Os testes Angular usam Vitest com Chromium pelo Playwright e verificam carregamento inicial, reaproveitamento de contas e categorias, atualização após edição e exclusão, falhas de carregamento, troca rápida de mês e limpeza dos dados ao sair. O CI executa os testes do backend e do frontend, configura SQL Server 2022 em um serviço temporário e executa o fluxo no navegador.
 
 ## Verificação com SQL Server
 
@@ -62,8 +62,8 @@ O Playwright está fixado como dependência de desenvolvimento do frontend. Depo
 Use uma API local separada, ligada a um banco novo `FinTrackValidation_<GUID>`, e configure `FINTRACK_API_URL` para ela. Nunca aponte esses scripts para os dados de uso pessoal.
 
 - `node scripts/validation/check-ui.mjs`: serve o build de produção em `localhost:4201`; valida cadastro, login, contas, categorias, lançamentos, filtros, bloqueios de edição/exclusão, exportação completa, tema, páginas de relatórios, busca além da primeira página, totais do gráfico e larguras de 320 a 1440 pixels. Salva capturas e resultados em `out/validation/ui`.
-- `node scripts/validation/check-database.mjs`: exige `FINTRACK_VALIDATION_DATABASE`, autenticação integrada no SQL Server local e `sqlcmd`. Confere que a API usa o banco informado, insere 120 mil lançamentos fictícios e mede sete requisições após uma de aquecimento. A listagem medida usa a página padrão de 50 itens e confere o total de 10 mil no mês; as medições antigas de listagem completa não são diretamente comparáveis. Também restaura um backup em outro banco temporário e compara os dados.
+- `node scripts/validation/check-database.mjs`: exige `FINTRACK_VALIDATION_DATABASE`, autenticação integrada no SQL Server local e `sqlcmd`. Confere que a API usa o banco informado, insere 120 mil lançamentos fictícios e mede sete requisições após uma de aquecimento. A listagem medida usa a página padrão de 50 itens e confere o total de 10 mil no mês; as medições antigas de listagem completa não são diretamente comparáveis. Executa também oito consultas simultâneas por endpoint, 40 requisições em cada grupo, conferindo resultados, mediana e percentil 95. Também restaura um backup em outro banco temporário e compara os dados.
 - `FINTRACK_BENCHMARK_REUSE=true` reutiliza o usuário de volume existente e repete apenas a medição, sem inserir lançamentos ou fazer outro backup.
 
-O teste de restauração exclui sua própria cópia do banco. Ao terminar a sessão, encerrar a API temporária e remover o banco de origem descartável e os arquivos de backup gerados, conferindo os nomes antes da exclusão. Esses scripts não fazem teste de concorrência de muitos usuários nem simulam uma rede móvel real.
+O teste de restauração exclui sua própria cópia do banco. Ao terminar a sessão, encerrar a API temporária e remover o banco de origem descartável e os arquivos de backup gerados, conferindo os nomes antes da exclusão. A concorrência medida usa um único usuário fictício em localhost; não representa muitos usuários em produção nem uma rede móvel real. A porta do servidor visual pode ser alterada com FINTRACK_WEB_PORT (padrão 4201), desde que a API permita essa origem no CORS.
 

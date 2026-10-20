@@ -81,7 +81,7 @@ MVP funcional validado localmente.
 
 ## Última validação Docker
 
-- Data: 16/09/2026.
+- Data: 20/10/2026.
 - Comando: `docker compose up --build -d`.
 - Serviços validados: SQL Server, API e frontend.
 - API: health check em `/health` retornou `Healthy`.
@@ -93,9 +93,9 @@ MVP funcional validado localmente.
 
 - Data: 20/10/2026.
 - Backend: 54 testes aprovados, nenhum ignorado, incluindo SQL Server real e paginação.
-- Frontend: 14 testes aprovados no Chrome sem interface.
-- Build de produção aprovado; permanece o aviso de orçamento do CSS principal.
-- CI atualizado para executar o teste SQL e o fluxo no navegador; execução hospedada pendente de envio ao GitHub.
+- Frontend: 14 testes aprovados com Vitest e Chromium sem interface.
+- Build de produção aprovado sem aviso de CSS; regras responsivas em arquivo próprio e declarações redundantes removidas.
+- Auditorias npm e NuGet sem vulnerabilidades conhecidas. CI: corrigida a corrida na navegação encontrada na execução hospedada; nova execução em acompanhamento.
 
 ## Última validação ponta a ponta
 
@@ -105,3 +105,8 @@ MVP funcional validado localmente.
 - Paginação: 55 lançamentos em duas páginas, busca fora da primeira página e totais independentes da página.
 - 42 capturas com verificações de largura entre 320 e 1440 pixels, incluindo tema escuro e menu compacto.
 - Detalhes e pendências em [Validação de 20/10/2026](operacao/validacao-2026-10-20.md).
+
+## Fechamento das pendências
+
+- [Resultados de segurança, volume e concorrência](operacao/fechamento-2026-10-20.md).
+- Validação em aparelho físico continua dependendo de um dispositivo real.
