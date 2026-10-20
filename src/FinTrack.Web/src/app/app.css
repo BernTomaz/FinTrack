@@ -252,13 +252,6 @@ select {
   padding: 10px 12px;
 }
 
-.form-line {
-  align-items: center;
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
-}
-
 .check {
   align-items: center;
   display: flex;
@@ -1470,8 +1463,7 @@ button:disabled {
   }
 
   .topbar,
-  .panel-head,
-  .form-line {
+  .panel-head {
     align-items: stretch;
     display: grid;
   }
