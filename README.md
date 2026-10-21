@@ -188,3 +188,11 @@ Criar dados de demonstração em uma API em execução:
 ```powershell
 .\scripts\demo\seed-demo.ps1
 ```
+
+Criar e verificar um backup do banco no Docker:
+
+```powershell
+.\scripts\database\backup.ps1
+```
+
+O arquivo fica em `out/backups`. Veja [backup e teste de restauração](scripts/database/README.md) para escolher outro destino e validar uma cópia sem sobrescrever o banco original.

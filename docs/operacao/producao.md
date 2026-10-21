@@ -27,6 +27,8 @@ Cadastre o administrador enquanto a aplicação ainda estiver restrita ao respon
 
 ## Backup e restauração
 
+Para o ambiente Docker local, use o [script de backup](../../scripts/database/README.md), que verifica o backup e copia o arquivo para a máquina. Ele não configura uma rotina de produção nem substitui o ensaio de restauração descrito abaixo.
+
 O backup deve ter frequência, retenção e destino definidos conforme a perda de dados tolerável. Mantenha uma cópia protegida fora da máquina do banco; o teste local não substitui essa operação.
 
 No SQL Server, use `BACKUP DATABASE` com `COPY_ONLY, CHECKSUM` para um backup manual de validação sem alterar a sequência dos backups diferenciais. O diretório deve ser acessível pela conta do serviço SQL Server.

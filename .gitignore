@@ -28,5 +28,6 @@ TestResults/
 
 # SQL Server / local data
 *.bak
+*.bak.partial
 *.mdf
 *.ldf
