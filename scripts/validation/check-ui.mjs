@@ -87,14 +87,14 @@ try {
   await nav('Categorias');
   for (const [name, type] of [['Salário teste', 'Income'], ['Mercado teste', 'Expense']]) {
     await page.getByLabel('Nome', { exact: true }).fill(name);
-    await page.getByLabel(/^Tipo/).selectOption(type);
+    await page.getByRole('combobox', { name: /^Tipo/ }).selectOption(type);
     await save('Salvar categoria', '/categories');
     await page.getByText(name, { exact: true }).waitFor();
   }
   for (const [view, category, amount, description] of [['Receitas', 'Salário teste', '1000', 'Receita validada'], ['Despesas', 'Mercado teste', '200', 'Despesa validada']]) {
     await nav(view);
-    await page.getByLabel(/^Conta/).selectOption({ label: 'Conta de validação' });
-    await page.getByLabel(/^Categoria/).selectOption({ label: category });
+    await page.getByRole('combobox', { name: /^Conta/ }).selectOption({ label: 'Conta de validação' });
+    await page.getByRole('combobox', { name: /^Categoria/ }).selectOption({ label: category });
     await page.getByLabel('Valor', { exact: true }).fill(amount);
     await page.getByLabel('Data', { exact: true }).fill('2026-10-10');
     await page.getByLabel('Descrição', { exact: true }).fill(description);
@@ -120,7 +120,7 @@ try {
   assert.equal((await deletion).status(), 409);
   await nav('Categorias');
   await page.locator('.account-line').filter({ hasText: 'Mercado teste' }).getByTitle('Editar categoria', { exact: true }).click();
-  await page.getByLabel(/^Tipo/).selectOption('Income');
+  await page.getByRole('combobox', { name: /^Tipo/ }).selectOption('Income');
   await save('Atualizar categoria', '/categories', 409);
   assert.match(await page.locator('.message').innerText(), /compatível/);
   await nav('Relatórios');
