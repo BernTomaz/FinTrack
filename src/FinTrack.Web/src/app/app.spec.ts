@@ -77,6 +77,24 @@ describe('App', () => {
     expect(app['loginForm'].controls.email.value).toBe('user@example.com');
   });
 
+  it('opens deletion as a native modal and cancels without deleting', async () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.autoDetectChanges();
+    const app = fixture.componentInstance;
+    app['token'].set('test-token');
+    app['deleteTransaction']('transaction');
+    await fixture.whenStable();
+    const dialog = fixture.nativeElement.querySelector('dialog') as HTMLDialogElement;
+    expect(dialog.open).toBe(true);
+    expect(dialog.matches(':modal')).toBe(true);
+    expect(dialog.contains(document.activeElement)).toBe(true);
+    dialog.dispatchEvent(new Event('cancel'));
+    await fixture.whenStable();
+    expect(app['deleteTarget']()).toBeNull();
+    expect(fixture.nativeElement.querySelector('dialog')).toBeNull();
+    http.expectNone(request => request.method === 'DELETE');
+  });
+
   it('loads balances and catalogs, then reuses catalogs when changing month', () => {
     const app = loadedApp();
     expect(app['dashboard']()?.currentBalance).toBe(40);

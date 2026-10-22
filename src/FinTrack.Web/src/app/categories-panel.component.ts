@@ -21,8 +21,8 @@ import { Category, CategoryType } from './fintrack-api.service';
                 <small>{{ categoryTypeLabel(category.type) }}</small>
               </div>
               <div class="row-actions">
-                <button type="button" class="icon" title="Editar categoria" (click)="edit.emit(category)">✎</button>
-                <button type="button" class="icon" title="Excluir categoria" (click)="delete.emit(category.id)">×</button>
+                <button type="button" class="icon" aria-label="Editar categoria" title="Editar categoria" (click)="edit.emit(category)">✎</button>
+                <button type="button" class="icon" aria-label="Excluir categoria" title="Excluir categoria" (click)="delete.emit(category.id)">×</button>
               </div>
             </div>
           } @empty {

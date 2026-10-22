@@ -66,8 +66,8 @@ type TransactionSortField = 'date' | 'description' | 'category' | 'type' | 'amou
               </strong>
               <span>{{ accountName(transaction.accountId) }}</span>
               <span style="display:flex;gap:8px">
-                <button type="button" class="icon" title="Editar lançamento" (click)="edit.emit(transaction)">✎</button>
-                <button type="button" class="icon danger-icon" title="Excluir lançamento" (click)="delete.emit(transaction.id)">×</button>
+                <button type="button" class="icon" aria-label="Editar lançamento" title="Editar lançamento" (click)="edit.emit(transaction)">✎</button>
+                <button type="button" class="icon danger-icon" aria-label="Excluir lançamento" title="Excluir lançamento" (click)="delete.emit(transaction.id)">×</button>
               </span>
             </div>
           } @empty {

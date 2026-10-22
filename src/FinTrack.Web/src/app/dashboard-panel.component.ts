@@ -7,7 +7,7 @@ import { Account, AccountType, Category, CategoryType, Dashboard, Transaction, T
   imports: [ReactiveFormsModule],
   template: `
     <section class="toolbar">
-      <input class="select-like" type="month" [value]="month" (change)="monthChange.emit($any($event.target).value)" title="Selecionar mês" />
+      <input class="select-like" type="month" [value]="month" (change)="monthChange.emit($any($event.target).value)" title="Selecionar mês" aria-label="Selecionar mês" />
     </section>
 
     <section id="dashboard" class="summary" aria-label="Resumo mensal">
@@ -130,8 +130,8 @@ import { Account, AccountType, Category, CategoryType, Dashboard, Transaction, T
               </strong>
               <span>{{ accountName(transaction.accountId) }}</span>
               <span style="display:flex;gap:8px">
-                <button type="button" class="icon" title="Editar lançamento" (click)="editTransaction.emit(transaction)">✎</button>
-                <button type="button" class="icon danger-icon" title="Excluir lançamento" (click)="deleteTransaction.emit(transaction.id)">×</button>
+                <button type="button" class="icon" aria-label="Editar lançamento" title="Editar lançamento" (click)="editTransaction.emit(transaction)">✎</button>
+                <button type="button" class="icon danger-icon" aria-label="Excluir lançamento" title="Excluir lançamento" (click)="deleteTransaction.emit(transaction.id)">×</button>
               </span>
             </div>
           } @empty {
@@ -162,7 +162,7 @@ import { Account, AccountType, Category, CategoryType, Dashboard, Transaction, T
                 <small>Saldo inicial: {{ money(account.initialBalance) }}</small>
                 <small>Início: {{ account.openingDate }}</small>
               </div>
-              <button type="button" class="icon" title="Excluir conta" (click)="deleteAccount.emit(account.id)">×</button>
+              <button type="button" class="icon" aria-label="Excluir conta" title="Excluir conta" (click)="deleteAccount.emit(account.id)">×</button>
             </div>
           } @empty {
             <div class="empty-state">
@@ -176,7 +176,7 @@ import { Account, AccountType, Category, CategoryType, Dashboard, Transaction, T
     </section>
 
     <section class="forms-grid">
-      <form id="contas" class="panel" [formGroup]="accountForm" (ngSubmit)="createAccount.emit()">
+      <form id="nova-conta" class="panel" [formGroup]="accountForm" (ngSubmit)="createAccount.emit()">
         <h2>Nova conta</h2>
         <label>Nome<input type="text" formControlName="name" /></label>
         <label>Tipo

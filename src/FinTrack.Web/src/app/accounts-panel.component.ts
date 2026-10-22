@@ -23,8 +23,8 @@ import { Account, AccountType } from './fintrack-api.service';
                 <small>Início: {{ account.openingDate }}</small>
               </div>
               <div class="row-actions">
-                <button type="button" class="icon" title="Editar conta" (click)="edit.emit(account)">✎</button>
-                <button type="button" class="icon" title="Excluir conta" (click)="delete.emit(account.id)">×</button>
+                <button type="button" class="icon" aria-label="Editar conta" title="Editar conta" (click)="edit.emit(account)">✎</button>
+                <button type="button" class="icon" aria-label="Excluir conta" title="Excluir conta" (click)="delete.emit(account.id)">×</button>
               </div>
             </div>
           } @empty {

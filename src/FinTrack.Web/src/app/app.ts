@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, ViewEncapsulation, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, ViewEncapsulation, afterRenderEffect, computed, inject, signal, viewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription, finalize, forkJoin, of } from 'rxjs';
 import { Account, AccountType, AuthResponse, Category, CategoryType, Dashboard, FinTrackApiService, HealthStatus, LockedUser, Transaction, TransactionType } from './fintrack-api.service';
@@ -61,6 +61,7 @@ export class App implements OnDestroy {
   private catalogsLoaded = false;
   private reportSubscription?: Subscription;
   private searchTimeout?: ReturnType<typeof setTimeout>;
+  private readonly deleteDialog = viewChild<ElementRef<HTMLDialogElement>>('deleteDialog');
 
   protected readonly token = signal(sessionStorage.getItem('fintrack.token') ?? '');
   protected readonly isEntering = signal((sessionStorage.getItem('fintrack.token') ?? '').length > 0);
@@ -205,6 +206,10 @@ export class App implements OnDestroy {
   });
 
   constructor() {
+    afterRenderEffect(() => {
+      const dialog = this.deleteDialog()?.nativeElement;
+      if (dialog && !dialog.open) dialog.showModal();
+    });
     if (this.isLoggedIn()) {
       this.theme.set(this.savedThemeFor(this.userEmail()));
       this.loadAll();

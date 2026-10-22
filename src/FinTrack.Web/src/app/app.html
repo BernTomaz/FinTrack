@@ -12,10 +12,10 @@
 } @else if (!isLoggedIn()) {
   <main class="login-page" [class.custom-cursor]="customCursorEnabled()">
     @if (message()) {
-      <div class="message" [class.leaving]="isMessageLeaving()" [attr.style]="messageStyle()">
+      <div class="message" role="status" aria-live="polite" aria-atomic="true" [class.leaving]="isMessageLeaving()" [attr.style]="messageStyle()">
         <strong style="border:1px solid currentColor;border-radius:999px;display:grid;flex:0 0 28px;height:28px;place-items:center;width:28px">{{ messageIcon() }}</strong>
         <span style="flex:1">{{ message() }}</span>
-        <button type="button" style="background:transparent;color:inherit;cursor:pointer;font-size:1.25rem;line-height:1;padding:2px 0 2px 8px" (click)="closeMessage()">×</button>
+        <button type="button" style="background:transparent;color:inherit;cursor:pointer;font-size:1.25rem;line-height:1;padding:2px 0 2px 8px" aria-label="Fechar mensagem" (click)="closeMessage()">×</button>
       </div>
     }
 
@@ -128,28 +128,28 @@
   <main class="app-shell" [class.custom-cursor]="customCursorEnabled()" [class.dark-theme]="theme() === 'dark'" [class.sidebar-hidden]="sidebarHidden()" [class.dashboard-view]="activeView() === 'dashboard'">
     <aside class="sidebar">
       <div class="top-actions">
-        <button type="button" class="brand-row brand-button" (click)="openView('dashboard')" title="Ir para o dashboard">
+        <button type="button" class="brand-row brand-button" (click)="openView('dashboard')" aria-label="Ir para o dashboard" title="Ir para o dashboard">
           <span class="brand-mark" aria-hidden="true">FT</span>
           <div class="brand-title sidebar-title">
             <strong>FinTrack</strong>
             <small>Controle Financeiro Pessoal</small>
           </div>
         </button>
-        <button type="button" class="icon sidebar-toggle" title="Ocultar menu lateral" (click)="toggleSidebar()">
+        <button type="button" class="icon sidebar-toggle" aria-label="Ocultar menu lateral" title="Ocultar menu lateral" (click)="toggleSidebar()">
           <span class="toggle-desktop">&lt;</span>
           <span class="toggle-mobile">⌄</span>
         </button>
       </div>
 
       <nav aria-label="Menu principal">
-        <button type="button" title="Dashboard" [class.active]="activeView() === 'dashboard'" (click)="openView('dashboard')"><span class="nav-icon" aria-hidden="true">⌂</span><span class="nav-label">Dashboard</span></button>
-        <button type="button" title="Receitas" [class.active]="activeView() === 'income'" (click)="openView('income')"><span class="nav-icon" aria-hidden="true">↗</span><span class="nav-label">Receitas</span></button>
-        <button type="button" title="Despesas" [class.active]="activeView() === 'expense'" (click)="openView('expense')"><span class="nav-icon" aria-hidden="true">↘</span><span class="nav-label">Despesas</span></button>
-        <button type="button" title="Contas" [class.active]="activeView() === 'accounts'" (click)="openView('accounts')"><span class="nav-icon" aria-hidden="true">▣</span><span class="nav-label">Contas</span></button>
-        <button type="button" title="Categorias" [class.active]="activeView() === 'categories'" (click)="openView('categories')"><span class="nav-icon" aria-hidden="true">◇</span><span class="nav-label">Categorias</span></button>
-        <button type="button" title="Relatórios" [class.active]="activeView() === 'reports'" (click)="openView('reports')"><span class="nav-icon" aria-hidden="true">▥</span><span class="nav-label">Relatórios</span></button>
-        <button type="button" title="Resumo por categoria" [class.active]="activeView() === 'categorySummary'" (click)="openCategorySummary()"><span class="nav-icon" aria-hidden="true">▤</span><span class="nav-label">Resumo por categoria</span></button>
-        <button type="button" title="Exportação CSV" [class.active]="activeView() === 'export'" (click)="openView('export')"><span class="nav-icon" aria-hidden="true">⇩</span><span class="nav-label">Exportação CSV</span></button>
+        <button type="button" aria-label="Dashboard" title="Dashboard" [class.active]="activeView() === 'dashboard'" (click)="openView('dashboard')"><span class="nav-icon" aria-hidden="true">⌂</span><span class="nav-label">Dashboard</span></button>
+        <button type="button" aria-label="Receitas" title="Receitas" [class.active]="activeView() === 'income'" (click)="openView('income')"><span class="nav-icon" aria-hidden="true">↗</span><span class="nav-label">Receitas</span></button>
+        <button type="button" aria-label="Despesas" title="Despesas" [class.active]="activeView() === 'expense'" (click)="openView('expense')"><span class="nav-icon" aria-hidden="true">↘</span><span class="nav-label">Despesas</span></button>
+        <button type="button" aria-label="Contas" title="Contas" [class.active]="activeView() === 'accounts'" (click)="openView('accounts')"><span class="nav-icon" aria-hidden="true">▣</span><span class="nav-label">Contas</span></button>
+        <button type="button" aria-label="Categorias" title="Categorias" [class.active]="activeView() === 'categories'" (click)="openView('categories')"><span class="nav-icon" aria-hidden="true">◇</span><span class="nav-label">Categorias</span></button>
+        <button type="button" aria-label="Relatórios" title="Relatórios" [class.active]="activeView() === 'reports'" (click)="openView('reports')"><span class="nav-icon" aria-hidden="true">▥</span><span class="nav-label">Relatórios</span></button>
+        <button type="button" aria-label="Resumo por categoria" title="Resumo por categoria" [class.active]="activeView() === 'categorySummary'" (click)="openCategorySummary()"><span class="nav-icon" aria-hidden="true">▤</span><span class="nav-label">Resumo por categoria</span></button>
+        <button type="button" aria-label="Exportação CSV" title="Exportação CSV" [class.active]="activeView() === 'export'" (click)="openView('export')"><span class="nav-icon" aria-hidden="true">⇩</span><span class="nav-label">Exportação CSV</span></button>
       </nav>
 
       <div class="safe-note">
@@ -173,7 +173,7 @@
             <button type="button" class="blue" (click)="openView('expense')"><span class="label-full">+ Nova despesa</span><span class="label-short">+ Nova despesa</span></button>
           }
           <div class="user-menu">
-            <button type="button" class="avatar" (click)="toggleUserMenu()" title="Menu do usuário">{{ initial() }}</button>
+            <button type="button" class="avatar" (click)="toggleUserMenu()" aria-label="Menu do usuário" title="Menu do usuário" [attr.aria-expanded]="userMenuOpen()">{{ initial() }}</button>
             @if (userMenuOpen()) {
               <div class="menu-popover">
                 <strong>{{ userName() }}</strong>
@@ -195,20 +195,20 @@
       @if (sidebarHidden()) {
         <nav class="compact-nav" aria-label="Menu principal compacto">
           <span class="brand-mark compact-brand" aria-hidden="true">FT</span>
-          <button type="button" class="icon compact-toggle" title="Mostrar menu lateral" (click)="toggleSidebar()">☰</button>
-          <button type="button" title="Dashboard" [class.active]="activeView() === 'dashboard'" (click)="openView('dashboard')"><span class="nav-icon" aria-hidden="true">⌂</span></button>
-          <button type="button" title="Receitas" [class.active]="activeView() === 'income'" (click)="openView('income')"><span class="nav-icon" aria-hidden="true">↗</span></button>
-          <button type="button" title="Despesas" [class.active]="activeView() === 'expense'" (click)="openView('expense')"><span class="nav-icon" aria-hidden="true">↘</span></button>
-          <button type="button" title="Contas" [class.active]="activeView() === 'accounts'" (click)="openView('accounts')"><span class="nav-icon" aria-hidden="true">▣</span></button>
-          <button type="button" title="Categorias" [class.active]="activeView() === 'categories'" (click)="openView('categories')"><span class="nav-icon" aria-hidden="true">◇</span></button>
-          <button type="button" title="Relatórios" [class.active]="activeView() === 'reports'" (click)="openView('reports')"><span class="nav-icon" aria-hidden="true">▥</span></button>
-          <button type="button" title="Resumo por categoria" [class.active]="activeView() === 'categorySummary'" (click)="openCategorySummary()"><span class="nav-icon" aria-hidden="true">▤</span></button>
-          <button type="button" title="Exportação CSV" [class.active]="activeView() === 'export'" (click)="openView('export')"><span class="nav-icon" aria-hidden="true">⇩</span></button>
+          <button type="button" class="icon compact-toggle" aria-label="Mostrar menu lateral" title="Mostrar menu lateral" (click)="toggleSidebar()">☰</button>
+          <button type="button" aria-label="Dashboard" title="Dashboard" [class.active]="activeView() === 'dashboard'" (click)="openView('dashboard')"><span class="nav-icon" aria-hidden="true">⌂</span></button>
+          <button type="button" aria-label="Receitas" title="Receitas" [class.active]="activeView() === 'income'" (click)="openView('income')"><span class="nav-icon" aria-hidden="true">↗</span></button>
+          <button type="button" aria-label="Despesas" title="Despesas" [class.active]="activeView() === 'expense'" (click)="openView('expense')"><span class="nav-icon" aria-hidden="true">↘</span></button>
+          <button type="button" aria-label="Contas" title="Contas" [class.active]="activeView() === 'accounts'" (click)="openView('accounts')"><span class="nav-icon" aria-hidden="true">▣</span></button>
+          <button type="button" aria-label="Categorias" title="Categorias" [class.active]="activeView() === 'categories'" (click)="openView('categories')"><span class="nav-icon" aria-hidden="true">◇</span></button>
+          <button type="button" aria-label="Relatórios" title="Relatórios" [class.active]="activeView() === 'reports'" (click)="openView('reports')"><span class="nav-icon" aria-hidden="true">▥</span></button>
+          <button type="button" aria-label="Resumo por categoria" title="Resumo por categoria" [class.active]="activeView() === 'categorySummary'" (click)="openCategorySummary()"><span class="nav-icon" aria-hidden="true">▤</span></button>
+          <button type="button" aria-label="Exportação CSV" title="Exportação CSV" [class.active]="activeView() === 'export'" (click)="openView('export')"><span class="nav-icon" aria-hidden="true">⇩</span></button>
         </nav>
       }
 
       @if (isLoading()) {
-        <div class="loading-strip">Carregando dados...</div>
+        <div class="loading-strip" role="status">Carregando dados…</div>
       }
 
       @if (activeView() === 'profile') {
@@ -514,35 +514,35 @@
           <small>{{ petTip() }}</small>
           <p>{{ petAnswer() }}</p>
           <div style="display:grid;gap:8px;grid-template-columns:minmax(0,1fr) auto">
-            <input type="text" [style.background]="theme() === 'dark' ? '#ffffff' : '#0c1526'" [style.color]="theme() === 'dark' ? '#111827' : '#f8fafc'" style="min-width:0" [value]="petQuestion()" (input)="updatePetQuestion($any($event.target).value)" (keydown.enter)="askPet()" placeholder="Pergunte algo..." />
+            <input type="text" aria-label="Pergunta para o assistente Fin" [style.background]="theme() === 'dark' ? '#ffffff' : '#0c1526'" [style.color]="theme() === 'dark' ? '#111827' : '#f8fafc'" style="min-width:0" [value]="petQuestion()" (input)="updatePetQuestion($any($event.target).value)" (keydown.enter)="askPet()" placeholder="Pergunte algo…" />
             <button type="button" class="primary" (click)="askPet()">Enviar</button>
           </div>
         </div>
       }
-      <button type="button" class="pet-pig" style="background:transparent;border:0;height:72px;padding:0;width:72px" (click)="togglePet()" title="Abrir assistente Fin">
+      <button type="button" class="pet-pig" style="background:transparent;border:0;height:72px;padding:0;width:72px" (click)="togglePet()" aria-label="Abrir assistente Fin" title="Abrir assistente Fin">
         <img [src]="petImageSrc()" alt="" aria-hidden="true" style="display:block;height:72px;object-fit:contain;width:72px" />
       </button>
     </section>
     }
 
     @if (deleteTarget(); as target) {
-      <section class="confirm-backdrop" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+      <dialog #deleteDialog class="confirm-dialog" aria-labelledby="delete-title" aria-describedby="delete-description" (cancel)="cancelDelete()">
         <div class="confirm-card">
           <strong id="delete-title">{{ target.title }}</strong>
-          <p>{{ target.description }}</p>
+          <p id="delete-description">{{ target.description }}</p>
           <div>
             <button type="button" class="ghost" (click)="cancelDelete()">Cancelar</button>
             <button type="button" class="danger-button" (click)="confirmDelete()">Excluir</button>
           </div>
         </div>
-      </section>
+      </dialog>
     }
 
     @if (message()) {
-      <div class="message" [class.leaving]="isMessageLeaving()" [attr.style]="messageStyle()">
+      <div class="message" role="status" aria-live="polite" aria-atomic="true" [class.leaving]="isMessageLeaving()" [attr.style]="messageStyle()">
         <strong style="border:1px solid currentColor;border-radius:999px;display:grid;flex:0 0 28px;height:28px;place-items:center;width:28px">{{ messageIcon() }}</strong>
         <span style="flex:1">{{ message() }}</span>
-        <button type="button" style="background:transparent;color:inherit;cursor:pointer;font-size:1.25rem;line-height:1;padding:2px 0 2px 8px" (click)="closeMessage()">×</button>
+        <button type="button" style="background:transparent;color:inherit;cursor:pointer;font-size:1.25rem;line-height:1;padding:2px 0 2px 8px" aria-label="Fechar mensagem" (click)="closeMessage()">×</button>
       </div>
     }
   </main>
