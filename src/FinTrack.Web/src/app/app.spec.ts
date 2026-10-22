@@ -4,6 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
 import { FinTrackApiService } from './fintrack-api.service';
+import { ReportsPanelComponent } from './reports-panel.component';
 
 describe('App', () => {
   let http: HttpTestingController;
@@ -93,6 +94,25 @@ describe('App', () => {
     expect(app['deleteTarget']()).toBeNull();
     expect(fixture.nativeElement.querySelector('dialog')).toBeNull();
     http.expectNone(request => request.method === 'DELETE');
+  });
+
+  it('offers mobile sorting through the existing report sort event', async () => {
+    const fixture = TestBed.createComponent(ReportsPanelComponent);
+    fixture.autoDetectChanges();
+    const sort = vi.fn();
+    fixture.componentInstance.sort.subscribe(sort);
+    await fixture.whenStable();
+    const select = fixture.nativeElement.querySelector('.mobile-sort select') as HTMLSelectElement;
+    select.value = 'amount';
+    select.dispatchEvent(new Event('change'));
+    expect(sort).toHaveBeenLastCalledWith('amount');
+    fixture.componentRef.setInput('sortField', 'amount');
+    fixture.componentRef.setInput('sortDirection', 'desc');
+    await fixture.whenStable();
+    const direction = fixture.nativeElement.querySelector('.mobile-sort button') as HTMLButtonElement;
+    expect(direction.textContent).toContain('decrescente');
+    direction.click();
+    expect(sort).toHaveBeenLastCalledWith('amount');
   });
 
   it('loads balances and catalogs, then reuses catalogs when changing month', () => {

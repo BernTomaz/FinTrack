@@ -43,6 +43,18 @@ type TransactionSortField = 'date' | 'description' | 'category' | 'type' | 'amou
             </select>
           </label>
         </div>
+        <div class="mobile-sort">
+          <label>Ordenar por
+          <select [value]="sortField" (change)="sort.emit($any($event.target).value)">
+            <option value="date">Data</option>
+            <option value="description">Descrição</option>
+            <option value="category">Categoria</option>
+            <option value="type">Tipo</option>
+            <option value="amount">Valor</option>
+          </select>
+          </label>
+          <button type="button" class="ghost" (click)="sort.emit(sortField)">{{ sortDirection === 'asc' ? 'Ordem crescente ↑' : 'Ordem decrescente ↓' }}</button>
+        </div>
         <div class="table">
           <div class="table-row table-head">
             <button type="button" style="background:transparent;color:inherit;text-align:left" (click)="sort.emit('date')">Data{{ sortLabel('date') }}</button>

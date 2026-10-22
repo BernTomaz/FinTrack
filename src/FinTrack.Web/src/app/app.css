@@ -482,6 +482,7 @@ nav .active {
 }
 
 .content {
+  min-width: 0;
   display: grid;
   align-content: start;
   gap: 14px;
@@ -599,6 +600,7 @@ nav .active {
 }
 
 .settings-page {
+  min-width: 0;
   display: grid;
   min-height: calc(100vh - 110px);
   place-items: center;
@@ -606,6 +608,7 @@ nav .active {
 }
 
 .settings-card {
+  min-width: 0;
   max-width: 560px;
   width: 100%;
 }
@@ -835,6 +838,22 @@ nav .active {
 
 .table {
   overflow-x: auto;
+}
+
+.mobile-sort {
+  display: none;
+}
+
+:is(.panel, .metric, .account-line) > div,
+.table-row > :is(span, strong),
+.menu-popover strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.message {
+  max-width: calc(100vw - 24px);
+  overflow-wrap: anywhere;
 }
 
 .pagination {

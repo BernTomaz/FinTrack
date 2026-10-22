@@ -294,6 +294,15 @@
 }
 
 @media (max-width: 760px) {
+  .mobile-sort {
+    display: grid;
+  }
+
+  .panel-head {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
   .app-shell,
   .sidebar,
   .content,
