@@ -61,7 +61,7 @@
               </button>
             </span>
           </label>
-          <button type="submit" class="primary">Entrar</button>
+          <button type="submit" class="primary" [disabled]="authPending()">{{ authPending() ? 'Entrando…' : 'Entrar' }}</button>
           @if (loginError()) {
             <p class="login-error" role="alert">{{ loginError() }}</p>
           }
@@ -69,7 +69,7 @@
 
         <div class="auth-switch">
           <span>Não tem conta?</span>
-          <button type="button" class="link strong" (click)="showRegister()">Criar conta grátis</button>
+          <button type="button" class="link strong" [disabled]="authPending()" (click)="showRegister()">Criar conta grátis</button>
         </div>
       } @else {
         <form [formGroup]="registerForm" (ngSubmit)="register()">
@@ -114,12 +114,12 @@
               </span>
             }
           </label>
-          <button type="submit" class="primary" [disabled]="!canCreateAccount()" [style.opacity]="canCreateAccount() ? 1 : 0.38">Criar conta</button>
+          <button type="submit" class="primary" [disabled]="authPending() || !canCreateAccount()">{{ authPending() ? 'Criando conta…' : 'Criar conta' }}</button>
         </form>
 
         <div class="auth-switch">
           <span>Já tem conta?</span>
-          <button type="button" class="link strong" (click)="showLogin()">Voltar para login</button>
+          <button type="button" class="link strong" [disabled]="authPending()" (click)="showLogin()">Voltar para login</button>
         </div>
       }
     </section>

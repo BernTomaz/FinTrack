@@ -75,6 +75,7 @@ export class App implements OnDestroy {
   protected readonly registerPasswordVisible = signal(false);
   protected readonly isMessageLeaving = signal(false);
   protected readonly isLoading = signal(false);
+  protected readonly authPending = signal(false);
   protected readonly deleteTarget = signal<DeleteTarget | null>(null);
   protected readonly accounts = signal<Account[]>([]);
   protected readonly categories = signal<Category[]>([]);
@@ -212,6 +213,7 @@ export class App implements OnDestroy {
   }
 
   protected login(): void {
+    if (this.authPending()) return;
     this.loginError.set('');
     const validation = this.loginValidationMessage();
     if (validation) {
@@ -221,7 +223,8 @@ export class App implements OnDestroy {
       return;
     }
 
-    this.api.login(this.loginForm.getRawValue()).subscribe({
+    this.authPending.set(true);
+    this.api.login(this.loginForm.getRawValue()).pipe(finalize(() => this.authPending.set(false))).subscribe({
       next: (auth) => this.startSession(auth),
       error: (error) => {
         const attempts = Math.max(this.loginAttemptsRemaining() - 1, 0);
@@ -234,6 +237,7 @@ export class App implements OnDestroy {
   }
 
   protected register(): void {
+    if (this.authPending()) return;
     const validation = this.registerValidationMessage();
     if (validation) {
       this.registerForm.markAllAsTouched();
@@ -241,7 +245,8 @@ export class App implements OnDestroy {
       return;
     }
 
-    this.api.register(this.registerForm.getRawValue()).subscribe({
+    this.authPending.set(true);
+    this.api.register(this.registerForm.getRawValue()).pipe(finalize(() => this.authPending.set(false))).subscribe({
       next: () => {
         const email = this.registerForm.controls.email.value.trim();
         this.registerForm.reset({ name: '', email: '', password: '' });
