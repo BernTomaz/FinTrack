@@ -23,6 +23,9 @@
 - Validar descrição máxima de lançamento
 - Validar que o saldo inicial da conta respeita a data de início
 - Impedir lançamento com data anterior ao início da conta
+- Recalcular saldos exatos após editar valor, tipo e mês de um lançamento e depois excluí-lo
+- Negar leitura, edição, exclusão e uso de identificadores de outro usuário, sem alterar os dados existentes
+- Rejeitar tipos inexistentes e valores fora da precisão monetária, preservando os limites válidos
 
 ## Estratégia
 
@@ -43,7 +46,7 @@ Os testes Angular usam Vitest com Chromium pelo Playwright e verificam carregame
 
 ## Verificação com SQL Server
 
-O teste abaixo executa o dashboard no SQL Server real, incluindo migrations, agrupamentos, saldos, limites de mês e isolamento por usuário. O teste também verifica paginação, busca, ordenação e exportação completa. O CI fornece essa conexão. Localmente, sem a variável, apenas esse teste é marcado como ignorado; os demais usam o banco em memória.
+O teste abaixo executa o dashboard no SQL Server real, incluindo migrations, agrupamentos, saldos, limites de mês e isolamento por usuário. Também verifica paginação, busca, ordenação, exportação, recálculo após edição/exclusão, rejeição de acessos entre usuários e persistência dos limites monetários. O CI fornece essa conexão. No Windows, sem `FINTRACK_TEST_SQLSERVER` definida, o projeto carrega automaticamente `tests/FinTrack.Tests/visualstudio.runsettings` e usa `localhost` com autenticação integrada. Isso exige a instância padrão do SQL Server em execução e permissão para criar e excluir bancos. Após alterar essa configuração, recarregue o projeto no Visual Studio e execute todos os testes novamente. Nos demais sistemas, sem a variável, apenas esse teste é marcado como ignorado; os demais usam o banco em memória.
 
 Execute a partir da raiz, usando uma instância de desenvolvimento com permissão para criar e excluir bancos:
 
