@@ -1,5 +1,11 @@
 # Endpoints
 
+## Validações financeiras
+
+- Criação e edição de contas, categorias e lançamentos rejeitam tipos inexistentes com `400 Bad Request`.
+- Saldos iniciais e valores de lançamentos aceitam até duas casas decimais, sem arredondamento silencioso. Valores fora da precisão `decimal(18,2)` retornam `400 Bad Request` antes da gravação.
+- O saldo inicial pode ser negativo. O valor de um lançamento precisa ser maior que zero.
+
 ## Auth
 
 ```text

@@ -113,6 +113,11 @@ public static class CategoryEndpoints
 
     private static IResult? ValidateRequest(CategoryRequest request)
     {
+        if (!Enum.IsDefined(request.Type))
+        {
+            return Results.BadRequest("Invalid category type.");
+        }
+
         var name = request.Name?.Trim() ?? string.Empty;
         if (name.Length == 0)
         {

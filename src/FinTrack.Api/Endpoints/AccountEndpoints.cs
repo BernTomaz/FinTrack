@@ -111,6 +111,17 @@ public static class AccountEndpoints
 
     private static IResult? ValidateRequest(AccountRequest request)
     {
+        if (!Enum.IsDefined(request.Type))
+        {
+            return Results.BadRequest("Invalid account type.");
+        }
+
+        if (request.InitialBalance is < -9999999999999999.99m or > 9999999999999999.99m ||
+            decimal.Round(request.InitialBalance, 2) != request.InitialBalance)
+        {
+            return Results.BadRequest("Initial balance must have at most two decimal places and be within the supported range.");
+        }
+
         var name = request.Name?.Trim() ?? string.Empty;
         if (name.Length == 0)
         {

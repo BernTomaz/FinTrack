@@ -22,6 +22,198 @@ namespace FinTrack.Tests;
 public sealed class ApiFlowTests
 {
     [Fact]
+    public async Task Transaction_edits_and_deletion_recalculate_exact_balances_across_months()
+    {
+        await using var app = new FinTrackApiFactory();
+        using var client = app.CreateClient();
+        await VerifyTransactionBalances(client);
+    }
+
+    private static async Task VerifyTransactionBalances(HttpClient client)
+    {
+        await RegisterAndAuthorize(client, "Saldos", "balances@fintrack.local");
+        var account = await CreateAccount(client, "Conta", 100.10m);
+        var income = await CreateCategory(client, "Salário", CategoryType.Income);
+        var expense = await CreateCategory(client, "Mercado", CategoryType.Expense);
+        var date = new DateOnly(2026, 1, 31);
+        var credit = await CreateTransaction(client, account.Id, income.Id, TransactionType.Income, 10.20m, date, null);
+        var debit = await CreateTransaction(client, account.Id, expense.Id, TransactionType.Expense, 0.30m, date, null);
+
+        var january = await client.GetFromJsonAsync<MonthlyDashboardResponse>("/dashboard/monthly?year=2026&month=1");
+        Assert.NotNull(january);
+        Assert.Equal(10.20m, january.TotalIncome);
+        Assert.Equal(0.30m, january.TotalExpense);
+        Assert.Equal(9.90m, january.MonthBalance);
+        Assert.Equal(110.00m, january.CurrentBalance);
+        Assert.Equal(0.30m, Assert.Single(january.ExpensesByCategory).Total);
+
+        var update = await client.PutAsJsonAsync($"/transactions/{debit.Id}", new TransactionRequest(
+            account.Id, income.Id, TransactionType.Income, 5.15m, date.AddDays(1), "Crédito corrigido"));
+        Assert.Equal(HttpStatusCode.OK, update.StatusCode);
+        january = await client.GetFromJsonAsync<MonthlyDashboardResponse>("/dashboard/monthly?year=2026&month=1");
+        Assert.NotNull(january);
+        Assert.Equal(10.20m, january.MonthBalance);
+        Assert.Equal(110.30m, january.CurrentBalance);
+        Assert.Equal(0, january.TotalExpense);
+        Assert.Empty(january.ExpensesByCategory);
+        Assert.Equal(credit.Id, Assert.Single(january.LatestTransactions).Id);
+        var february = await client.GetFromJsonAsync<MonthlyDashboardResponse>("/dashboard/monthly?year=2026&month=2");
+        Assert.NotNull(february);
+        Assert.Equal(5.15m, february.TotalIncome);
+        Assert.Equal(0, february.TotalExpense);
+        Assert.Equal(5.15m, february.MonthBalance);
+        Assert.Equal(115.45m, february.CurrentBalance);
+
+        Assert.Equal(HttpStatusCode.NoContent, (await client.DeleteAsync($"/transactions/{debit.Id}")).StatusCode);
+        february = await client.GetFromJsonAsync<MonthlyDashboardResponse>("/dashboard/monthly?year=2026&month=2");
+        Assert.NotNull(february);
+        Assert.Equal(0, february.TotalIncome);
+        Assert.Equal(0, february.MonthBalance);
+        Assert.Equal(110.30m, february.CurrentBalance);
+        Assert.Empty(february.LatestTransactions);
+        Assert.Equal(HttpStatusCode.NotFound, (await client.DeleteAsync($"/transactions/{debit.Id}")).StatusCode);
+        Assert.DoesNotContain("Crédito corrigido", await client.GetStringAsync("/exports/transactions.csv"));
+    }
+
+    [Fact]
+    public async Task Other_users_cannot_read_change_delete_or_reference_financial_data()
+    {
+        await using var app = new FinTrackApiFactory();
+        using var owner = app.CreateClient();
+        await VerifyUserIsolation(app, owner);
+    }
+
+    private static async Task VerifyUserIsolation(WebApplicationFactory<Program> app, HttpClient owner)
+    {
+        await RegisterAndAuthorize(owner, "Proprietário", "owner@fintrack.local");
+        var account = await CreateAccount(owner, "Conta privada", 100);
+        var category = await CreateCategory(owner, "Categoria privada", CategoryType.Expense);
+        var date = new DateOnly(2026, 8, 16);
+        var transaction = await CreateTransaction(owner, account.Id, category.Id, TransactionType.Expense, 25, date, "Descrição privada");
+        using var other = app.CreateClient();
+        await RegisterAndAuthorize(other, "Visitante", "other@fintrack.local");
+        var otherAccount = await CreateAccount(other, "Minha conta");
+        var otherCategory = await CreateCategory(other, "Minha categoria", CategoryType.Expense);
+        var otherTransaction = await CreateTransaction(other, otherAccount.Id, otherCategory.Id, TransactionType.Expense, 1, date, "Meu lançamento");
+        var accountEdit = new AccountRequest("Alterada", AccountType.Checking, 999, account.OpeningDate);
+        var categoryEdit = new CategoryRequest("Alterada", CategoryType.Expense);
+        var transactionEdit = new TransactionRequest(otherAccount.Id, otherCategory.Id, TransactionType.Expense, 999, date, "Alterado");
+        foreach (var (url, body) in new (string, object)[]
+        {
+            ($"/accounts/{account.Id}", accountEdit),
+            ($"/categories/{category.Id}", categoryEdit),
+            ($"/transactions/{transaction.Id}", transactionEdit)
+        })
+        {
+            Assert.Equal(HttpStatusCode.NotFound, (await other.GetAsync(url)).StatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, (await other.PutAsJsonAsync(url, body)).StatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, (await other.DeleteAsync(url)).StatusCode);
+        }
+
+        Assert.Equal(otherAccount.Id, Assert.Single((await other.GetFromJsonAsync<List<AccountResponse>>("/accounts"))!).Id);
+        Assert.Equal(otherCategory.Id, Assert.Single((await other.GetFromJsonAsync<List<CategoryResponse>>("/categories"))!).Id);
+        var filtered = await other.GetFromJsonAsync<TransactionPageResponse>($"/transactions?accountId={account.Id}&categoryId={category.Id}");
+        Assert.NotNull(filtered);
+        Assert.Empty(filtered.Items);
+        Assert.Equal(0, filtered.TotalCount);
+        Assert.DoesNotContain("Descrição privada", await other.GetStringAsync("/exports/transactions.csv"));
+        var dashboard = await other.GetFromJsonAsync<MonthlyDashboardResponse>("/dashboard/monthly?year=2026&month=8");
+        Assert.NotNull(dashboard);
+        Assert.Equal(-1, dashboard.CurrentBalance);
+        Assert.Equal(1, dashboard.TotalExpense);
+        Assert.Equal("Minha categoria", Assert.Single(dashboard.ExpensesByCategory).CategoryName);
+
+        foreach (var request in new[]
+        {
+            transactionEdit with { AccountId = account.Id },
+            transactionEdit with { CategoryId = category.Id }
+        })
+        {
+            Assert.Equal(HttpStatusCode.BadRequest, (await other.PostAsJsonAsync("/transactions", request)).StatusCode);
+            Assert.Equal(HttpStatusCode.BadRequest, (await other.PutAsJsonAsync($"/transactions/{otherTransaction.Id}", request)).StatusCode);
+            Assert.Equal(otherTransaction, await other.GetFromJsonAsync<TransactionResponse>($"/transactions/{otherTransaction.Id}"));
+        }
+        Assert.Equal(account, await owner.GetFromJsonAsync<AccountResponse>($"/accounts/{account.Id}"));
+        Assert.Equal(category, await owner.GetFromJsonAsync<CategoryResponse>($"/categories/{category.Id}"));
+        Assert.Equal(transaction, await owner.GetFromJsonAsync<TransactionResponse>($"/transactions/{transaction.Id}"));
+    }
+
+    [Theory]
+    [InlineData("0.001")]
+    [InlineData("1.005")]
+    [InlineData("-0.001")]
+    [InlineData("10000000000000000")]
+    [InlineData("-10000000000000000")]
+    [InlineData("79228162514264337593543950335")]
+    public async Task Money_outside_database_precision_is_rejected_without_changes(string value)
+    {
+        await using var app = new FinTrackApiFactory();
+        using var client = app.CreateClient();
+        await RegisterAndAuthorize(client);
+        var account = await CreateAccount(client, "Conta", 10);
+        var category = await CreateCategory(client, "Mercado", CategoryType.Expense);
+        var date = new DateOnly(2026, 8, 16);
+        var transaction = await CreateTransaction(client, account.Id, category.Id, TransactionType.Expense, 1, date, null);
+        var amount = decimal.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
+        var accountRequest = new AccountRequest("Alterada", account.Type, amount, account.OpeningDate);
+        var transactionRequest = new TransactionRequest(account.Id, category.Id, transaction.Type, amount, date, "Alterado");
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsJsonAsync("/accounts", accountRequest)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PutAsJsonAsync($"/accounts/{account.Id}", accountRequest)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsJsonAsync("/transactions", transactionRequest)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PutAsJsonAsync($"/transactions/{transaction.Id}", transactionRequest)).StatusCode);
+        Assert.Equal(account, await client.GetFromJsonAsync<AccountResponse>($"/accounts/{account.Id}"));
+        Assert.Equal(transaction, await client.GetFromJsonAsync<TransactionResponse>($"/transactions/{transaction.Id}"));
+        Assert.Single((await client.GetFromJsonAsync<List<AccountResponse>>("/accounts"))!);
+        Assert.Equal(1, (await client.GetFromJsonAsync<TransactionPageResponse>("/transactions"))!.TotalCount);
+    }
+
+    [Theory]
+    [InlineData("0.01")]
+    [InlineData("9999999999999999.99")]
+    public async Task Money_at_valid_precision_boundaries_is_preserved(string value)
+    {
+        await using var app = new FinTrackApiFactory();
+        using var client = app.CreateClient();
+        await RegisterAndAuthorize(client);
+        var amount = decimal.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
+        var account = await CreateAccount(client, "Conta", -amount);
+        var category = await CreateCategory(client, "Receita", CategoryType.Income);
+        var transaction = await CreateTransaction(client, account.Id, category.Id, TransactionType.Income, amount, new DateOnly(2026, 8, 16), null);
+        Assert.Equal(-amount, account.InitialBalance);
+        Assert.Equal(amount, transaction.Amount);
+        var dashboard = await client.GetFromJsonAsync<MonthlyDashboardResponse>("/dashboard/monthly?year=2026&month=8");
+        Assert.NotNull(dashboard);
+        Assert.Equal(0, dashboard.CurrentBalance);
+        Assert.Equal(amount, dashboard.TotalIncome);
+    }
+
+    [Theory]
+    [InlineData("accounts")]
+    [InlineData("categories")]
+    [InlineData("transactions")]
+    public async Task Undefined_financial_types_are_rejected_without_changes(string resource)
+    {
+        await using var app = new FinTrackApiFactory();
+        using var client = app.CreateClient();
+        await RegisterAndAuthorize(client);
+        var account = await CreateAccount(client, "Conta");
+        var category = await CreateCategory(client, "Mercado", CategoryType.Expense);
+        var date = new DateOnly(2026, 8, 16);
+        var transaction = await CreateTransaction(client, account.Id, category.Id, TransactionType.Expense, 1, date, null);
+        var (id, request) = resource switch
+        {
+            "accounts" => (account.Id, (object)new AccountRequest("Alterada", (AccountType)999, 10, account.OpeningDate)),
+            "categories" => (category.Id, (object)new CategoryRequest("Alterada", (CategoryType)999)),
+            _ => (transaction.Id, (object)new TransactionRequest(account.Id, category.Id, (TransactionType)999, 10, date, "Alterado"))
+        };
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsJsonAsync($"/{resource}", request)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PutAsJsonAsync($"/{resource}/{id}", request)).StatusCode);
+        Assert.Equal(account, await client.GetFromJsonAsync<AccountResponse>($"/accounts/{account.Id}"));
+        Assert.Equal(category, await client.GetFromJsonAsync<CategoryResponse>($"/categories/{category.Id}"));
+        Assert.Equal(transaction, await client.GetFromJsonAsync<TransactionResponse>($"/transactions/{transaction.Id}"));
+    }
+
+    [Fact]
     public void Production_rejects_development_jwt_key()
     {
         using var app = new FinTrackApiFactory().WithWebHostBuilder(builder => builder
@@ -220,6 +412,17 @@ public sealed class ApiFlowTests
                 new CategoryRequest(category.Name, CategoryType.Income));
             Assert.Equal(HttpStatusCode.Conflict, categoryEdit.StatusCode);
             await VerifyTransactionPages(client);
+            await VerifyTransactionBalances(client);
+            await VerifyUserIsolation(app, client);
+            const decimal maximumAmount = 9999999999999999.99m;
+            var limitAccount = await CreateAccount(client, "Limite monetário", -maximumAmount);
+            var limitCategory = await CreateCategory(client, "Receita limite", CategoryType.Income);
+            var limitTransaction = await CreateTransaction(client, limitAccount.Id, limitCategory.Id,
+                TransactionType.Income, maximumAmount, new DateOnly(2026, 8, 16), null);
+            Assert.Equal(-maximumAmount, (await client.GetFromJsonAsync<AccountResponse>($"/accounts/{limitAccount.Id}"))!.InitialBalance);
+            Assert.Equal(maximumAmount, (await client.GetFromJsonAsync<TransactionResponse>($"/transactions/{limitTransaction.Id}"))!.Amount);
+            Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsJsonAsync("/transactions", new TransactionRequest(
+                limitAccount.Id, limitCategory.Id, TransactionType.Income, 1.005m, new DateOnly(2026, 8, 16), null))).StatusCode);
         }
         finally
         {

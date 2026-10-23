@@ -212,6 +212,11 @@ public static class TransactionEndpoints
 
     private static IResult? ValidateRequest(TransactionRequest request)
     {
+        if (!Enum.IsDefined(request.Type))
+        {
+            return Results.BadRequest("Invalid transaction type.");
+        }
+
         if (request.AccountId == Guid.Empty)
         {
             return Results.BadRequest("Account is required.");
@@ -225,6 +230,11 @@ public static class TransactionEndpoints
         if (request.Amount <= 0)
         {
             return Results.BadRequest("Amount must be greater than zero.");
+        }
+
+        if (request.Amount > 9999999999999999.99m || decimal.Round(request.Amount, 2) != request.Amount)
+        {
+            return Results.BadRequest("Amount must have at most two decimal places and not exceed 9999999999999999.99.");
         }
 
         if (request.Date == default)
