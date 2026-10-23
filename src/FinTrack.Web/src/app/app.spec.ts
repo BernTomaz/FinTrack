@@ -53,6 +53,22 @@ describe('App', () => {
     expect(compiled.querySelector('h1')?.textContent).toContain('Controle suas finanças');
   });
 
+  it('moves the loading bar horizontally, including when reduced motion is enabled', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.componentInstance['isEntering'].set(true);
+    fixture.detectChanges();
+    const bar = fixture.nativeElement.querySelector('.loading-bar i') as HTMLElement;
+    const animation = bar.getAnimations()[0];
+    expect(animation).toBeDefined();
+    const frames = (animation.effect as KeyframeEffect).getKeyframes();
+    expect(frames.some(frame => String(frame['transform']).includes('125%'))).toBe(true);
+    animation.pause();
+    animation.currentTime = 0;
+    const start = bar.getBoundingClientRect().left;
+    animation.currentTime = Number(animation.effect!.getTiming().duration) / 2;
+    expect(bar.getBoundingClientRect().left).toBeGreaterThan(start);
+  });
+
   it.each(['login', 'register'] as const)('prevents duplicate %s requests and allows retry after failure', (action) => {
     const app = TestBed.createComponent(App).componentInstance;
     app['loginForm'].setValue({ email: 'user@example.com', password: 'Strong@123' });

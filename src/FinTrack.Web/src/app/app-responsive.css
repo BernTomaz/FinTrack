@@ -675,4 +675,8 @@
     transition: none !important;
     scroll-behavior: auto !important;
   }
+
+  .loading-bar i {
+    animation: loading-bar 1800ms ease-in-out infinite !important;
+  }
 }
