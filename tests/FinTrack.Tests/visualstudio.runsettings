@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RunSettings>
+  <RunConfiguration>
+    <EnvironmentVariables>
+      <FINTRACK_TEST_SQLSERVER>Server=localhost;Integrated Security=True;TrustServerCertificate=True</FINTRACK_TEST_SQLSERVER>
+    </EnvironmentVariables>
+  </RunConfiguration>
   <DataCollectionRunSettings>
     <DataCollectors>
       <DataCollector friendlyName="Code Coverage">
         <Configuration>
           <CodeCoverage>
+            <CollectFromChildProcesses>False</CollectFromChildProcesses>
             <ModulePaths>
               <Exclude>
                 <ModulePath>.*FinTrack.Tests.dll$</ModulePath>

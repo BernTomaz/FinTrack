@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <ExcludeFromCodeCoverage>true</ExcludeFromCodeCoverage>
+    <RunSettingsFilePath Condition="'$(OS)' == 'Windows_NT' and '$(FINTRACK_TEST_SQLSERVER)' == ''">$(MSBuildProjectDirectory)\visualstudio.runsettings</RunSettingsFilePath>
   </PropertyGroup>
 
   <ItemGroup>
