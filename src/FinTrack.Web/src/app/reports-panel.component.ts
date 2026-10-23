@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Account, Category, Transaction, TransactionType } from './fintrack-api.service';
+import { formatMoney } from './format-money';
 
 type TransactionSortField = 'date' | 'description' | 'category' | 'type' | 'amount';
 
@@ -144,9 +145,7 @@ export class ReportsPanelComponent {
     return type === 'Income' ? 'Receita' : 'Despesa';
   }
 
-  money(value: number): string {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-  }
+  readonly money = formatMoney;
 
   sortLabel(field: TransactionSortField): string {
     return this.sortField === field ? (this.sortDirection === 'asc' ? ' ↑' : ' ↓') : '';

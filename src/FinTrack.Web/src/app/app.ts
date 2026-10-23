@@ -11,11 +11,12 @@ import { PasswordPanelComponent } from './password-panel.component';
 import { ProfilePanelComponent } from './profile-panel.component';
 import { ReportsPanelComponent } from './reports-panel.component';
 import { TransactionFormPanelComponent } from './transaction-form-panel.component';
+import { formatMoney } from './format-money';
+import { passwordStrength, passwordStrengthLabel, passwordStrengthColor, passwordRequirementColor, passwordRequirementIcon, isStrongPassword } from './password-rules';
 
 type Theme = 'light' | 'dark';
 type AuthMode = 'login' | 'register';
 type PetColor = 'green' | 'blue' | 'orange' | 'purple';
-type PasswordRequirement = 'length' | 'upper' | 'lower' | 'numberSymbol';
 type DeleteTarget = { type: 'account' | 'category' | 'transaction'; id: string; title: string; description: string };
 type TransactionSortField = 'date' | 'description' | 'category' | 'type' | 'amount';
 type View =
@@ -53,6 +54,13 @@ type View =
   encapsulation: ViewEncapsulation.None,
 })
 export class App implements OnDestroy {
+  protected readonly passwordStrength = passwordStrength;
+  protected readonly passwordStrengthLabel = passwordStrengthLabel;
+  protected readonly passwordStrengthColor = passwordStrengthColor;
+  protected readonly passwordRequirementColor = passwordRequirementColor;
+  protected readonly passwordRequirementIcon = passwordRequirementIcon;
+  protected readonly isStrongPassword = isStrongPassword;
+
   private readonly api = inject(FinTrackApiService);
   private readonly fb = inject(FormBuilder);
   private messageTimeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -119,7 +127,6 @@ export class App implements OnDestroy {
   protected readonly isLoggedIn = computed(() => this.token().length > 0);
   protected readonly selectedYear = computed(() => Number(this.selectedMonth().slice(0, 4)));
   protected readonly selectedMonthNumber = computed(() => Number(this.selectedMonth().slice(5, 7)));
-  protected readonly recentTransactions = computed(() => this.transactions());
   protected readonly hasMoreTransactions = computed(() => this.transactionCount() > this.transactions().length);
   protected readonly categorySummary = computed(() => {
     const total = this.dashboard()?.totalExpense ?? 0;
@@ -270,46 +277,6 @@ export class App implements OnDestroy {
 
   protected toggleRegisterPassword(): void {
     this.registerPasswordVisible.update((visible) => !visible);
-  }
-
-  protected passwordStrength(password: string): number {
-    return this.passwordRequirements(password).filter(Boolean).length;
-  }
-
-  protected passwordStrengthLabel(password: string): string {
-    const strength = this.passwordStrength(password);
-
-    if (strength < 3) {
-      return 'fraca';
-    }
-
-    if (strength < 5) {
-      return 'média';
-    }
-
-    return 'forte';
-  }
-
-  protected passwordStrengthColor(password: string): string {
-    const strength = this.passwordStrength(password);
-
-    if (strength < 3) {
-      return '#dc2626';
-    }
-
-    if (strength < 5) {
-      return '#d97706';
-    }
-
-    return '#059669';
-  }
-
-  protected passwordRequirementColor(password: string, requirement: PasswordRequirement): string {
-    return this.passwordRequirementMet(password, requirement) ? '#059669' : '#dc2626';
-  }
-
-  protected passwordRequirementIcon(password: string, requirement: PasswordRequirement): string {
-    return this.passwordRequirementMet(password, requirement) ? '✓' : '•';
   }
 
   protected canCreateAccount(): boolean {
@@ -534,46 +501,7 @@ export class App implements OnDestroy {
     });
   }
 
-  protected accountName(id: string): string {
-    return this.accounts().find((account) => account.id === id)?.name ?? 'Conta';
-  }
-
-  protected categoryName(id: string): string {
-    return this.categories().find((category) => category.id === id)?.name ?? 'Categoria';
-  }
-
-  protected accountTypeLabel(type: AccountType): string {
-    const labels: Record<AccountType, string> = {
-      Wallet: 'Carteira',
-      Checking: 'Conta corrente',
-      Savings: 'Poupança',
-      CreditCard: 'Cartão de crédito',
-    };
-
-    return labels[type];
-  }
-
-  protected categoryTypeLabel(type: CategoryType): string {
-    return type === 'Income' ? 'Receita' : 'Despesa';
-  }
-
-  protected transactionTypeLabel(type: TransactionType): string {
-    return type === 'Income' ? 'Receita' : 'Despesa';
-  }
-
-  protected money(value: number): string {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-  }
-
-  protected cashFlowTooltip(month: { label: string; incomeAmount: number; expenseAmount: number }): string {
-    return `${month.label}\nReceitas: ${this.money(month.incomeAmount)}\nDespesas: ${this.money(month.expenseAmount)}\nSaldo: ${this.money(month.incomeAmount - month.expenseAmount)}`;
-  }
-
-  protected expenseDonutTooltip(): string {
-    const total = this.dashboard()?.totalExpense ?? 0;
-
-    return total > 0 ? `Total de despesas do mês: ${this.money(total)}` : 'Sem despesas neste mês';
-  }
+  protected readonly money = formatMoney;
 
   protected categoryExpenseTooltip(item: { categoryName: string; total: number }): string {
     const total = this.dashboard()?.totalExpense ?? 0;
@@ -592,10 +520,6 @@ export class App implements OnDestroy {
     this.transactionSortField.set(field);
     this.transactionSortDirection.set(field === 'amount' ? 'desc' : 'asc');
     this.loadReport();
-  }
-
-  protected sortLabel(field: TransactionSortField): string {
-    return this.transactionSortField() === field ? (this.transactionSortDirection() === 'asc' ? ' ↑' : ' ↓') : '';
   }
 
   protected initial(): string {
@@ -629,24 +553,6 @@ export class App implements OnDestroy {
   protected setCustomCursorEnabled(enabled: boolean): void {
     localStorage.setItem('fintrack.cursor.custom', String(enabled));
     this.customCursorEnabled.set(enabled);
-  }
-
-  protected petColorValue(): string {
-    return {
-      green: '#10b981',
-      blue: '#3b82f6',
-      orange: '#f97316',
-      purple: '#8b5cf6',
-    }[this.petColor()];
-  }
-
-  protected petBorderColor(): string {
-    return {
-      green: '#047857',
-      blue: '#1d4ed8',
-      orange: '#c2410c',
-      purple: '#6d28d9',
-    }[this.petColor()];
   }
 
   protected petImageSrc(): string {
@@ -690,10 +596,6 @@ export class App implements OnDestroy {
     this.transactionCategoryFilter.set('');
     this.transactionAccountFilter.set('');
     this.loadReport();
-  }
-
-  protected showMoreTransactions(): void {
-    this.showAllTransactions();
   }
 
   protected changeReportPage(page: number): void {
@@ -787,10 +689,6 @@ export class App implements OnDestroy {
     if (view !== 'categories') {
       this.cancelCategoryEdit();
     }
-  }
-
-  protected currentMonthValue(): string {
-    return this.selectedMonth();
   }
 
   protected currentMonthLabel(): string {
@@ -1119,33 +1017,6 @@ export class App implements OnDestroy {
     }
 
     return null;
-  }
-
-  private isStrongPassword(password: string): boolean {
-    return password.length <= 100 && this.passwordStrength(password) === 5;
-  }
-
-  private passwordRequirements(password: string): boolean[] {
-    return [
-      password.length >= 8,
-      /[A-Z]/.test(password),
-      /[a-z]/.test(password),
-      /\d/.test(password),
-      /[^A-Za-z0-9]/.test(password),
-    ];
-  }
-
-  private passwordRequirementMet(password: string, requirement: PasswordRequirement): boolean {
-    switch (requirement) {
-      case 'length':
-        return password.length >= 8;
-      case 'upper':
-        return /[A-Z]/.test(password);
-      case 'lower':
-        return /[a-z]/.test(password);
-      case 'numberSymbol':
-        return /\d/.test(password) && /[^A-Za-z0-9]/.test(password);
-    }
   }
 
   private accountValidationMessage(): string | null {

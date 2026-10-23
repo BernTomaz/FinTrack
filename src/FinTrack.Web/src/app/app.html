@@ -315,7 +315,7 @@
                 <option value="dark">Escuro</option>
               </select>
             </label>
-            <label>Mês de referência<input type="month" [value]="currentMonthValue()" (change)="setCurrentMonth($any($event.target).value)" /></label>
+            <label>Mês de referência<input type="month" [value]="selectedMonth()" (change)="setCurrentMonth($any($event.target).value)" /></label>
             <label class="check">
               <input type="checkbox" checked />
               Exibir resumo mensal no dashboard
@@ -367,7 +367,7 @@
           [accounts]="accounts()"
           [categories]="categories()"
           [transactions]="transactions()"
-          [recentTransactions]="recentTransactions()"
+          [recentTransactions]="transactions()"
           [dashboard]="dashboard()"
           [chartMonths]="chartMonths()"
           [accountTypes]="accountTypes"
@@ -376,7 +376,7 @@
           [accountForm]="accountForm"
           [categoryForm]="categoryForm"
           [transactionForm]="transactionForm"
-          [month]="currentMonthValue()"
+          [month]="selectedMonth()"
           [monthLabel]="currentMonthLabel()"
           [chartRangeLabel]="chartRangeLabel()"
           [hasMoreTransactions]="hasMoreTransactions()"
@@ -386,7 +386,7 @@
           (showTransactionsByCategory)="showTransactionsByCategory($event)"
           (showAllTransactions)="showAllTransactions()"
           (showAllAccounts)="showAllAccounts()"
-          (showMoreTransactions)="showMoreTransactions()"
+          (showMoreTransactions)="showAllTransactions()"
           (addExpense)="openView('expense')"
           (editTransaction)="editTransaction($event)"
           (deleteTransaction)="deleteTransaction($event)"
@@ -441,7 +441,7 @@
           [categories]="categories()"
           [transactions]="reportTransactions()"
           [transactionTypes]="transactionTypes"
-          [month]="currentMonthValue()"
+          [month]="selectedMonth()"
           [search]="transactionSearch()"
           [typeFilter]="transactionTypeFilter()"
           [categoryFilter]="transactionCategoryFilter()"

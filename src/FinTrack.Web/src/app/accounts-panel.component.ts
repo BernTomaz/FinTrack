@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Account, AccountType } from './fintrack-api.service';
+import { formatMoney } from './format-money';
 
 @Component({
   selector: 'app-accounts-panel',
@@ -78,7 +79,5 @@ export class AccountsPanelComponent {
     }[type];
   }
 
-  money(value: number): string {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-  }
+  readonly money = formatMoney;
 }

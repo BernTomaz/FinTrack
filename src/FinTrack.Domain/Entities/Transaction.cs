@@ -18,28 +18,8 @@ public sealed class Transaction
             throw new ArgumentException("User is required.", nameof(userId));
         }
 
-        if (accountId == Guid.Empty)
-        {
-            throw new ArgumentException("Account is required.", nameof(accountId));
-        }
-
-        if (categoryId == Guid.Empty)
-        {
-            throw new ArgumentException("Category is required.", nameof(categoryId));
-        }
-
-        if (amount <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be greater than zero.");
-        }
-
         UserId = userId;
-        AccountId = accountId;
-        CategoryId = categoryId;
-        Type = type;
-        Amount = amount;
-        Date = date;
-        Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim();
+        Update(accountId, categoryId, type, amount, date, description);
     }
 
     public Guid Id { get; init; } = Guid.NewGuid();

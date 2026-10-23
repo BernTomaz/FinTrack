@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { passwordStrength, passwordStrengthLabel, passwordStrengthColor, passwordRequirementColor, passwordRequirementIcon, isStrongPassword } from './password-rules';
 
 @Component({
   selector: 'app-password-panel',
@@ -39,6 +40,13 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
   `,
 })
 export class PasswordPanelComponent {
+  protected readonly passwordStrength = passwordStrength;
+  protected readonly passwordStrengthLabel = passwordStrengthLabel;
+  protected readonly passwordStrengthColor = passwordStrengthColor;
+  protected readonly passwordRequirementColor = passwordRequirementColor;
+  protected readonly passwordRequirementIcon = passwordRequirementIcon;
+  protected readonly isStrongPassword = isStrongPassword;
+
   @Input({ required: true }) form!: FormGroup;
   @Output() save = new EventEmitter<void>();
   @Output() back = new EventEmitter<void>();
@@ -46,73 +54,4 @@ export class PasswordPanelComponent {
   protected newPassword(): string {
     return String(this.form.get('newPassword')?.value ?? '');
   }
-
-  protected passwordStrength(password: string): number {
-    return this.passwordRequirements(password).filter(Boolean).length;
-  }
-
-  protected passwordStrengthLabel(password: string): string {
-    const strength = this.passwordStrength(password);
-
-    if (strength < 3) {
-      return 'fraca';
-    }
-
-    if (strength < 5) {
-      return 'média';
-    }
-
-    return 'forte';
-  }
-
-  protected passwordStrengthColor(password: string): string {
-    const strength = this.passwordStrength(password);
-
-    if (strength < 3) {
-      return '#dc2626';
-    }
-
-    if (strength < 5) {
-      return '#d97706';
-    }
-
-    return '#059669';
-  }
-
-  protected passwordRequirementColor(password: string, requirement: PasswordRequirement): string {
-    return this.passwordRequirementMet(password, requirement) ? '#059669' : '#dc2626';
-  }
-
-  protected passwordRequirementIcon(password: string, requirement: PasswordRequirement): string {
-    return this.passwordRequirementMet(password, requirement) ? '✓' : '•';
-  }
-
-  protected isStrongPassword(password: string): boolean {
-    return password.length <= 100 && this.passwordStrength(password) === 5;
-  }
-
-  private passwordRequirements(password: string): boolean[] {
-    return [
-      password.length >= 8,
-      /[A-Z]/.test(password),
-      /[a-z]/.test(password),
-      /\d/.test(password),
-      /[^A-Za-z0-9]/.test(password),
-    ];
-  }
-
-  private passwordRequirementMet(password: string, requirement: PasswordRequirement): boolean {
-    switch (requirement) {
-      case 'length':
-        return password.length >= 8;
-      case 'upper':
-        return /[A-Z]/.test(password);
-      case 'lower':
-        return /[a-z]/.test(password);
-      case 'numberSymbol':
-        return /\d/.test(password) && /[^A-Za-z0-9]/.test(password);
-    }
-  }
 }
-
-type PasswordRequirement = 'length' | 'upper' | 'lower' | 'numberSymbol';

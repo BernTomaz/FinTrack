@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Account, AccountType, Category, CategoryType, Dashboard, Transaction, TransactionType } from './fintrack-api.service';
+import { formatMoney } from './format-money';
 
 @Component({
   selector: 'app-dashboard-panel',
@@ -302,9 +303,7 @@ export class DashboardPanelComponent {
     return type === 'Income' ? 'Receita' : 'Despesa';
   }
 
-  money(value: number): string {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-  }
+  readonly money = formatMoney;
 
   cashFlowTooltip(month: { label: string; incomeAmount: number; expenseAmount: number }): string {
     return `${month.label}\nReceitas: ${this.money(month.incomeAmount)}\nDespesas: ${this.money(month.expenseAmount)}\nSaldo: ${this.money(month.incomeAmount - month.expenseAmount)}`;
