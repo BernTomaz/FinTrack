@@ -35,6 +35,8 @@ As regressões também verificam alterações de contas e categorias com lançam
 
 ## Execução
 
+Os testes de fluxo da API estão divididos em `AuthFlowTests`, `TransactionFlowTests`, `DashboardFlowTests`, `FinancialValidationFlowTests`, `UserIsolationFlowTests`, `HostingFlowTests` e `SqlServerFlowTests`. O suporte compartilhado fica em `tests/FinTrack.Tests/Fixtures/`. No frontend, cada componente mantém seus testes na mesma pasta; os testes de login e cadastro ficam em `auth/auth.component.spec.ts`.
+
 ```powershell
 dotnet test FinTrack.slnx -m:1
 cd src/FinTrack.Web
