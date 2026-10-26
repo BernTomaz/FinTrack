@@ -12,6 +12,8 @@ assert(['localhost', '127.0.0.1'].includes(new URL(apiUrl).hostname), 'Use uma A
 const root = path.resolve('src/FinTrack.Web/dist/FinTrack.Web/browser');
 const webPort = Number(process.env.FINTRACK_WEB_PORT ?? 4201);
 assert(Number.isInteger(webPort) && webPort >= 1024 && webPort <= 65535, 'Porta de validação inválida.');
+const webUrl = process.env.FINTRACK_WEB_URL ?? `http://localhost:${webPort}`;
+assert(['localhost', '127.0.0.1'].includes(new URL(webUrl).hostname), 'Use um frontend local de validação.');
 const output = path.resolve('out/validation/ui');
 await fs.mkdir(output, { recursive: true });
 const server = http.createServer(async (request, response) => {
@@ -55,6 +57,14 @@ async function screenshot(name) {
   const layout = await page.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
   layouts.push({ name, ...layout });
   assert(layout.scrollWidth <= layout.width + 1, `${name}: página transborda (${layout.scrollWidth}/${layout.width})`);
+  for (const amount of await page.locator('.metric strong').all()) {
+    const lines = await amount.evaluate(element => {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      return new Set(Array.from(range.getClientRects(), rect => Math.round(rect.top))).size;
+    });
+    assert.equal(lines, 1, `${name}: valor do resumo quebrado em mais de uma linha`);
+  }
   assert.match(await page.locator('.app-shell, .login-page').evaluate(element => getComputedStyle(element).fontFamily), /Segoe UI/, `${name}: fonte principal ausente`);
   for (const button of await page.locator('.topbar .top-actions > button').all()) {
     const box = await button.boundingBox();
@@ -68,7 +78,7 @@ async function screenshot(name) {
 }
 
 try {
-  await page.goto(`http://localhost:${webPort}`, { waitUntil: 'networkidle' });
+  await page.goto(webUrl, { waitUntil: 'networkidle' });
   await screenshot('desktop-login');
   await page.getByRole('button', { name: 'Criar conta grátis', exact: true }).click();
   await page.getByPlaceholder('Seu nome', { exact: true }).fill(`Validação ${id}`);

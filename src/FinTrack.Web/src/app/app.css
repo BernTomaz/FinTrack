@@ -660,7 +660,7 @@ nav .active {
 .summary {
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   margin-bottom: 16px;
 }
 
@@ -692,6 +692,7 @@ nav .active {
   display: block;
   font-size: 1.45rem;
   margin: 8px 0 6px;
+  overflow-wrap: normal;
 }
 
 .income > span { background: #e8f7ee; color: #059669; }

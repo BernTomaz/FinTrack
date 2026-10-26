@@ -70,3 +70,5 @@ Use uma API local separada, ligada a um banco novo `FinTrackValidation_<GUID>`, 
 
 O teste de restauração exclui sua própria cópia do banco. Ao terminar a sessão, encerrar a API temporária e remover o banco de origem descartável e os arquivos de backup gerados, conferindo os nomes antes da exclusão. A concorrência medida usa um único usuário fictício em localhost; não representa muitos usuários em produção nem uma rede móvel real. A porta do servidor visual pode ser alterada com FINTRACK_WEB_PORT (padrão 4201), desde que a API permita essa origem no CORS.
 
+Para validar o frontend servido pelo Docker, informe `FINTRACK_WEB_URL` com a URL local do container e `FINTRACK_API_URL` com a API descartável correspondente. O frontend precisa apontar para essa API, e o CORS deve permitir sua origem. A validação visual também verifica que os valores dos cartões do resumo permanecem em uma única linha.
+
