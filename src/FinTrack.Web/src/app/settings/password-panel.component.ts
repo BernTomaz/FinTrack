@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { passwordStrength, passwordStrengthLabel, passwordStrengthColor, passwordRequirementColor, passwordRequirementIcon, isStrongPassword } from './password-rules';
+import { passwordStrength, passwordStrengthLabel, passwordStrengthColor, passwordRequirementColor, passwordRequirementIcon, isStrongPassword } from '../shared/password-rules';
 
 @Component({
   selector: 'app-password-panel',

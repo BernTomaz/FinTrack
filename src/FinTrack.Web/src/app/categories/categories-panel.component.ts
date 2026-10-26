@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Category, CategoryType } from './fintrack-api.service';
+import { Category, CategoryType } from '../fintrack-api.service';
 
 @Component({
   selector: 'app-categories-panel',

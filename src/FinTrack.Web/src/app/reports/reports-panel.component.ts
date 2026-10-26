@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Account, Category, Transaction, TransactionType } from './fintrack-api.service';
-import { formatMoney } from './format-money';
+import { Account, Category, Transaction, TransactionType } from '../fintrack-api.service';
+import { formatMoney } from '../shared/format-money';
 
 type TransactionSortField = 'date' | 'description' | 'category' | 'type' | 'amount';
 

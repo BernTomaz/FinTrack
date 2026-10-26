@@ -3,19 +3,19 @@ import { Component, ElementRef, OnDestroy, ViewEncapsulation, afterRenderEffect,
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription, finalize, forkJoin, of } from 'rxjs';
 import { Account, AccountType, AuthResponse, Category, CategoryType, Dashboard, FinTrackApiService, HealthStatus, LockedUser, Transaction, TransactionType } from './fintrack-api.service';
-import { AccountsPanelComponent } from './accounts-panel.component';
-import { CategoriesPanelComponent } from './categories-panel.component';
-import { DashboardPanelComponent } from './dashboard-panel.component';
-import { ExportPanelComponent } from './export-panel.component';
-import { PasswordPanelComponent } from './password-panel.component';
-import { ProfilePanelComponent } from './profile-panel.component';
-import { ReportsPanelComponent } from './reports-panel.component';
-import { TransactionFormPanelComponent } from './transaction-form-panel.component';
-import { formatMoney } from './format-money';
-import { passwordStrength, passwordStrengthLabel, passwordStrengthColor, passwordRequirementColor, passwordRequirementIcon, isStrongPassword } from './password-rules';
+import { AuthComponent } from './auth/auth.component';
+import { AccountsPanelComponent } from './accounts/accounts-panel.component';
+import { CategoriesPanelComponent } from './categories/categories-panel.component';
+import { DashboardPanelComponent } from './dashboard/dashboard-panel.component';
+import { ExportPanelComponent } from './reports/export-panel.component';
+import { PasswordPanelComponent } from './settings/password-panel.component';
+import { ProfilePanelComponent } from './settings/profile-panel.component';
+import { ReportsPanelComponent } from './reports/reports-panel.component';
+import { TransactionFormPanelComponent } from './transactions/transaction-form-panel.component';
+import { formatMoney } from './shared/format-money';
+import { isStrongPassword } from './shared/password-rules';
 
 type Theme = 'light' | 'dark';
-type AuthMode = 'login' | 'register';
 type PetColor = 'green' | 'blue' | 'orange' | 'purple';
 type DeleteTarget = { type: 'account' | 'category' | 'transaction'; id: string; title: string; description: string };
 type TransactionSortField = 'date' | 'description' | 'category' | 'type' | 'amount';
@@ -38,6 +38,7 @@ type View =
 @Component({
   selector: 'app-root',
   imports: [
+    AuthComponent,
     CommonModule,
     ReactiveFormsModule,
     AccountsPanelComponent,
@@ -54,15 +55,11 @@ type View =
   encapsulation: ViewEncapsulation.None,
 })
 export class App implements OnDestroy {
-  protected readonly passwordStrength = passwordStrength;
-  protected readonly passwordStrengthLabel = passwordStrengthLabel;
-  protected readonly passwordStrengthColor = passwordStrengthColor;
-  protected readonly passwordRequirementColor = passwordRequirementColor;
-  protected readonly passwordRequirementIcon = passwordRequirementIcon;
   protected readonly isStrongPassword = isStrongPassword;
 
   private readonly api = inject(FinTrackApiService);
   private readonly fb = inject(FormBuilder);
+
   private messageTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private messageClearTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private loadSubscription?: Subscription;
@@ -78,13 +75,8 @@ export class App implements OnDestroy {
   protected readonly isAdmin = signal(sessionStorage.getItem('fintrack.admin') === 'true');
   protected readonly message = signal('');
   protected readonly messageKind = signal<'success' | 'error' | 'info'>('info');
-  protected readonly loginError = signal('');
-  protected readonly loginAttemptsRemaining = signal(3);
-  protected readonly loginPasswordVisible = signal(false);
-  protected readonly registerPasswordVisible = signal(false);
   protected readonly isMessageLeaving = signal(false);
   protected readonly isLoading = signal(false);
-  protected readonly authPending = signal(false);
   protected readonly deleteTarget = signal<DeleteTarget | null>(null);
   protected readonly accounts = signal<Account[]>([]);
   protected readonly categories = signal<Category[]>([]);
@@ -119,7 +111,6 @@ export class App implements OnDestroy {
   protected readonly editingAccountId = signal('');
   protected readonly editingCategoryId = signal('');
   protected readonly editingTransactionId = signal('');
-  protected readonly authMode = signal<AuthMode>('login');
   protected readonly activeView = signal<View>('dashboard');
   protected readonly theme = signal<Theme>('light');
   protected readonly selectedMonth = signal(this.currentMonthKey());
@@ -166,15 +157,10 @@ export class App implements OnDestroy {
     }));
   });
 
-  protected readonly loginForm = this.fb.nonNullable.group({
-    email: ['', [Validators.required, Validators.email, Validators.maxLength(120)]],
-    password: ['', [Validators.required, Validators.maxLength(100)]],
-  });
-
-  protected readonly registerForm = this.fb.nonNullable.group({
-    name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
-    email: ['', [Validators.required, Validators.email, Validators.maxLength(120)]],
-    password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
+  protected readonly passwordForm = this.fb.nonNullable.group({
+    currentPassword: ['', [Validators.required, Validators.maxLength(100)]],
+    newPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
+    confirmPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
   });
 
   protected readonly accountForm = this.fb.nonNullable.group({
@@ -202,12 +188,6 @@ export class App implements OnDestroy {
     name: [this.userName(), [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
   });
 
-  protected readonly passwordForm = this.fb.nonNullable.group({
-    currentPassword: ['', [Validators.required, Validators.maxLength(100)]],
-    newPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
-    confirmPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
-  });
-
   protected readonly adminResetForm = this.fb.nonNullable.group({
     newPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
   });
@@ -222,78 +202,6 @@ export class App implements OnDestroy {
       this.loadAll();
       setTimeout(() => this.isEntering.set(false), 1400);
     }
-  }
-
-  protected login(): void {
-    if (this.authPending()) return;
-    this.loginError.set('');
-    const validation = this.loginValidationMessage();
-    if (validation) {
-      this.loginForm.markAllAsTouched();
-      this.loginError.set(validation);
-      this.showMessage(validation, 'error');
-      return;
-    }
-
-    this.authPending.set(true);
-    this.api.login(this.loginForm.getRawValue()).pipe(finalize(() => this.authPending.set(false))).subscribe({
-      next: (auth) => this.startSession(auth),
-      error: (error) => {
-        const attempts = Math.max(this.loginAttemptsRemaining() - 1, 0);
-        const text = this.api.errorMessage(error, `E-mail ou senha incorretos. Tentativas restantes: ${attempts}.`);
-        this.loginAttemptsRemaining.set(attempts);
-        this.loginError.set(text);
-        this.showMessage(text, 'error');
-      },
-    });
-  }
-
-  protected register(): void {
-    if (this.authPending()) return;
-    const validation = this.registerValidationMessage();
-    if (validation) {
-      this.registerForm.markAllAsTouched();
-      this.showMessage(validation, 'error');
-      return;
-    }
-
-    this.authPending.set(true);
-    this.api.register(this.registerForm.getRawValue()).pipe(finalize(() => this.authPending.set(false))).subscribe({
-      next: () => {
-        const email = this.registerForm.controls.email.value.trim();
-        this.registerForm.reset({ name: '', email: '', password: '' });
-        this.loginForm.patchValue({ email, password: '' });
-        this.authMode.set('login');
-        this.loginError.set('');
-        this.showMessage('Usuário criado com sucesso. Entre com seu e-mail e senha.', 'success');
-      },
-      error: (error) => this.showMessage(this.api.errorMessage(error, 'Não foi possível criar a conta.'), 'error'),
-    });
-  }
-
-  protected toggleLoginPassword(): void {
-    this.loginPasswordVisible.update((visible) => !visible);
-  }
-
-  protected toggleRegisterPassword(): void {
-    this.registerPasswordVisible.update((visible) => !visible);
-  }
-
-  protected canCreateAccount(): boolean {
-    return this.isStrongPassword(this.registerForm.controls.password.value);
-  }
-
-  protected showLogin(): void {
-    this.authMode.set('login');
-    this.loginError.set('');
-    this.message.set('');
-    this.isMessageLeaving.set(false);
-  }
-
-  protected showRegister(): void {
-    this.authMode.set('register');
-    this.message.set('');
-    this.isMessageLeaving.set(false);
   }
 
   protected logout(): void {
@@ -900,9 +808,7 @@ export class App implements OnDestroy {
     this.openView('accounts');
   }
 
-  private startSession(auth: AuthResponse): void {
-    this.loginError.set('');
-    this.loginAttemptsRemaining.set(3);
+  protected startSession(auth: AuthResponse): void {
     this.isEntering.set(true);
     this.applyAuth(auth);
     this.loadAll();
@@ -941,7 +847,7 @@ export class App implements OnDestroy {
     }[this.messageKind()];
   }
 
-  private showMessage(text: string, kind: 'success' | 'error' | 'info' = 'info'): void {
+  protected showMessage(text: string, kind: 'success' | 'error' | 'info' = 'info'): void {
     this.messageKind.set(kind);
     if (this.messageTimeoutId) {
       clearTimeout(this.messageTimeoutId);
@@ -970,53 +876,6 @@ export class App implements OnDestroy {
 
   private themeStorageKey(email: string): string {
     return `fintrack.theme.${email.trim().toLowerCase()}`;
-  }
-
-  private loginValidationMessage(): string | null {
-    const email = this.loginForm.controls.email.value.trim();
-    const password = this.loginForm.controls.password.value;
-
-    if (!email) {
-      return 'Informe o e-mail.';
-    }
-
-    if (this.loginForm.controls.email.invalid) {
-      return 'Informe um e-mail válido.';
-    }
-
-    if (!password) {
-      return 'Informe a senha.';
-    }
-
-    return null;
-  }
-
-  private registerValidationMessage(): string | null {
-    const name = this.registerForm.controls.name.value.trim();
-    const email = this.registerForm.controls.email.value.trim();
-    const password = this.registerForm.controls.password.value;
-
-    if (name.length < 2) {
-      return 'Informe um nome com pelo menos 2 caracteres.';
-    }
-
-    if (name.length > 80) {
-      return 'O nome deve ter no máximo 80 caracteres.';
-    }
-
-    if (!email) {
-      return 'Informe o e-mail.';
-    }
-
-    if (this.registerForm.controls.email.invalid) {
-      return 'Informe um e-mail válido.';
-    }
-
-    if (!this.isStrongPassword(password)) {
-      return 'A senha deve ter de 8 a 100 caracteres, com letra maiúscula, letra minúscula, número e caractere especial.';
-    }
-
-    return null;
   }
 
   private accountValidationMessage(): string | null {

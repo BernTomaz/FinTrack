@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Account, AccountType } from './fintrack-api.service';
-import { formatMoney } from './format-money';
+import { Account, AccountType } from '../fintrack-api.service';
+import { formatMoney } from '../shared/format-money';
 
 @Component({
   selector: 'app-accounts-panel',

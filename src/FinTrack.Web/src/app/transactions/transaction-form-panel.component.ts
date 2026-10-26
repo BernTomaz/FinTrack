@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Account, Category } from './fintrack-api.service';
+import { Account, Category } from '../fintrack-api.service';
 
 @Component({
   selector: 'app-transaction-form-panel',

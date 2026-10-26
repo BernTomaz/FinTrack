@@ -4,7 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
 import { FinTrackApiService } from './fintrack-api.service';
-import { ReportsPanelComponent } from './reports-panel.component';
+import { ReportsPanelComponent } from './reports/reports-panel.component';
 
 describe('App', () => {
   let http: HttpTestingController;
@@ -67,31 +67,6 @@ describe('App', () => {
     const start = bar.getBoundingClientRect().left;
     animation.currentTime = Number(animation.effect!.getTiming().duration) / 2;
     expect(bar.getBoundingClientRect().left).toBeGreaterThan(start);
-  });
-
-  it.each(['login', 'register'] as const)('prevents duplicate %s requests and allows retry after failure', (action) => {
-    const app = TestBed.createComponent(App).componentInstance;
-    app['loginForm'].setValue({ email: 'user@example.com', password: 'Strong@123' });
-    app['registerForm'].setValue({ name: 'Usuário', email: 'user@example.com', password: 'Strong@123' });
-    app[action]();
-    app[action]();
-    expect(app['authPending']()).toBe(true);
-    const request = http.expectOne(request => request.url.endsWith(`/auth/${action}`));
-    request.flush('Unavailable', { status: 503, statusText: 'Unavailable' });
-    expect(app['authPending']()).toBe(false);
-    app[action]();
-    http.expectOne(request => request.url.endsWith(`/auth/${action}`))
-      .flush('Unavailable', { status: 503, statusText: 'Unavailable' });
-  });
-
-  it('releases the registration button after success', () => {
-    const app = TestBed.createComponent(App).componentInstance;
-    app['registerForm'].setValue({ name: 'Usuário', email: 'user@example.com', password: 'Strong@123' });
-    app['register']();
-    http.expectOne(request => request.url.endsWith('/auth/register')).flush({});
-    expect(app['authPending']()).toBe(false);
-    expect(app['authMode']()).toBe('login');
-    expect(app['loginForm'].controls.email.value).toBe('user@example.com');
   });
 
   it('opens deletion as a native modal and cancels without deleting', async () => {
