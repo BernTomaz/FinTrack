@@ -7,7 +7,7 @@ Este guia mostra como rodar o projeto localmente ou com Docker.
 Para rodar localmente:
 
 - .NET 10 SDK
-- Node.js 20.19 ou superior
+- Node.js 24 (mesma linha usada no CI e no Docker)
 - Angular CLI
 - SQL Server LocalDB ou SQL Server local
 
@@ -16,6 +16,12 @@ Para rodar com Docker:
 - Docker Desktop
 
 Execute os comandos na raiz do projeto, onde ficam `FinTrack.slnx` e `docker-compose.yml`.
+
+### Correções transitivas de segurança
+
+O build e o CLI Angular usam a versão 21.2.28. Enquanto o build fixar uma versão vulnerável de Undici, `package.json` aplica um override restrito a `@angular/build` para usar 7.30.1. Remover esse override quando a versão usada do build incorporar a correção e repetir `npm audit`, build e testes.
+
+A imagem Docker mantém npm 11.21.1 e atualiza sua cópia interna de Undici para 6.29.1. Esse ajuste não instala um pacote novo na aplicação; deve ser removido quando o npm usado pela imagem incorporar a correção. Atualizar versões sem repetir a análise da imagem não comprova ausência de vulnerabilidades.
 
 ## Rodar localmente, sem Docker
 

@@ -32,12 +32,17 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular/build": "21.2.27",
-    "@angular/cli": "21.2.27",
+    "@angular/build": "21.2.28",
+    "@angular/cli": "21.2.28",
     "@angular/compiler-cli": "21.2.25",
+    "@vitest/browser-playwright": "4.1.12",
     "playwright": "1.64.1",
     "typescript": "~5.9.2",
-    "vitest": "4.1.12",
-    "@vitest/browser-playwright": "4.1.12"
+    "vitest": "4.1.12"
+  },
+  "overrides": {
+    "@angular/build": {
+      "undici": "7.30.1"
+    }
   }
 }
