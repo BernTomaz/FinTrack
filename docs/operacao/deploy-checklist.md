@@ -16,7 +16,7 @@ O deploy público fica fora do MVP, mas o projeto já deve estar pronto para uma
 - [x] Validar que contas com lançamentos não podem ser excluídas diretamente.
 - [x] Validar a exclusão de lançamentos pela interface.
 - [x] Validar que a conta pode ser excluída após remover seus lançamentos.
-- [x] Revisar as telas principais no desktop e no mobile.
+- [x] Revisar as telas principais no desktop e em larguras mobile simuladas.
 - [x] Rodar os testes automatizados do backend.
 - [x] Rodar o build de produção do frontend.
 
@@ -33,4 +33,6 @@ Procedimento: [Preparação para produção](producao.md).
 - Configurar HTTPS.
 - Revisar logs de inicialização da API.
 - Validar backup e restauração do banco, se houver ambiente persistente.
+
+O teste em celular físico não foi executado. Nesta etapa foi escolhida a validação simulada; ela não confirma comportamento de teclado, downloads e desempenho em um aparelho real.
 

@@ -2,6 +2,29 @@
 
 O Compose atual é de desenvolvimento: a API usa `Development` e o frontend usa `ng serve`. Não exponha esse ambiente diretamente na internet. A hospedagem e o certificado TLS precisam ser escolhidos antes da publicação.
 
+## Roteiro enquanto a hospedagem não foi escolhida
+
+1. Escolher onde servir os arquivos estáticos do frontend, executar a API .NET 10 e manter o SQL Server com armazenamento persistente. Anotar as URLs HTTPS e os endereços do proxy antes de configurar CORS e cabeçalhos encaminhados.
+2. Criar um ambiente de homologação com banco separado e dados fictícios. Injetar as configurações abaixo pelo mecanismo de segredos da hospedagem; não versionar credenciais nem reutilizar a chave de desenvolvimento.
+3. Gerar os artefatos na raiz do repositório:
+
+   ```powershell
+   dotnet publish src/FinTrack.Api/FinTrack.Api.csproj -c Release -o out/publish/api
+   # Substituir pela URL HTTPS real da API de homologação.
+   ./scripts/frontend/set-api-url.ps1 -ApiUrl 'https://api.exemplo.invalid'
+   cd src/FinTrack.Web
+   npm ci
+   npm run build
+   ```
+
+   O comando de URL altera `src/index.html`; gerar o artefato por ambiente e revisar essa alteração antes de qualquer commit. A URL de exemplo não é um serviço publicado. O frontend entregue é `src/FinTrack.Web/dist/FinTrack.Web/browser`; não usar `ng serve` como servidor público.
+4. Configurar HTTPS, persistência, segredos e origens exatas. Publicar apenas uma instância da API para aplicar migrations na inicialização. Cadastrar o administrador com acesso restrito antes de abrir o cadastro ao público.
+5. Conferir `/health`, cadastro/login, contas, categorias, receitas, despesas, edição, exclusão, filtros, saldos e CSV na homologação. Verificar também que as origens não autorizadas são recusadas.
+6. Fazer e restaurar um backup em outro banco no serviço escolhido. Registrar frequência, retenção, destino protegido, responsável e prazo de recuperação. O ensaio local não confirma permissões ou armazenamento da hospedagem.
+7. Liberar a publicação somente depois dessas verificações e definir como voltar à versão anterior. Uma reversão de binários não garante compatibilidade com migrations novas.
+
+Permanecem por escolher: hospedagem, domínio, certificados, proxies confiáveis e política de backup de produção. Nenhum serviço precisa ser contratado para executar os testes locais.
+
 ## Configuração mínima
 
 - Definir `ASPNETCORE_ENVIRONMENT=Production`.
