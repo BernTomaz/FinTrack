@@ -217,8 +217,8 @@
   }
 
   .table-row {
-    grid-template-columns: 82px minmax(130px, 1.1fr) minmax(110px, 0.9fr) 68px 96px minmax(105px, 0.9fr) 74px;
-    min-width: 780px;
+    grid-template-columns: 82px minmax(130px, 1.1fr) minmax(110px, 0.9fr) 68px 96px minmax(105px, 0.9fr) 118px;
+    min-width: 824px;
   }
 
   .settings-page {

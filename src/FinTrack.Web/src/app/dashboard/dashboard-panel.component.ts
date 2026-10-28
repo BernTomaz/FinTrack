@@ -34,6 +34,7 @@ export class DashboardPanelComponent {
   @Output() showMoreTransactions = new EventEmitter<void>();
   @Output() addExpense = new EventEmitter<void>();
   @Output() editTransaction = new EventEmitter<Transaction>();
+  @Output() duplicateTransaction = new EventEmitter<Transaction>();
   @Output() deleteTransaction = new EventEmitter<string>();
   @Output() deleteAccount = new EventEmitter<string>();
   @Output() createAccount = new EventEmitter<void>();

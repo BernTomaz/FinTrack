@@ -40,6 +40,53 @@ describe('App', () => {
     return app;
   }
 
+  it.each([
+    ['dashboard', 'Income'], ['dashboard', 'Expense'],
+    ['reports', 'Income'], ['reports', 'Expense'],
+  ] as const)('duplicates a %s %s only after review and saves with POST', async (view, type) => {
+    const fixture = TestBed.createComponent(App);
+    fixture.autoDetectChanges();
+    const app = fixture.componentInstance;
+    const original = Object.freeze({ ...transaction, type, description: type === 'Income' ? null : 'Original' });
+    app['token'].set('test-token');
+    app['loadAll']();
+    http.expectOne(request => request.url.endsWith('/accounts')).flush([account]);
+    http.expectOne(request => request.url.endsWith('/categories')).flush([{ ...category, type }]);
+    flushPeriod(app['selectedMonth']());
+    app['transactions'].set([original]);
+    app['reportTransactions'].set([original]);
+    app['activeView'].set(view);
+    app['editingTransactionId'].set('previous-edit');
+    await fixture.whenStable();
+
+    const duplicate = fixture.nativeElement.querySelector('button[aria-label="Duplicar lançamento"]') as HTMLButtonElement;
+    expect(duplicate).not.toBeNull();
+    duplicate.click();
+    await fixture.whenStable();
+    expect(app['editingTransactionId']()).toBe('');
+    expect(app['activeView']()).toBe(type === 'Income' ? 'income' : 'expense');
+    expect(app['transactionForm'].getRawValue()).toEqual({
+      accountId: original.accountId, categoryId: original.categoryId, type,
+      amount: original.amount, date: original.date, description: original.description ?? '',
+    });
+    http.expectNone(request => ['POST', 'PUT'].includes(request.method));
+
+    app['transactionForm'].patchValue({ amount: 22.5, date: '2026-08-03', description: 'Cópia revisada' });
+    const form = fixture.nativeElement.querySelector('app-transaction-form-panel form') as HTMLFormElement;
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    const creation = http.expectOne(request => request.url.endsWith('/transactions') && request.method === 'POST');
+    expect(creation.request.body).toEqual({
+      accountId: original.accountId, categoryId: original.categoryId, type,
+      amount: 22.5, date: '2026-08-03', description: 'Cópia revisada',
+    });
+    http.expectNone(request => request.method === 'PUT');
+    creation.flush({ ...original, ...creation.request.body, id: 'copy' });
+    flushPeriod(app['selectedMonth']());
+    expect(original.amount).toBe(10);
+    expect(original.date).toBe('2026-08-02');
+    expect(original.description).toBe(type === 'Income' ? null : 'Original');
+  });
+
   it('should create the app', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;

@@ -26,6 +26,12 @@ O sistema valida conta, categoria, valor, data e descrição antes de salvar. A 
 
 O lançamento atualiza os cálculos de saldo, dashboard e exportação.
 
+## Duplicar um lançamento
+
+No dashboard ou nos relatórios, use **Duplicar lançamento** nas ações da linha. O formulário de nova receita ou despesa recebe conta, categoria, tipo, valor, data e descrição do original. A data é preservada para revisão, sem escolher automaticamente outro mês.
+
+Revise os dados e selecione **Salvar lançamento** para criar uma nova entrada. O original não é alterado, e a cópia passa pelas mesmas validações de qualquer lançamento novo. Usar **Voltar** sem salvar não cria a cópia. Não há endpoint nem migration específicos para duplicação: o salvamento usa a criação existente.
+
 ## Exclusão
 
 ```text

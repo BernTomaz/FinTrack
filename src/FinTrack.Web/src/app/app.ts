@@ -536,6 +536,11 @@ export class App implements OnDestroy {
     this.transactionForm.patchValue({ amount: 0, description: '' });
   }
 
+  protected duplicateTransaction(transaction: Transaction): void {
+    this.editTransaction(transaction);
+    this.editingTransactionId.set('');
+  }
+
   protected askPet(): void {
     const question = this.petQuestion().trim().toLowerCase();
     const dashboard = this.dashboard();

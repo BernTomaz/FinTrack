@@ -122,6 +122,7 @@
               </strong>
               <span>{{ accountName(transaction.accountId) }}</span>
               <span style="display:flex;gap:8px">
+                <button type="button" class="icon" aria-label="Duplicar lançamento" title="Duplicar lançamento" (click)="duplicateTransaction.emit(transaction)">⧉</button>
                 <button type="button" class="icon" aria-label="Editar lançamento" title="Editar lançamento" (click)="editTransaction.emit(transaction)">✎</button>
                 <button type="button" class="icon danger-icon" aria-label="Excluir lançamento" title="Excluir lançamento" (click)="deleteTransaction.emit(transaction.id)">×</button>
               </span>

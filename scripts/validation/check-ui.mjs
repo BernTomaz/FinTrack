@@ -51,6 +51,7 @@ async function save(name, endpoint, expectedStatus) {
   const response = await result;
   assert(expectedStatus ? response.status() === expectedStatus : response.ok(), `${name}: ${response.status()} ${await response.text()}`);
   await page.locator('.loading-strip').waitFor({ state: 'hidden' });
+  return response;
 }
 async function screenshot(name) {
   await page.screenshot({ path: path.join(output, `${name}.png`), fullPage: true });
@@ -117,7 +118,32 @@ try {
   const expenseRow = page.locator('.table-row').filter({ hasText: 'Despesa validada' });
   await expenseRow.getByTitle('Editar lançamento', { exact: true }).click();
   await page.getByLabel('Descrição', { exact: true }).fill('Despesa validada editada');
-  await save('Atualizar lançamento', '/transactions');
+  const originalExpense = await (await save('Atualizar lançamento', '/transactions')).json();
+  await nav('Relatórios');
+  await page.locator('.table-row').filter({ hasText: 'Despesa validada editada' }).getByTitle('Duplicar lançamento', { exact: true }).click();
+  assert.equal(await page.getByLabel('Valor', { exact: true }).inputValue(), '200');
+  assert.equal(await page.getByLabel('Data', { exact: true }).inputValue(), '2026-10-10');
+  assert.equal(await page.getByLabel('Descrição', { exact: true }).inputValue(), 'Despesa validada editada');
+  await page.getByLabel('Valor', { exact: true }).fill('25');
+  await page.getByLabel('Data', { exact: true }).fill('2026-10-12');
+  await page.getByLabel('Descrição', { exact: true }).fill('Cópia revisada');
+  const copyResponse = await save('Salvar lançamento', '/transactions', 201);
+  assert.equal(copyResponse.request().method(), 'POST');
+  const copiedExpense = await copyResponse.json();
+  assert.notEqual(copiedExpense.id, originalExpense.id);
+  assert.equal(copiedExpense.accountId, originalExpense.accountId);
+  assert.equal(copiedExpense.categoryId, originalExpense.categoryId);
+  assert.equal(copiedExpense.type, originalExpense.type);
+  await nav('Relatórios');
+  const copyRow = page.locator('.table-row').filter({ hasText: 'Cópia revisada' });
+  await copyRow.waitFor();
+  assert.match(await copyRow.innerText(), /25,00/);
+  assert.match(await page.locator('.table-row').filter({ hasText: 'Despesa validada editada' }).innerText(), /200,00/);
+  const copyDeletion = page.waitForResponse(response => response.request().method() === 'DELETE' && response.url().endsWith(`/transactions/${copiedExpense.id}`));
+  await copyRow.getByTitle('Excluir lançamento', { exact: true }).click();
+  await page.locator('.confirm-card').getByRole('button', { name: 'Excluir', exact: true }).click();
+  assert.equal((await copyDeletion).status(), 204);
+  await copyRow.waitFor({ state: 'hidden' });
   await nav('Contas');
   await page.getByTitle('Editar conta', { exact: true }).click();
   await page.getByLabel('Início da conta').fill('2026-10-11');
@@ -146,6 +172,14 @@ try {
     await page.setViewportSize({ width, height: 900 });
     for (const view of ['Dashboard', 'Contas', 'Categorias', 'Receitas', 'Despesas', 'Relatórios', 'Exportação CSV']) {
       await nav(view);
+      if (width === 320 && view === 'Dashboard') {
+        await page.locator('.table-row').filter({ hasText: 'Despesa validada editada' }).getByTitle('Duplicar lançamento', { exact: true }).click();
+        await page.getByRole('button', { name: 'Salvar lançamento', exact: true }).waitFor();
+        await screenshot('mobile-duplicate-review');
+        await page.getByRole('button', { name: 'Voltar', exact: true }).click();
+        await page.locator('app-dashboard-panel').waitFor();
+        assert.equal(await page.locator('.table-row:not(.table-head)').count(), 2);
+      }
       await screenshot(`${width}-${view.replaceAll(' ', '-')}`);
     }
   }

@@ -94,6 +94,7 @@ FinTrack/
 - Cadastro de contas financeiras
 - Cadastro de categorias
 - Cadastro de lançamentos financeiros
+- Duplicação de receitas e despesas com revisão antes de salvar
 - Listagem e filtros de lançamentos
 - Dashboard mensal
 - Gráfico de fluxo de caixa com dados reais

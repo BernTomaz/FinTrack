@@ -79,6 +79,7 @@ type TransactionSortField = 'date' | 'description' | 'category' | 'type' | 'amou
               </strong>
               <span>{{ accountName(transaction.accountId) }}</span>
               <span style="display:flex;gap:8px">
+                <button type="button" class="icon" aria-label="Duplicar lançamento" title="Duplicar lançamento" (click)="duplicate.emit(transaction)">⧉</button>
                 <button type="button" class="icon" aria-label="Editar lançamento" title="Editar lançamento" (click)="edit.emit(transaction)">✎</button>
                 <button type="button" class="icon danger-icon" aria-label="Excluir lançamento" title="Excluir lançamento" (click)="delete.emit(transaction.id)">×</button>
               </span>
@@ -127,6 +128,7 @@ export class ReportsPanelComponent {
   @Output() accountFilterChange = new EventEmitter<string>();
   @Output() sort = new EventEmitter<TransactionSortField>();
   @Output() edit = new EventEmitter<Transaction>();
+  @Output() duplicate = new EventEmitter<Transaction>();
   @Output() delete = new EventEmitter<string>();
   @Output() pageChange = new EventEmitter<number>();
   @Output() addTransaction = new EventEmitter<void>();

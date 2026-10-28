@@ -33,6 +33,8 @@
 
 ## Pós-MVP concluído
 
+- Duplicação de lançamentos pelo dashboard e relatórios, sem alterar o original.
+
 - Edição de contas.
 - Edição de categorias.
 - Paginação dos relatórios com filtros e ordenação no servidor.
