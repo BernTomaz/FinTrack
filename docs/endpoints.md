@@ -99,6 +99,7 @@ GET /dashboard/monthly?year=2026&month=8
 Observação:
 
 - O saldo atual considera, até o fim do mês selecionado, os saldos iniciais das contas já iniciadas mais receitas menos despesas.
+- `dailyCashFlow` contém `date`, `income`, `expense` e `balance` para cada dia com movimentação, em ordem cronológica. O saldo acumulado começa em zero no mês e não inclui saldos iniciais das contas. A consulta considera todos os lançamentos do mês do usuário, independentemente dos cinco lançamentos recentes.
 
 ## Exports
 

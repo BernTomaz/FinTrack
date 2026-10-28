@@ -139,23 +139,6 @@ export class App implements OnDestroy {
   protected readonly accountTypes: AccountType[] = ['Wallet', 'Checking', 'Savings', 'CreditCard'];
   protected readonly categoryTypes: CategoryType[] = ['Income', 'Expense'];
   protected readonly transactionTypes: TransactionType[] = ['Income', 'Expense'];
-  protected readonly chartMonths = computed(() => {
-    const dashboard = this.dashboard();
-    const rows = dashboard && this.transactionCount() > 0 ? [{
-      label: this.shortMonthLabel(new Date(this.selectedYear(), this.selectedMonthNumber() - 1, 1)),
-      incomeAmount: dashboard.totalIncome,
-      expenseAmount: dashboard.totalExpense,
-    }] : [];
-    const maxAmount = Math.max(...rows.flatMap((month) => [month.incomeAmount, month.expenseAmount]), 0);
-
-    return rows.map((month) => ({
-      label: month.label,
-      income: maxAmount > 0 ? Math.max((month.incomeAmount / maxAmount) * 100, month.incomeAmount > 0 ? 12 : 0) : 0,
-      expense: maxAmount > 0 ? Math.max((month.expenseAmount / maxAmount) * 100, month.expenseAmount > 0 ? 12 : 0) : 0,
-      incomeAmount: month.incomeAmount,
-      expenseAmount: month.expenseAmount,
-    }));
-  });
 
   protected readonly passwordForm = this.fb.nonNullable.group({
     currentPassword: ['', [Validators.required, Validators.maxLength(100)]],
@@ -622,11 +605,6 @@ export class App implements OnDestroy {
     }
   }
 
-  protected chartRangeLabel(): string {
-    const total = this.chartMonths().length;
-    return total === 1 ? this.currentMonthLabel() : `${total} meses`;
-  }
-
   protected pageTitle(): string {
     const titles: Record<View, string> = {
       dashboard: 'Dashboard',
@@ -942,11 +920,6 @@ export class App implements OnDestroy {
     }
 
     return null;
-  }
-
-  private shortMonthLabel(date: Date): string {
-    const month = new Intl.DateTimeFormat('pt-BR', { month: 'short' }).format(date).replace('.', '');
-    return `${month[0].toUpperCase()}${month.slice(1)}/${String(date.getFullYear()).slice(2)}`;
   }
 
   private currentMonthKey(): string {

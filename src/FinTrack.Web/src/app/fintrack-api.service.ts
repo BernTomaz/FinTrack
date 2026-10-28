@@ -49,6 +49,7 @@ export interface Dashboard {
   monthBalance: number;
   currentBalance: number;
   expensesByCategory: { categoryName: string; total: number }[];
+  dailyCashFlow: { date: string; income: number; expense: number; balance: number }[];
 }
 
 export interface TransactionPage {

@@ -198,12 +198,6 @@
     padding: 18px;
   }
 
-  .bar-chart {
-    gap: 12px;
-    height: 190px;
-    overflow-x: auto;
-    padding-top: 18px;
-  }
 
   .category-card {
     gap: 14px;
@@ -561,10 +555,6 @@
     min-height: auto;
   }
 
-  .bar-chart {
-    gap: 10px;
-    overflow-x: auto;
-  }
 
   .sidebar-hidden .sidebar {
     display: grid;

@@ -227,7 +227,11 @@ try {
   await nav('Dashboard');
   await page.locator('.topbar').getByRole('button', { name: 'Atualizar', exact: true }).click();
   await page.getByText(/1\.247,00/).first().waitFor();
-  assert.match(await page.locator('.bar-group').getAttribute('title'), /253,00/);
+  assert.match(await page.locator('.cash-day[data-date="2026-10-10"] title').textContent(), /253,00/);
+  await page.getByLabel('Consultar dia do fluxo de caixa').selectOption('31');
+  assert.match(await page.locator('.cash-day-summary').textContent(), /747,00/);
+  assert.equal(await page.locator('.cash-day').count(), 31);
+  assert.match(await page.locator('.expense-legend').textContent(), /253,00/);
   await nav('Exportação CSV');
   const fullDownload = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Baixar CSV', exact: true }).click();

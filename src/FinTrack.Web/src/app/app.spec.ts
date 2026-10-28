@@ -11,7 +11,7 @@ describe('App', () => {
   const account = { id: 'account', name: 'Conta', type: 'Checking', initialBalance: 50, openingDate: '2026-01-01' };
   const category = { id: 'category', name: 'Mercado', type: 'Expense' };
   const transaction = { id: 'transaction', accountId: 'account', categoryId: 'category', type: 'Expense', amount: 10, date: '2026-08-02', description: null };
-  const dashboard = { totalIncome: 0, totalExpense: 10, monthBalance: -10, currentBalance: 40, expensesByCategory: [{ categoryName: 'Mercado', total: 10 }] };
+  const dashboard = { totalIncome: 0, totalExpense: 10, monthBalance: -10, currentBalance: 40, dailyCashFlow: [{ date: '2026-08-02', income: 0, expense: 10, balance: -10 }], expensesByCategory: [{ categoryName: 'Mercado', total: 10 }] };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -91,6 +91,33 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
+  });
+
+  it('shows category values and lets the user inspect a daily negative balance', async () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.autoDetectChanges();
+    const app = fixture.componentInstance;
+    app['token'].set('test-token');
+    app['selectedMonth'].set('2024-02');
+    app['dashboard'].set({
+      totalIncome: 10, totalExpense: 40, monthBalance: -30, currentBalance: 970,
+      expensesByCategory: [{ categoryName: 'Mercado', total: 40 }],
+      dailyCashFlow: [
+        { date: '2024-02-01', income: 10, expense: 0, balance: 10 },
+        { date: '2024-02-03', income: 0, expense: 40, balance: -30 },
+      ],
+    });
+    await fixture.whenStable();
+    const legend = fixture.nativeElement.querySelector('.expense-legend') as HTMLElement;
+    expect(legend.textContent).toContain('Mercado');
+    expect(legend.textContent).toContain('100,0%');
+    const select = fixture.nativeElement.querySelector('.cash-day-summary select') as HTMLSelectElement;
+    expect(select.options.length).toBe(29);
+    select.value = '3';
+    select.dispatchEvent(new Event('change'));
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('.cash-day-summary').textContent).toContain('-R$\u00a030,00');
+    expect(fixture.nativeElement.querySelector('.cash-day[data-date="2024-02-03"] rect.cash-expense').getAttribute('height')).not.toBe('0');
   });
 
   it('should render login title', () => {
@@ -269,7 +296,7 @@ describe('App', () => {
     expect(app['reportPageCount']()).toBe(1);
     app['sortTransactions']('amount');
     http.expectOne(request => request.url.includes('sort=amount&direction=desc')).flush({ items: [transaction], totalCount: 1, page: 1, pageSize: 50 });
-    expect(app['chartMonths']()[0].expenseAmount).toBe(10);
+    expect(app['dashboard']()?.dailyCashFlow[0].expense).toBe(10);
   });
 
   it('cancels stale report requests and pending searches on logout', () => {

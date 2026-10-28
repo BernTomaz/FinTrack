@@ -723,40 +723,6 @@ nav .active {
   grid-column: 1 / -1;
 }
 
-.bar-chart {
-  align-items: end;
-  border-bottom: 1px solid #cbd5e1;
-  display: grid;
-  gap: 18px;
-  grid-template-columns: repeat(auto-fit, minmax(58px, 88px));
-  height: 230px;
-  justify-content: start;
-  padding: 28px 10px 0;
-}
-
-.bar-group {
-  align-items: end;
-  display: grid;
-  gap: 5px;
-  grid-template-columns: 1fr 1fr;
-  height: 100%;
-  text-align: center;
-}
-
-.bar-group span {
-  align-self: end;
-  border-radius: 4px 4px 0 0;
-  min-height: 18px;
-}
-
-.income-bar { background: linear-gradient(#22c55e, #86efac); }
-.expense-bar { background: linear-gradient(#ef4444, #fca5a5); }
-
-.bar-group small {
-  grid-column: 1 / -1;
-  min-height: 22px;
-}
-
 .category-card {
   align-items: center;
   display: grid;

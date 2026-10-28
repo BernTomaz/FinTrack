@@ -41,22 +41,63 @@
       <article class="panel chart-panel">
         <div class="panel-head">
           <h2>Fluxo de caixa mensal</h2>
-          <button type="button" class="select-like">{{ chartRangeLabel }}</button>
+          <span class="select-like">{{ monthLabel }}</span>
         </div>
-        @if (transactions.length > 0) {
-          <div class="bar-chart" aria-label="Gráfico de fluxo de caixa mensal">
-            @for (month of chartMonths; track month.label) {
-              <div class="bar-group" [title]="cashFlowTooltip(month)">
-                <span class="income-bar" [style.height.%]="month.income"></span>
-                <span class="expense-bar" [style.height.%]="month.expense"></span>
-                <small>{{ month.label }}</small>
-              </div>
-            }
+        <p class="chart-explanation">Receitas e despesas por dia. A linha acompanha o saldo acumulado do mês, sem os saldos iniciais das contas.</p>
+        @if (dailyChart(); as chart) {
+          <div class="cash-legend" aria-label="Legenda do fluxo de caixa">
+            <span><i class="cash-income"></i>Receitas do dia</span>
+            <span><i class="cash-expense"></i>Despesas do dia</span>
+            <span><i class="cash-balance"></i>Saldo acumulado</span>
           </div>
+          <div class="cash-chart-scroll" tabindex="0" role="region" aria-label="Gráfico diário; role horizontalmente em telas pequenas">
+            <svg class="cash-chart" viewBox="0 0 720 246" role="img" aria-label="Receitas, despesas e saldo acumulado por dia">
+              @for (tick of chart.ticks; track tick.y) {
+                <line x1="62" x2="700" [attr.y1]="tick.y" [attr.y2]="tick.y" class="cash-grid" />
+                <text x="54" [attr.y]="tick.y + 4" text-anchor="end">{{ tick.label }}</text>
+              }
+              <line x1="62" x2="700" [attr.y1]="chart.zeroY" [attr.y2]="chart.zeroY" class="cash-zero" />
+              <line [attr.x1]="chart.selected.x" [attr.x2]="chart.selected.x" y1="12" y2="213" class="cash-selected" />
+              @for (day of chart.points; track day.date) {
+                <g class="cash-day" [attr.data-date]="day.date">
+                  <title>{{ dailyTooltip(day) }}</title>
+                  <rect [attr.x]="day.x - 7" [attr.y]="day.incomeY" width="6" [attr.height]="day.incomeHeight" rx="2" class="cash-income" />
+                  <rect [attr.x]="day.x + 1" [attr.y]="day.expenseY" width="6" [attr.height]="day.expenseHeight" rx="2" class="cash-expense" />
+                  @if (day.label) { <text [attr.x]="day.x" y="236" text-anchor="middle">{{ day.day }}</text> }
+                </g>
+              }
+              <polyline [attr.points]="chart.line" class="cash-line" />
+              <circle [attr.cx]="chart.selected.x" [attr.cy]="chart.selected.balanceY" r="4" class="cash-marker" />
+            </svg>
+          </div>
+          <div class="cash-day-summary">
+            <label>Consultar dia
+              <select aria-label="Consultar dia do fluxo de caixa" [value]="chart.selected.day" (change)="selectedDay = +$any($event.target).value">
+                @for (day of chart.points; track day.date) { <option [value]="day.day">Dia {{ day.day }}</option> }
+              </select>
+            </label>
+            <div><small>Receitas do dia</small><strong class="positive">{{ money(chart.selected.income) }}</strong></div>
+            <div><small>Despesas do dia</small><strong class="negative">{{ money(chart.selected.expense) }}</strong></div>
+            <div><small>Saldo acumulado</small><strong [class.negative]="chart.selected.balance < 0">{{ money(chart.selected.balance) }}</strong></div>
+          </div>
+          <details class="cash-data">
+            <summary>Ver valores de todos os dias</summary>
+            <div class="cash-chart-scroll">
+              <table>
+                <caption>Valores diários de {{ monthLabel }}</caption>
+                <thead><tr><th scope="col">Dia</th><th scope="col">Receitas</th><th scope="col">Despesas</th><th scope="col">Saldo acumulado</th></tr></thead>
+                <tbody>
+                  @for (day of chart.points; track day.date) {
+                    <tr><th scope="row">{{ day.day }}</th><td>{{ money(day.income) }}</td><td>{{ money(day.expense) }}</td><td>{{ money(day.balance) }}</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </details>
         } @else {
           <div class="empty-state">
             <strong>Nenhum lançamento cadastrado</strong>
-            <span>Cadastre receitas e despesas para visualizar o fluxo de caixa.</span>
+            <span>Cadastre receitas e despesas para visualizar a evolução diária do mês.</span>
             <button type="button" class="primary" style="justify-self:center" (click)="addExpense.emit()">Adicionar lançamento</button>
           </div>
         }
@@ -66,7 +107,7 @@
         <article id="categorias" class="panel">
           <div class="panel-head">
             <h2>Despesas por categoria</h2>
-            <button type="button" class="select-like">{{ monthLabel }}</button>
+            <span class="select-like">{{ monthLabel }}</span>
           </div>
           <div class="category-card category-card-centered">
             <div class="donut-svg" [title]="expenseDonutTooltip()">
@@ -79,6 +120,17 @@
               </svg>
               <span>Total<br />{{ money(dashboard?.totalExpense ?? 0) }}</span>
             </div>
+            <ul class="expense-legend" aria-label="Categorias de despesa, valores e percentuais">
+              @for (slice of expenseDonutSlices(); track slice.categoryName) {
+                <li>
+                  <button type="button" (click)="showTransactionsByCategory.emit(slice.categoryName)" [attr.aria-label]="slice.tooltip" [title]="slice.tooltip">
+                    <i [style.background]="slice.color" aria-hidden="true"></i>
+                    <span>{{ slice.categoryName }}</span>
+                    <span class="expense-legend-value"><strong>{{ money(slice.total) }}</strong><small>{{ slice.percentage }}</small></span>
+                  </button>
+                </li>
+              }
+            </ul>
           </div>
         </article>
       } @else {

@@ -8,7 +8,10 @@ public sealed record MonthlyDashboardResponse(
     decimal MonthBalance,
     decimal CurrentBalance,
     IReadOnlyList<CategoryExpenseResponse> ExpensesByCategory,
-    IReadOnlyList<LatestTransactionResponse> LatestTransactions);
+    IReadOnlyList<LatestTransactionResponse> LatestTransactions,
+    IReadOnlyList<DailyCashFlowResponse> DailyCashFlow);
+
+public sealed record DailyCashFlowResponse(DateOnly Date, decimal Income, decimal Expense, decimal Balance);
 
 public sealed record CategoryExpenseResponse(Guid CategoryId, string CategoryName, decimal Total);
 

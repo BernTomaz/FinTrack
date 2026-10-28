@@ -7,6 +7,7 @@ import { formatMoney } from '../shared/format-money';
   selector: 'app-dashboard-panel',
   imports: [ReactiveFormsModule],
   templateUrl: './dashboard-panel.component.html',
+  styleUrl: './dashboard-panel.component.css',
 })
 export class DashboardPanelComponent {
   @Input() accounts: Account[] = [];
@@ -14,7 +15,6 @@ export class DashboardPanelComponent {
   @Input() transactions: Transaction[] = [];
   @Input() recentTransactions: Transaction[] = [];
   @Input() dashboard: Dashboard | null = null;
-  @Input() chartMonths: { label: string; income: number; expense: number; incomeAmount: number; expenseAmount: number }[] = [];
   @Input() accountTypes: AccountType[] = [];
   @Input() categoryTypes: CategoryType[] = [];
   @Input() transactionTypes: TransactionType[] = [];
@@ -23,7 +23,6 @@ export class DashboardPanelComponent {
   @Input({ required: true }) transactionForm!: FormGroup;
   @Input() month = '';
   @Input() monthLabel = '';
-  @Input() chartRangeLabel = '';
   @Input() hasMoreTransactions = false;
   @Input() editingTransaction = false;
   @Output() monthChange = new EventEmitter<string>();
@@ -69,8 +68,49 @@ export class DashboardPanelComponent {
 
   readonly money = formatMoney;
 
-  cashFlowTooltip(month: { label: string; incomeAmount: number; expenseAmount: number }): string {
-    return `${month.label}\nReceitas: ${this.money(month.incomeAmount)}\nDespesas: ${this.money(month.expenseAmount)}\nSaldo: ${this.money(month.incomeAmount - month.expenseAmount)}`;
+  selectedDay = 1;
+  readonly compactMoney = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format;
+
+  dailyChart() {
+    const rows = this.dashboard?.dailyCashFlow;
+    const period = /^(\d{4})-(\d{2})$/.exec(this.month);
+    if (!rows?.length || !period) return null;
+    const year = Number(period[1]);
+    const month = Number(period[2]);
+    if (year < 1 || year > 9999 || month < 1 || month > 12) return null;
+    const dayCount = new Date(year, month, 0).getDate();
+    const byDate = new Map(rows.map(row => [row.date, row]));
+    let balance = 0;
+    const days = Array.from({ length: dayCount }, (_, index) => {
+      const day = index + 1;
+      const date = this.month + '-' + String(day).padStart(2, '0');
+      const row = byDate.get(date);
+      if (row) balance = row.balance;
+      return { day, date, income: row?.income ?? 0, expense: row?.expense ?? 0, balance };
+    });
+    const minimum = Math.min(0, ...days.map(day => day.balance)) * 1.1;
+    const maximum = Math.max(1, ...days.flatMap(day => [day.income, day.expense, day.balance])) * 1.1;
+    const y = (amount: number) => 18 + (maximum - amount) / (maximum - minimum) * 190;
+    const zeroY = y(0);
+    const points = days.map((day, index) => ({
+      ...day, x: 78 + index * 600 / (dayCount - 1),
+      incomeY: y(day.income), expenseY: y(day.expense), balanceY: y(day.balance),
+      incomeHeight: zeroY - y(day.income), expenseHeight: zeroY - y(day.expense),
+      label: day.day === 1 || day.day % 5 === 0 || day.day === dayCount,
+    }));
+    return {
+      points, zeroY,
+      selected: points[Math.min(Math.max(this.selectedDay, 1), dayCount) - 1],
+      line: points.map(day => day.x + ',' + day.balanceY).join(' '),
+      ticks: Array.from({ length: 5 }, (_, index) => {
+        const amount = minimum + (maximum - minimum) * index / 4;
+        return { y: y(amount), label: this.compactMoney(amount) };
+      }),
+    };
+  }
+
+  dailyTooltip(day: { date: string; income: number; expense: number; balance: number }): string {
+    return day.date.split('-').reverse().join('/') + '\nReceitas: ' + this.money(day.income) + '\nDespesas: ' + this.money(day.expense) + '\nSaldo acumulado do mês: ' + this.money(day.balance);
   }
 
   expenseDonutTooltip(): string {
@@ -79,10 +119,10 @@ export class DashboardPanelComponent {
     return total > 0 ? `Total de despesas do mês: ${this.money(total)}` : 'Sem despesas neste mês';
   }
 
-  expenseDonutSlices(): { categoryName: string; color: string; path: string; tooltip: string }[] {
+  expenseDonutSlices(): { categoryName: string; color: string; path: string; tooltip: string; total: number; percentage: string }[] {
     const items = this.dashboard?.expensesByCategory ?? [];
     const total = this.dashboard?.totalExpense ?? 0;
-    const colors = ['#2f80ed', '#35b66a', '#f59e0b', '#8b5cf6', '#22b8cf', '#f97316', '#98a2b3'];
+    const colors = ['#2f80ed', '#35b66a', '#f59e0b', '#8b5cf6', '#22b8cf', '#f97316', '#64748b', '#db2777', '#0d9488', '#a16207'];
 
     if (total <= 0 || items.length === 0) {
       return [];
@@ -93,6 +133,8 @@ export class DashboardPanelComponent {
       const end = start + (item.total / total) * 100;
       const slice = {
         categoryName: item.categoryName,
+        total: item.total,
+        percentage: item.total / total < 0.001 ? '<0,1%' : ((item.total / total) * 100).toFixed(1).replace('.', ',') + '%',
         color: colors[index % colors.length],
         path: this.donutSlicePath(start, end),
         tooltip: this.categoryExpenseTooltip(item),

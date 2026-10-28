@@ -1,0 +1,44 @@
+.chart-panel { align-content: start; min-width: 0; }
+.chart-explanation { color: #667085; font-size: 0.86rem; line-height: 1.5; margin: -8px 0 0; }
+.cash-legend { display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: 0.78rem; }
+.cash-legend span { align-items: center; display: flex; gap: 6px; }
+.cash-legend i { border-radius: 3px; height: 9px; width: 15px; }
+.cash-income { background: #059669; fill: #059669; }
+.cash-expense { background: #ef4444; fill: #ef4444; }
+.cash-balance { background: #6366f1; }
+.cash-chart-scroll { max-width: 100%; min-width: 0; overflow-x: auto; }
+.cash-chart { display: block; min-width: 600px; width: 100%; }
+.cash-chart text { fill: #667085; font-family: inherit; font-size: 12px; }
+.cash-grid { stroke: #e2e8f0; stroke-dasharray: 3 5; }
+.cash-zero { stroke: #94a3b8; }
+.cash-selected { stroke: #6366f1; stroke-dasharray: 4; opacity: 0.4; }
+.cash-line { fill: none; stroke: #6366f1; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.5; }
+.cash-marker { fill: #6366f1; stroke: #fff; stroke-width: 2; }
+.cash-day-summary { align-items: center; background: rgba(99, 102, 241, 0.06); border-radius: 8px; display: grid; gap: 14px; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 14px; }
+.cash-day-summary label { font-size: 0.75rem; }
+.cash-day-summary select { min-height: 36px; padding: 6px; }
+.cash-day-summary small { color: #667085; display: block; font-size: 0.72rem; margin-bottom: 5px; }
+.cash-day-summary strong { font-size: 0.9rem; overflow-wrap: anywhere; }
+.cash-data { font-size: 0.8rem; min-width: 0; }
+.cash-data summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
+.cash-data table { border-collapse: collapse; min-width: 420px; width: 100%; }
+.cash-data caption { padding: 10px; text-align: left; }
+.cash-data th, .cash-data td { border-bottom: 1px solid #cbd5e1; padding: 9px; text-align: right; }
+.cash-data th:first-child { text-align: left; }
+.category-card-centered { align-content: start; width: 100%; }
+.expense-legend { align-self: start; display: grid; gap: 3px; list-style: none; margin: 0; padding: 0; width: 100%; }
+.expense-legend button { align-items: center; background: transparent; border-bottom: 1px solid rgba(148, 163, 184, 0.2); border-radius: 4px; color: inherit; display: grid; gap: 10px; grid-template-columns: 10px minmax(0, 1fr) auto; padding: 9px 5px; text-align: left; width: 100%; }
+.expense-legend button:hover { background: rgba(99, 102, 241, 0.07); transform: none; }
+.expense-legend i { border-radius: 3px; height: 10px; width: 10px; }
+.expense-legend button > span { font-size: 0.85rem; min-width: 0; overflow-wrap: anywhere; }
+.expense-legend-value { display: grid; gap: 3px; text-align: right; }
+.expense-legend-value strong { font-size: 0.82rem; }
+.expense-legend-value small { color: #667085; font-size: 0.76rem; }
+:host-context(.dark-theme) .chart-explanation,
+:host-context(.dark-theme) .cash-day-summary small,
+:host-context(.dark-theme) .expense-legend-value small { color: #b5c3d7; }
+:host-context(.dark-theme) .cash-chart text { fill: #b5c3d7; }
+:host-context(.dark-theme) .cash-grid { stroke: #334155; }
+@media (max-width: 1100px) {
+  .cash-day-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

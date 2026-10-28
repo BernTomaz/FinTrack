@@ -84,6 +84,24 @@ public static class DashboardEndpoints
                     transaction.Description))
                 .ToListAsync(cancellationToken);
 
+            var dailyTotals = await monthTransactions
+                .GroupBy(transaction => transaction.Date)
+                .Select(day => new
+                {
+                    Date = day.Key,
+                    Income = day.Sum(transaction => transaction.Type == TransactionType.Income ? transaction.Amount : 0),
+                    Expense = day.Sum(transaction => transaction.Type == TransactionType.Expense ? transaction.Amount : 0)
+                })
+                .OrderBy(day => day.Date)
+                .ToListAsync(cancellationToken);
+            var dailyCashFlow = new List<DailyCashFlowResponse>();
+            decimal runningBalance = 0;
+            foreach (var day in dailyTotals)
+            {
+                runningBalance += day.Income - day.Expense;
+                dailyCashFlow.Add(new DailyCashFlowResponse(day.Date, day.Income, day.Expense, runningBalance));
+            }
+
             return Results.Ok(new MonthlyDashboardResponse(
                 year,
                 month,
@@ -92,7 +110,8 @@ public static class DashboardEndpoints
                 totalIncome - totalExpense,
                 initialBalance + (income?.Current ?? 0) - (expense?.Current ?? 0),
                 expensesByCategory,
-                latestTransactions));
+                latestTransactions,
+                dailyCashFlow));
         });
 
         return app;

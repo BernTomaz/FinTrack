@@ -56,6 +56,7 @@ public sealed class SqlServerFlowTests
             await VerifyTransactionPages(client);
             await VerifyTransactionBalances(client);
             await VerifyUserIsolation(app, client);
+            await DailyCashFlowTests.VerifyDailyCashFlow(app);
             const decimal maximumAmount = 9999999999999999.99m;
             var limitAccount = await CreateAccount(client, "Limite monetário", -maximumAmount);
             var limitCategory = await CreateCategory(client, "Receita limite", CategoryType.Income);
