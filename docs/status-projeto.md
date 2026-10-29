@@ -4,6 +4,8 @@
 
 MVP funcional validado localmente.
 
+Documentação revisada em 29/10/2026. A revisão não representa uma nova execução completa dos testes nem confirma o CI remoto.
+
 ## Concluído
 
 - Documento base `FinTrack.md`
@@ -77,9 +79,25 @@ MVP funcional validado localmente.
 ## Em aberto
 
 - Preencher manualmente o painel About do GitHub.
-- Decidir se o próximo passo será deploy público ou novas melhorias pós-MVP.
+- Conferir o CI dos commits mais recentes.
+- Escolher hospedagem e preparar homologação, HTTPS, segredos e backup de produção conforme [Preparação para produção](operacao/producao.md).
 
-## Última validação Docker
+## Entregas recentes
+
+- Duplicação de lançamentos no dashboard e nos relatórios, com revisão antes de salvar e preservação do original.
+- Fluxo de caixa diário com receitas, despesas e saldo acumulado do mês, sem os saldos iniciais das contas; consulta por dia e tabela acessível.
+- Detalhamento de despesas por categoria com acesso aos lançamentos filtrados.
+- Backup local e ensaio de restauração em banco separado concluídos em 27/10/2026.
+
+## Validação de segurança e publicação — 27/10/2026
+
+- Build de produção e 23 testes Angular aprovados naquela revisão.
+- Auditoria npm sem vulnerabilidades; imagem frontend sem achados altos ou críticos no Trivy com a base disponível naquela data.
+- Ambiente Docker descartável saudável, fluxo completo no navegador e 42 capturas em desktop e larguras mobile simuladas.
+- Backup restaurado em outro banco, com `DBCC CHECKDB`, contagens e checksums conferidos.
+- Evidências e limites em [Validação de 27/10/2026](operacao/validacao-2026-10-27.md). Esses resultados antecedem as últimas mudanças do dashboard e não substituem a validação dos commits atuais.
+
+## Histórico de validação Docker — 20/10/2026
 
 - Data: 20/10/2026.
 - Comando: `docker compose up --build -d`.
@@ -89,7 +107,7 @@ MVP funcional validado localmente.
 - Fluxo real via API: cadastro, conta, categoria, lançamento, dashboard e CSV.
 - Resultado: aprovado.
 
-## Última validação automatizada
+## Histórico de validação automatizada — 20/10/2026
 
 - Data: 20/10/2026.
 - Backend: 54 testes aprovados, nenhum ignorado, incluindo SQL Server real e paginação.
@@ -97,7 +115,7 @@ MVP funcional validado localmente.
 - Build de produção aprovado sem aviso de CSS; regras responsivas em arquivo próprio e declarações redundantes removidas.
 - Auditorias npm e NuGet sem vulnerabilidades conhecidas. CI: corrigida a corrida na navegação encontrada na execução hospedada; nova execução em acompanhamento.
 
-## Última validação ponta a ponta
+## Histórico de validação ponta a ponta — 20/10/2026
 
 - Data: 20/10/2026.
 - Ambiente: API local, SQL Server com banco descartável e frontend com build de produção.
@@ -109,4 +127,4 @@ MVP funcional validado localmente.
 ## Fechamento das pendências
 
 - [Resultados de segurança, volume e concorrência](operacao/fechamento-2026-10-20.md).
-- Validação em aparelho físico continua dependendo de um dispositivo real.
+- Foi escolhida a validação mobile simulada nesta etapa. Teclado, downloads e desempenho em celular físico não foram verificados.

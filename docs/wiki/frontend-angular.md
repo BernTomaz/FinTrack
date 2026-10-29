@@ -48,6 +48,8 @@ O serviço Angular centraliza:
 
 ## Responsividade
 
+O dashboard apresenta receitas e despesas por dia, saldo acumulado do mês (sem saldos iniciais das contas), seletor de dia e tabela de valores. As despesas por categoria abrem os lançamentos filtrados. Dashboard e relatórios permitem duplicar um lançamento, revisar os campos e salvar uma nova cópia sem alterar o original.
+
 Responsividade mobile é requisito do projeto. As telas devem continuar utilizáveis em desktop e celular.
 
 ## Configuração da API

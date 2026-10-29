@@ -14,6 +14,7 @@
 - Calcular total de receitas do mês
 - Calcular total de despesas do mês
 - Calcular saldo mensal
+- Agrupar receitas e despesas por dia e calcular o saldo acumulado do mês sem incluir os saldos iniciais das contas (`DailyCashFlowTests`)
 - Exportar CSV com lançamentos filtrados por mês ou intervalo
 - Impedir exclusão de conta com lançamentos vinculados
 - Impedir exclusão de categoria com lançamentos vinculados
@@ -59,6 +60,12 @@ Remove-Item Env:FINTRACK_TEST_SQLSERVER
 ```
 
 O teste substitui o nome do banco da conexão por `FinTrackTests_<identificador aleatório>` e exclui somente esse banco ao terminar. Não use credenciais de produção. Se o processo for interrompido à força, o banco temporário pode precisar ser removido manualmente.
+
+## GIFs da documentação
+
+Com frontend e API locais em execução, use `scripts/docs/capture-readme-gifs.mjs` e depois `scripts/docs/build-readme-gifs.py` para gerar os quatro GIFs do README. A captura exige Playwright e Chrome; a montagem exige Python com Pillow. O script aceita `FINTRACK_WEB_URL`, `FINTRACK_API_URL`, `PLAYWRIGHT_PATH` e `PLAYWRIGHT_BROWSER_PATH`.
+
+Aponte a API para um banco descartável: a captura cadastra um usuário e lançamentos fictícios de setembro de 2026, selecionando esse mês no dashboard. As imagens intermediárias ficam em `docs/assets/gif-frames/`; somente os GIFs finais precisam ser versionados. Remova o banco de demonstração após encerrar a API e conferir seu nome.
 
 ## Validação visual e de volume
 

@@ -10,9 +10,9 @@ Tela de login com acesso direto, sem atalhos para recursos fora do MVP.
 
 ![Login do FinTrack](docs/assets/fintrack-login.gif)
 
-Dashboard mensal com receitas, despesas, saldo do mês, saldo atual e gráficos baseados nos lançamentos reais.
+Dashboard mensal com receitas, despesas, saldo do mês e saldo atual. O fluxo de caixa mostra valores por dia e saldo acumulado do mês; as despesas por categoria permitem abrir os lançamentos filtrados.
 
-![Dashboard do FinTrack com mascote Fin](docs/assets/fintrack-dashboard.gif)
+![Dashboard do FinTrack com fluxo diário e tabela de valores](docs/assets/fintrack-dashboard.gif)
 
 Tela de contas mostrando saldo inicial e data de início, usados no cálculo do saldo atual por período.
 
@@ -97,7 +97,8 @@ FinTrack/
 - Duplicação de receitas e despesas com revisão antes de salvar
 - Listagem e filtros de lançamentos
 - Dashboard mensal
-- Gráfico de fluxo de caixa com dados reais
+- Gráfico diário de receitas, despesas e saldo acumulado do mês, com consulta por dia e tabela de valores
+- Detalhamento de despesas por categoria com acesso aos lançamentos filtrados
 - Exportação CSV de lançamentos por mês ou intervalo
 - Exclusão de lançamentos
 - Bloqueio de exclusão de contas e categorias com lançamentos vinculados

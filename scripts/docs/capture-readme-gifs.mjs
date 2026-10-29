@@ -94,15 +94,17 @@ async function main() {
   await page.getByPlaceholder('seu@email.com').fill(user.email);
   await page.getByPlaceholder('Sua senha').fill(user.password);
   await page.getByRole('button', { name: /^Entrar$/ }).click();
-  await page.waitForTimeout(1800);
+  await page.getByLabel('Selecionar mês', { exact: true }).waitFor();
+  await page.getByLabel('Selecionar mês', { exact: true }).fill('2026-09');
+  await page.getByRole('heading', { name: 'Fluxo de caixa mensal' }).click();
+  await page.waitForTimeout(1000);
   await shot(page, 'dashboard', '001-dashboard');
-  await page.locator('.pet-pig').click({ force: true });
-  await page.waitForTimeout(400);
-  await shot(page, 'dashboard', '002-fin-open');
-  await page.getByPlaceholder('Pergunte algo...').fill('qual meu saldo?');
-  await page.getByRole('button', { name: 'Enviar' }).click();
-  await page.waitForTimeout(400);
-  await shot(page, 'dashboard', '003-fin-answer');
+  await page.getByLabel('Consultar dia do fluxo de caixa').selectOption('12');
+  await shot(page, 'dashboard', '002-daily-cash-flow');
+  await page.getByText('Ver valores de todos os dias', { exact: true }).click();
+  await page.getByRole('table').filter({ has: page.getByText('Valores diários de Setembro de 2026', { exact: true }) }).scrollIntoViewIfNeeded();
+  await shot(page, 'dashboard', '003-daily-values');
+  await page.getByText('Ver valores de todos os dias', { exact: true }).click();
 
   await prepare('accounts');
   await page.getByRole('button', { name: /Contas/ }).first().click();
