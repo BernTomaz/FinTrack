@@ -79,10 +79,12 @@ Documentação revisada em 29/10/2026. A revisão não representa uma nova execu
 ## Em aberto
 
 - Preencher manualmente o painel About do GitHub.
-- Conferir o CI dos commits mais recentes.
+- CI do commit `85f42af` conferido e aprovado em 30/10/2026; conferir novamente após novos commits.
 - Escolher hospedagem e preparar homologação, HTTPS, segredos e backup de produção conforme [Preparação para produção](operacao/producao.md).
 
 ## Entregas recentes
+
+- Versão `85f42af` validada em 30/10/2026: CI aprovado, 68 testes backend, 30 frontend, build de produção e fluxos de navegador com duplicação, fluxo diário e filtro por categoria. Evidências e limites em [Validação de 30/10/2026](operacao/validacao-2026-10-30.md).
 
 - Duplicação de lançamentos no dashboard e nos relatórios, com revisão antes de salvar e preservação do original.
 - Fluxo de caixa diário com receitas, despesas e saldo acumulado do mês, sem os saldos iniciais das contas; consulta por dia e tabela acessível.
