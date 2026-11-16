@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Security.Claims;
 using FinTrack.Api.Auth;
 using FinTrack.Application.DTOs.Transactions;
@@ -143,7 +144,7 @@ public static class TransactionEndpoints
             return transaction is null ? Results.NotFound() : Results.Ok(transaction);
         });
 
-        group.MapPost("/", async (TransactionRequest request, FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>
+        group.MapPost("/", async (TransactionRequest request, FinTrackDbContext db, ClaimsPrincipal user, HttpContext context, CancellationToken cancellationToken) =>
         {
             var requestValidation = ValidateRequest(request);
             if (requestValidation is not null)
@@ -160,12 +161,13 @@ public static class TransactionEndpoints
             }
 
             db.Transactions.Add(transaction);
+            RecordAudit(db, context, transaction, "Created", null, JsonSerializer.Serialize(ToResponse(transaction)));
             await db.SaveChangesAsync(cancellationToken);
 
             return Results.Created($"/transactions/{transaction.Id}", ToResponse(transaction));
         });
 
-        group.MapPut("/{id:guid}", async (Guid id, TransactionRequest request, FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>
+        group.MapPut("/{id:guid}", async (Guid id, TransactionRequest request, FinTrackDbContext db, ClaimsPrincipal user, HttpContext context, CancellationToken cancellationToken) =>
         {
             var requestValidation = ValidateRequest(request);
             if (requestValidation is not null)
@@ -180,6 +182,7 @@ public static class TransactionEndpoints
                 return Results.NotFound();
             }
 
+            var beforeJson = JsonSerializer.Serialize(ToResponse(transaction));
             transaction.Update(request.AccountId, request.CategoryId, request.Type, request.Amount, request.Date, request.Description);
             var validation = await ValidateReferences(transaction, db, cancellationToken);
             if (validation is not null)
@@ -187,12 +190,13 @@ public static class TransactionEndpoints
                 return validation;
             }
 
+            RecordAudit(db, context, transaction, "Updated", beforeJson, JsonSerializer.Serialize(ToResponse(transaction)));
             await db.SaveChangesAsync(cancellationToken);
 
             return Results.Ok(ToResponse(transaction));
         });
 
-        group.MapDelete("/{id:guid}", async (Guid id, FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>
+        group.MapDelete("/{id:guid}", async (Guid id, FinTrackDbContext db, ClaimsPrincipal user, HttpContext context, CancellationToken cancellationToken) =>
         {
             var userId = user.GetUserId();
             var transaction = await db.Transactions.SingleOrDefaultAsync(transaction => transaction.UserId == userId && transaction.Id == id, cancellationToken);
@@ -201,6 +205,7 @@ public static class TransactionEndpoints
                 return Results.NotFound();
             }
 
+            RecordAudit(db, context, transaction, "Deleted", JsonSerializer.Serialize(ToResponse(transaction)), null);
             db.Transactions.Remove(transaction);
             await db.SaveChangesAsync(cancellationToken);
 
@@ -208,6 +213,16 @@ public static class TransactionEndpoints
         });
 
         return app;
+    }
+
+    private static void RecordAudit(FinTrackDbContext db, HttpContext context, Transaction transaction,
+        string action, string? beforeJson, string? afterJson)
+    {
+        var correlationId = context.Response.Headers["X-Correlation-Id"].ToString();
+        if (string.IsNullOrWhiteSpace(correlationId) || correlationId.Length > 128)
+            correlationId = context.TraceIdentifier;
+        db.AuditEvents.Add(new AuditEvent(context.User.GetUserId(), transaction.UserId, action,
+            "Transaction", transaction.Id, beforeJson, afterJson, correlationId));
     }
 
     private static IResult? ValidateRequest(TransactionRequest request)

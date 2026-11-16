@@ -9,9 +9,18 @@ public sealed class FinTrackDbContext(DbContextOptions<FinTrackDbContext> option
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
+    public DbSet<AuditEvent> AuditEvents => Set<AuditEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<AuditEvent>(entity =>
+        {
+            entity.Property(audit => audit.Action).HasMaxLength(40).IsRequired();
+            entity.Property(audit => audit.EntityType).HasMaxLength(40).IsRequired();
+            entity.Property(audit => audit.CorrelationId).HasMaxLength(128).IsRequired();
+            entity.HasIndex(audit => new { audit.OwnerUserId, audit.OccurredAtUtc });
+            entity.HasIndex(audit => new { audit.EntityType, audit.EntityId });
+        });
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasIndex(user => user.Email).IsUnique();
