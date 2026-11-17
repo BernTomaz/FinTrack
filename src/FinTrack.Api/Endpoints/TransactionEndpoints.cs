@@ -161,7 +161,7 @@ public static class TransactionEndpoints
             }
 
             db.Transactions.Add(transaction);
-            RecordAudit(db, context, transaction, "Created", null, JsonSerializer.Serialize(ToResponse(transaction)));
+            AuditWriter.Record(db, context, transaction.UserId, "Transaction", transaction.Id, "Created", null, JsonSerializer.Serialize(ToResponse(transaction)));
             await db.SaveChangesAsync(cancellationToken);
 
             return Results.Created($"/transactions/{transaction.Id}", ToResponse(transaction));
@@ -190,7 +190,7 @@ public static class TransactionEndpoints
                 return validation;
             }
 
-            RecordAudit(db, context, transaction, "Updated", beforeJson, JsonSerializer.Serialize(ToResponse(transaction)));
+            AuditWriter.Record(db, context, transaction.UserId, "Transaction", transaction.Id, "Updated", beforeJson, JsonSerializer.Serialize(ToResponse(transaction)));
             await db.SaveChangesAsync(cancellationToken);
 
             return Results.Ok(ToResponse(transaction));
@@ -205,7 +205,7 @@ public static class TransactionEndpoints
                 return Results.NotFound();
             }
 
-            RecordAudit(db, context, transaction, "Deleted", JsonSerializer.Serialize(ToResponse(transaction)), null);
+            AuditWriter.Record(db, context, transaction.UserId, "Transaction", transaction.Id, "Deleted", JsonSerializer.Serialize(ToResponse(transaction)), null);
             db.Transactions.Remove(transaction);
             await db.SaveChangesAsync(cancellationToken);
 
@@ -213,16 +213,6 @@ public static class TransactionEndpoints
         });
 
         return app;
-    }
-
-    private static void RecordAudit(FinTrackDbContext db, HttpContext context, Transaction transaction,
-        string action, string? beforeJson, string? afterJson)
-    {
-        var correlationId = context.Response.Headers["X-Correlation-Id"].ToString();
-        if (string.IsNullOrWhiteSpace(correlationId) || correlationId.Length > 128)
-            correlationId = context.TraceIdentifier;
-        db.AuditEvents.Add(new AuditEvent(context.User.GetUserId(), transaction.UserId, action,
-            "Transaction", transaction.Id, beforeJson, afterJson, correlationId));
     }
 
     private static IResult? ValidateRequest(TransactionRequest request)

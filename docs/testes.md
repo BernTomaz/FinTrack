@@ -1,5 +1,12 @@
 # Testes
 
+## Auditoria: etapas 1 e 2
+
+- `AuditFlowTests` cobre snapshots de criação, edição e exclusão de lançamentos, contas e categorias; saldo inicial e data de abertura; isolamento de usuários; ausência de eventos de alteração para operações recusadas.
+- Validação em 17/11/2026: build do backend e dos testes aprovado, com dois avisos xUnit2012 preexistentes em InfrastructureTests.
+- O executor VSTest não conectou ao testhost (timeout de 90 segundos). Uma verificação temporária em processo único executou diretamente os métodos Fact e as linhas InlineData: 71 cenários passaram, nenhum falhou. O cenário SQL Server permaneceu excluído pela condição existente de conexão não configurada. Essa verificação não substitui a execução normal do CI nem mede cobertura.
+- A atomicidade no SQL Server e a aplicação da migration não foram verificadas nesta rodada. A etapa 2 reutiliza a tabela da etapa 1.
+
 ## Ferramentas
 
 - xUnit

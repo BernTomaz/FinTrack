@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Security.Claims;
 using FinTrack.Api.Auth;
 using FinTrack.Application.DTOs.Accounts;
@@ -36,7 +37,7 @@ public static class AccountEndpoints
             return account is null ? Results.NotFound() : Results.Ok(account);
         });
 
-        group.MapPost("/", async (AccountRequest request, FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>
+        group.MapPost("/", async (AccountRequest request, FinTrackDbContext db, ClaimsPrincipal user, HttpContext context, CancellationToken cancellationToken) =>
         {
             var validation = ValidateRequest(request);
             if (validation is not null)
@@ -46,12 +47,13 @@ public static class AccountEndpoints
 
             var account = new Account(user.GetUserId(), request.Name, request.Type, request.InitialBalance, request.OpeningDate);
             db.Accounts.Add(account);
+            AuditWriter.Record(db, context, account.UserId, "Account", account.Id, "Created", null, JsonSerializer.Serialize(ToResponse(account)));
             await db.SaveChangesAsync(cancellationToken);
 
             return Results.Created($"/accounts/{account.Id}", ToResponse(account));
         });
 
-        group.MapPut("/{id:guid}", async (Guid id, AccountRequest request, FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>
+        group.MapPut("/{id:guid}", async (Guid id, AccountRequest request, FinTrackDbContext db, ClaimsPrincipal user, HttpContext context, CancellationToken cancellationToken) =>
         {
             var validation = ValidateRequest(request);
             if (validation is not null)
@@ -74,13 +76,15 @@ public static class AccountEndpoints
                 return Results.Conflict("A data de início não pode ser posterior aos lançamentos desta conta.");
             }
 
+            var beforeJson = JsonSerializer.Serialize(ToResponse(account));
             account.Update(request.Name, request.Type, request.InitialBalance, openingDate);
+            AuditWriter.Record(db, context, account.UserId, "Account", account.Id, "Updated", beforeJson, JsonSerializer.Serialize(ToResponse(account)));
             await db.SaveChangesAsync(cancellationToken);
 
             return Results.Ok(ToResponse(account));
         });
 
-        group.MapDelete("/{id:guid}", async (Guid id, FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>
+        group.MapDelete("/{id:guid}", async (Guid id, FinTrackDbContext db, ClaimsPrincipal user, HttpContext context, CancellationToken cancellationToken) =>
         {
             var userId = user.GetUserId();
             var account = await db.Accounts.SingleOrDefaultAsync(account => account.UserId == userId && account.Id == id, cancellationToken);
@@ -97,6 +101,7 @@ public static class AccountEndpoints
                 return Results.Text("Exclua os lançamentos desta conta antes de remover a conta.", statusCode: StatusCodes.Status409Conflict);
             }
 
+            AuditWriter.Record(db, context, account.UserId, "Account", account.Id, "Deleted", JsonSerializer.Serialize(ToResponse(account)), null);
             db.Accounts.Remove(account);
             await db.SaveChangesAsync(cancellationToken);
 

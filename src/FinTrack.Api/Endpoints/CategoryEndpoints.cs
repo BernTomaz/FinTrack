@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Security.Claims;
 using FinTrack.Api.Auth;
 using FinTrack.Application.DTOs.Categories;
@@ -38,7 +39,7 @@ public static class CategoryEndpoints
             return category is null ? Results.NotFound() : Results.Ok(category);
         });
 
-        group.MapPost("/", async (CategoryRequest request, FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>
+        group.MapPost("/", async (CategoryRequest request, FinTrackDbContext db, ClaimsPrincipal user, HttpContext context, CancellationToken cancellationToken) =>
         {
             var validation = ValidateRequest(request);
             if (validation is not null)
@@ -48,12 +49,13 @@ public static class CategoryEndpoints
 
             var category = new Category(user.GetUserId(), request.Name, request.Type);
             db.Categories.Add(category);
+            AuditWriter.Record(db, context, category.UserId, "Category", category.Id, "Created", null, JsonSerializer.Serialize(ToResponse(category)));
             await db.SaveChangesAsync(cancellationToken);
 
             return Results.Created($"/categories/{category.Id}", ToResponse(category));
         });
 
-        group.MapPut("/{id:guid}", async (Guid id, CategoryRequest request, FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>
+        group.MapPut("/{id:guid}", async (Guid id, CategoryRequest request, FinTrackDbContext db, ClaimsPrincipal user, HttpContext context, CancellationToken cancellationToken) =>
         {
             var validation = ValidateRequest(request);
             if (validation is not null)
@@ -76,13 +78,15 @@ public static class CategoryEndpoints
                 return Results.Conflict("O tipo da categoria deve ser compatível com os lançamentos vinculados.");
             }
 
+            var beforeJson = JsonSerializer.Serialize(ToResponse(category));
             category.Update(request.Name, request.Type);
+            AuditWriter.Record(db, context, category.UserId, "Category", category.Id, "Updated", beforeJson, JsonSerializer.Serialize(ToResponse(category)));
             await db.SaveChangesAsync(cancellationToken);
 
             return Results.Ok(ToResponse(category));
         });
 
-        group.MapDelete("/{id:guid}", async (Guid id, FinTrackDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken) =>
+        group.MapDelete("/{id:guid}", async (Guid id, FinTrackDbContext db, ClaimsPrincipal user, HttpContext context, CancellationToken cancellationToken) =>
         {
             var userId = user.GetUserId();
             var category = await db.Categories.SingleOrDefaultAsync(category => category.UserId == userId && category.Id == id, cancellationToken);
@@ -99,6 +103,7 @@ public static class CategoryEndpoints
                 return Results.Text("Exclua os lançamentos desta categoria antes de remover a categoria.", statusCode: StatusCodes.Status409Conflict);
             }
 
+            AuditWriter.Record(db, context, category.UserId, "Category", category.Id, "Deleted", JsonSerializer.Serialize(ToResponse(category)), null);
             db.Categories.Remove(category);
             await db.SaveChangesAsync(cancellationToken);
 
