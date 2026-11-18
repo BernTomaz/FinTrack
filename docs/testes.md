@@ -7,6 +7,13 @@
 - O executor VSTest não conectou ao testhost (timeout de 90 segundos). Uma verificação temporária em processo único executou diretamente os métodos Fact e as linhas InlineData: 71 cenários passaram, nenhum falhou. O cenário SQL Server permaneceu excluído pela condição existente de conexão não configurada. Essa verificação não substitui a execução normal do CI nem mede cobertura.
 - A atomicidade no SQL Server e a aplicação da migration não foram verificadas nesta rodada. A etapa 2 reutiliza a tabela da etapa 1.
 
+## Auditoria: etapa 3
+
+- `SecurityAuditFlowTests` verifica `PasswordChanged` e `AdminPasswordReset`, autor e usuário afetado, correlação, ausência de snapshots de credenciais, nova senha persistida e desbloqueio no reset administrativo.
+- Requisições anônimas, usuários sem permissão, senha atual incorreta, senha nova fraca e alvo inexistente não geram eventos de sucesso.
+- Validação em 18/11/2026: os dois testes falharam antes da implementação por ausência dos eventos. Após implementar, build aprovado e 73 cenários passaram em execução direta em processo único, sem falhas; o teste SQL Server ficou de fora pela condição existente de conexão não configurada.
+- O VSTest continuou sem conectar ao testhost (tentativa com limite de 15 segundos). Cobertura e atomicidade no SQL Server não foram verificadas. Nenhuma configuração de testes versionada foi alterada.
+
 ## Ferramentas
 
 - xUnit

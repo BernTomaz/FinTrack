@@ -1,6 +1,7 @@
 using System.Net.Mail;
 using System.Security.Claims;
 using FinTrack.Application.DTOs.Auth;
+using FinTrack.Api.Endpoints;
 using FinTrack.Domain.Entities;
 using FinTrack.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -190,6 +191,7 @@ public static class AuthEndpoints
             FinTrackDbContext db,
             PasswordHasher passwordHasher,
             ClaimsPrincipal principal,
+            HttpContext context,
             CancellationToken cancellationToken) =>
         {
             if (string.IsNullOrWhiteSpace(request.CurrentPassword) || string.IsNullOrWhiteSpace(request.NewPassword))
@@ -214,6 +216,7 @@ public static class AuthEndpoints
             }
 
             user.ChangePassword(passwordHasher.Hash(request.NewPassword));
+            AuditWriter.Record(db, context, user.Id, "User", user.Id, "PasswordChanged", null, null);
             await db.SaveChangesAsync(cancellationToken);
 
             return Results.NoContent();
@@ -247,6 +250,7 @@ public static class AuthEndpoints
             PasswordHasher passwordHasher,
             ClaimsPrincipal principal,
             ILoggerFactory loggerFactory,
+            HttpContext context,
             CancellationToken cancellationToken) =>
         {
             var logger = loggerFactory.CreateLogger("FinTrack.Auth");
@@ -267,6 +271,7 @@ public static class AuthEndpoints
             }
 
             user.ResetBlockedPassword(passwordHasher.Hash(request.NewPassword));
+            AuditWriter.Record(db, context, user.Id, "User", user.Id, "AdminPasswordReset", null, null);
             await db.SaveChangesAsync(cancellationToken);
             logger.LogInformation("Admin reset password for locked user. AdminUserId: {AdminUserId}, UserId: {UserId}", principal.GetUserId(), user.Id);
 
