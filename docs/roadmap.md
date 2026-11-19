@@ -5,8 +5,8 @@
 - Auditoria por etapas: etapa 1 implementada para criação, edição e exclusão de lançamentos, com snapshots antes/depois, autor, proprietário, data UTC e correlação na tabela AuditEvents.
 - Etapa 2 implementada: criação, edição e exclusão de contas e categorias, incluindo saldo inicial e data de abertura. A gravação da auditoria é compartilhada com os lançamentos e permanece no mesmo SaveChanges da operação. Reutiliza AuditEvents, sem nova migration.
 - Etapa 3 implementada: troca de senha (`PasswordChanged`) e redefinição administrativa (`AdminPasswordReset`), com entidade User, autor autenticado e usuário afetado. Eventos sem snapshots de credenciais, salvos no mesmo SaveChanges da senha. Sem nova migration.
-- Próxima etapa da auditoria: consulta autenticada do histórico e definição de retenção.
-- A etapa 1 salva evento e lançamento no mesmo SaveChanges (transação do EF Core no SQL Server). Não há endpoint para editar, excluir ou consultar eventos; alterações diretas no banco não são cobertas. Registros anteriores à implantação não possuem histórico retroativo.
+- Etapa 4 implementada: API de consulta paginada com filtros, detalhe por proprietário e tela Histórico de atividades no menu do usuário. Política inicial de 365 dias com limpeza manual no Docker: simulação por padrão e exclusão somente com `-Apply`. Não há novo endpoint de escrita nem nova migration.
+- Eventos e mudanças são salvos no mesmo SaveChanges (transação do EF Core no SQL Server). Não há endpoint para editar ou excluir eventos; alterações diretas no banco não são cobertas. Registros anteriores à implantação não possuem histórico retroativo. Ver limites de validação em `testes.md` e operação em `scripts/database/README.md`.
 
 - Acompanhar o CI das correções de segurança e sincronização dos testes.
 - Avaliar validação em aparelho físico antes da publicação; a validação realizada foi em larguras mobile simuladas.

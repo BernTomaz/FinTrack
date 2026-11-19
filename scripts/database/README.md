@@ -1,5 +1,35 @@
 # Backup local com Docker
 
+## Retenção da auditoria
+
+A política operacional inicial mantém 365 dias de eventos. A limpeza é manual; não há exclusão na inicialização da API, endpoint de limpeza ou agendamento automático. O responsável pelo ambiente deve executar a rotina periodicamente. Enquanto ela não for executada, eventos mais antigos continuam armazenados e consultáveis.
+
+Na raiz do repositório, simule primeiro:
+
+```powershell
+.\scripts\database\prune-audit.ps1
+```
+
+O script usa o mesmo banco do Compose da API, mostra o instante de corte UTC e a quantidade elegível, sem mostrar snapshots ou credenciais. Depois de conferir o destino, o corte e seu backup, aplique explicitamente:
+
+```powershell
+.\scripts\database\prune-audit.ps1 -Apply
+```
+
+São excluídos até 10.000 eventos anteriores ao corte por execução. Eventos exatamente no corte são preservados. Se `EligibleRemaining` for maior que zero, repita a operação até concluir. Contas, categorias, lançamentos e usuários não são removidos. O comando é irreversível sem restauração do backup.
+
+`-RetentionDays` permite ajustar o prazo (1 a 36.500 dias); use o mesmo valor na simulação e na aplicação. Mudanças no prazo devem ser registradas pelo responsável. O padrão de 365 dias é uma decisão inicial de produto, não uma declaração de conformidade. Esta rotina atende ao Docker local; a hospedagem precisa de uma rotina equivalente com destino, permissões e periodicidade definidos.
+
+Backups têm retenção independente: apagar eventos no banco não apaga cópias antigas. Após restaurar um backup, reaplique a política antes de liberar o ambiente. Um evento removido deixa de aparecer no histórico; a auditoria não oferece desfazer ou recuperação automática.
+
+Teste das proteções do script, sem conectar ao Docker ou ao banco:
+
+```powershell
+.\scripts\validation\check-audit-retention.ps1
+```
+
+## Execução do backup
+
 Requisitos: PowerShell, Docker Compose e o servico `sqlserver` do projeto em execucao, com `.env` configurado. O script usa o banco definido na conexao da API no Compose e as credenciais do container, sem exibir a senha. Destina-se ao ambiente Docker local, nao ao SQL Server instalado diretamente no Windows.
 
 Da raiz do repositorio:

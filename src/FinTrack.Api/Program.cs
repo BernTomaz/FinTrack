@@ -120,6 +120,7 @@ app.MapCategoryEndpoints();
 app.MapTransactionEndpoints();
 app.MapDashboardEndpoints();
 app.MapExportEndpoints();
+app.MapAuditEndpoints();
 
 app.Run();
 

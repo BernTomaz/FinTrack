@@ -1,5 +1,20 @@
 # Endpoints
 
+## Histórico de atividades
+
+```text
+GET /audit-events?entityType=Account&action=Updated&from=2026-01-01&to=2026-01-31&page=1&pageSize=20
+GET /audit-events/{id}
+```
+
+- Exigem JWT. Listagem e detalhe usam sempre o proprietário autenticado; administradores não recebem acesso ao histórico de outros usuários, mesmo quando são autores de um reset de senha.
+- Filtros opcionais: `entityType` (`Account`, `Category`, `Transaction`, `User`), `entityId` (GUID), `action` (`Created`, `Updated`, `Deleted`, `PasswordChanged`, `AdminPasswordReset`), `from` e `to` (`yyyy-MM-dd`, dias inclusivos em UTC).
+- Paginação: padrão de 20 itens, máximo de 100; página positiva. Ordem: data UTC decrescente e identificador crescente para desempate. Filtros inválidos retornam 400; consulta sem resultados retorna lista vazia.
+- Lista: `{ items, totalCount, page, pageSize }`. Cada item contém `id`, `actorUserId`, `action`, `entityType`, `entityId`, `occurredAtUtc`. Detalhe acrescenta `correlationId`, `beforeJson` e `afterJson`.
+- Snapshots são textos JSON; eventos de senha têm ambos nulos. Somente o detalhe carrega snapshots. Respostas usam `Cache-Control: no-store`; datas retornam UTC com sufixo `Z`.
+- Identificador inexistente ou de outro proprietário retorna 404. Não existem rotas de criação, edição ou exclusão de eventos. O histórico de registros excluídos permanece consultável até a limpeza por retenção.
+- Na interface, abra **Menu do usuário → Histórico de atividades**. Datas dos eventos são apresentadas no fuso local; datas dos filtros são UTC.
+
 ## Validações financeiras
 
 - Criação e edição de contas, categorias e lançamentos rejeitam tipos inexistentes com `400 Bad Request`.

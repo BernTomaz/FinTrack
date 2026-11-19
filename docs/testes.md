@@ -14,6 +14,14 @@
 - Validação em 18/11/2026: os dois testes falharam antes da implementação por ausência dos eventos. Após implementar, build aprovado e 73 cenários passaram em execução direta em processo único, sem falhas; o teste SQL Server ficou de fora pela condição existente de conexão não configurada.
 - O VSTest continuou sem conectar ao testhost (tentativa com limite de 15 segundos). Cobertura e atomicidade no SQL Server não foram verificadas. Nenhuma configuração de testes versionada foi alterada.
 
+## Auditoria: etapa 4
+
+- `AuditQueryFlowTests` cobre autenticação, isolamento por proprietário (inclusive administrador autor de reset), filtros, dias UTC inclusivos, paginação, ausência de snapshots na lista, detalhes de registros excluídos, entradas inválidas e ausência de rota DELETE.
+- Validação em 19/11/2026: build do backend e do frontend aprovado. Na execução direta em processo único, 85 cenários do backend passaram; a suíte normal VSTest continuou sem conectar ao testhost (15 segundos). A tentativa específica de SQL Server local com autenticação integrada retornou acesso negado, sem validar as consultas nesse provedor.
+- Os quatro testes novos do componente Angular foram compilados. A suíte Vitest não executou: primeiro faltava o Chromium gerenciado; com `CHROME_BIN` apontando para o Chrome instalado, o ambiente negou acesso ao servidor HTTP local (`ERR_NETWORK_ACCESS_DENIED`).
+- Verificação complementar no Chrome headless com arquivos compilados e API simulada, sem rede externa: navegação pelo menu, detalhes, texto com HTML escapado, paginação, filtro com retorno vazio, recuperação de erro, teclado e ausência de corte horizontal em 320, 768, 1024 e 1440 pixels. Revisão de capturas em tema claro e escuro encontrou e corrigiu um corte na paginação mobile.
+- `scripts/validation/check-audit-retention.ps1` passou com Docker simulado, cobrindo simulação sem DELETE, limite de exclusão, corte UTC estrito, prazo inválido e nome de banco inválido. Não houve limpeza real; execução SQL da retenção, atomicidade e cobertura continuam pendentes de ambiente habilitado.
+
 ## Ferramentas
 
 - xUnit

@@ -74,6 +74,7 @@
                 <strong>{{ userName() }}</strong>
                 <button type="button" [style.--menu-hover]="theme() === 'dark' ? '#1e293b' : '#f8fafc'" [style.color]="theme() === 'dark' ? '#dbe7f5' : null" (click)="openView('profile')">Meu perfil</button>
                 <button type="button" [style.--menu-hover]="theme() === 'dark' ? '#1e293b' : '#f8fafc'" [style.color]="theme() === 'dark' ? '#dbe7f5' : null" (click)="openView('password')">Alterar senha</button>
+                <button type="button" [style.--menu-hover]="theme() === 'dark' ? '#1e293b' : '#f8fafc'" [style.color]="theme() === 'dark' ? '#dbe7f5' : null" (click)="openView('audit')">Histórico de atividades</button>
                 @if (isAdmin()) {
                   <button type="button" [style.--menu-hover]="theme() === 'dark' ? '#1e293b' : '#f8fafc'" [style.color]="theme() === 'dark' ? '#dbe7f5' : null" (click)="openView('admin')">Administração</button>
                 }
@@ -121,6 +122,10 @@
           [form]="passwordForm"
           (save)="changePassword()"
           (back)="openView('dashboard')" />
+      }
+
+      @if (activeView() === 'audit') {
+        <app-audit-panel [token]="token()" (back)="openView('dashboard')" />
       }
 
       @if (activeView() === 'admin') {

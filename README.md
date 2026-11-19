@@ -104,6 +104,7 @@ FinTrack/
 - Bloqueio de exclusão de contas e categorias com lançamentos vinculados
 - Perfil editável com e-mail somente leitura
 - Alteração de senha autenticada
+- Histórico de atividades com filtros, paginação e consulta dos valores antes/depois
 - Bloqueio de login após tentativas inválidas
 - Painel admin para redefinir senha de usuários bloqueados
 - Status do sistema com health check da API e do banco

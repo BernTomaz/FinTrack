@@ -1,0 +1,45 @@
+<section class="settings-page audit-page">
+  <article class="panel audit-panel">
+    <div class="panel-head">
+      <h2>Histórico de atividades</h2>
+      <button type="button" class="ghost" (click)="back.emit()">Voltar</button>
+    </div>
+    <p>Consulte alterações nos seus dados, inclusive registros excluídos. Horários exibidos no seu fuso local; filtros de data usam UTC.</p>
+    <form class="audit-filters" [formGroup]="filters" (ngSubmit)="load()">
+      <label>Registro<select aria-label="Registro" formControlName="entityType"><option value="">Todos</option>@for (key of entityKeys; track key) { <option [value]="key">{{ entities[key] }}</option> }</select></label>
+      <label>Ação<select aria-label="Ação" formControlName="action"><option value="">Todas</option>@for (key of actionKeys; track key) { <option [value]="key">{{ actions[key] }}</option> }</select></label>
+      <label>De (UTC)<input type="date" formControlName="from" /></label>
+      <label>Até (UTC)<input type="date" formControlName="to" /></label>
+      <div class="audit-buttons"><button type="submit" class="primary" [disabled]="loading()">Atualizar</button><button type="button" class="ghost" (click)="clear()" [disabled]="loading()">Limpar filtros</button></div>
+    </form>
+    @if (error()) { <p role="alert">{{ error() }}</p> }
+    @if (loading()) { <p role="status">Carregando histórico...</p> }
+    @if (data(); as page) {
+      <p aria-live="polite">{{ page.totalCount }} evento(s) encontrado(s)</p>
+      @for (item of page.items; track item.id) {
+        <article class="audit-entry">
+          <div class="audit-heading">
+            <div><strong>{{ actions[item.action] || item.action }} · {{ entities[item.entityType] || item.entityType }}</strong><p><time [attr.datetime]="item.occurredAtUtc">{{ item.occurredAtUtc | date:'dd/MM/yyyy HH:mm:ss' }}</time> · {{ item.action === 'AdminPasswordReset' ? 'Administrador' : 'Sua conta' }}</p></div>
+            <button type="button" class="ghost" [attr.aria-expanded]="selectedId() === item.id" [attr.aria-controls]="'audit-' + item.id" (click)="toggle(item)">{{ selectedId() === item.id ? 'Ocultar detalhes' : 'Ver detalhes' }}</button>
+          </div>
+          @if (selectedId() === item.id) {
+            <section [id]="'audit-' + item.id" aria-label="Detalhes do evento">
+              @if (detailLoading()) { <p role="status">Carregando detalhes...</p> }
+              @if (detail(); as event) {
+                @for (field of changes(event); track field.label) {
+                  <div class="audit-change"><strong>{{ field.label }}</strong><span><small>Antes</small>{{ field.before }}</span><span><small>Depois</small>{{ field.after }}</span></div>
+                } @empty { <p>Este evento não armazena valores anteriores ou posteriores. Credenciais não são registradas.</p> }
+                <p class="audit-reference">Referência do registro: {{ event.entityId }}<br />Código para suporte: {{ event.correlationId }}</p>
+              }
+            </section>
+          }
+        </article>
+      } @empty { <div class="empty-state"><strong>Nenhum evento encontrado</strong><span>Altere os filtros ou faça uma nova operação. O histórico começa com a ativação da auditoria.</span></div> }
+      <nav class="audit-pagination" aria-label="Paginação do histórico">
+        <button type="button" class="ghost" [disabled]="page.page <= 1" (click)="load(page.page - 1)">Anterior</button>
+        <span>Página {{ page.page }}</span>
+        <button type="button" class="ghost" [disabled]="page.page * page.pageSize >= page.totalCount" (click)="load(page.page + 1)">Próxima</button>
+      </nav>
+    }
+  </article>
+</section>

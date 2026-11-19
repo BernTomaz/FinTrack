@@ -9,6 +9,7 @@ import { CategoriesPanelComponent } from './categories/categories-panel.componen
 import { DashboardPanelComponent } from './dashboard/dashboard-panel.component';
 import { ExportPanelComponent } from './reports/export-panel.component';
 import { PasswordPanelComponent } from './settings/password-panel.component';
+import { AuditPanelComponent } from './settings/audit-panel.component';
 import { ProfilePanelComponent } from './settings/profile-panel.component';
 import { ReportsPanelComponent } from './reports/reports-panel.component';
 import { TransactionFormPanelComponent } from './transactions/transaction-form-panel.component';
@@ -30,6 +31,7 @@ type View =
   | 'export'
   | 'profile'
   | 'password'
+  | 'audit'
   | 'admin'
   | 'status'
   | 'preferences'
@@ -46,6 +48,7 @@ type View =
     DashboardPanelComponent,
     ExportPanelComponent,
     PasswordPanelComponent,
+    AuditPanelComponent,
     ProfilePanelComponent,
     ReportsPanelComponent,
     TransactionFormPanelComponent,
@@ -617,6 +620,7 @@ export class App implements OnDestroy {
       export: 'Exportação CSV',
       profile: 'Meu perfil',
       password: 'Alterar senha',
+      audit: 'Histórico de atividades',
       admin: 'Administração',
       status: 'Status do sistema',
       preferences: 'Preferências',

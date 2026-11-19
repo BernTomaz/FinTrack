@@ -64,6 +64,28 @@ export interface HealthStatus {
   database: string;
 }
 
+export interface AuditEvent {
+  id: string;
+  actorUserId: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  occurredAtUtc: string;
+}
+
+export interface AuditDetail extends AuditEvent {
+  correlationId: string;
+  beforeJson: string | null;
+  afterJson: string | null;
+}
+
+export interface AuditPage {
+  items: AuditEvent[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class FinTrackApiService {
   private readonly http = inject(HttpClient);
@@ -158,6 +180,14 @@ export class FinTrackApiService {
 
   getHealth() {
     return this.http.get<HealthStatus>(`${this.apiUrl}/health`, { observe: 'response' });
+  }
+
+  getAuditEvents(token: string, filters: URLSearchParams) {
+    return this.http.get<AuditPage>(`${this.apiUrl}/audit-events?${filters}`, this.options(token));
+  }
+
+  getAuditEvent(token: string, id: string) {
+    return this.http.get<AuditDetail>(`${this.apiUrl}/audit-events/${id}`, this.options(token));
   }
 
   saveSession(auth: AuthResponse): void {
