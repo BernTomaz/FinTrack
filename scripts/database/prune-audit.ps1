@@ -19,10 +19,10 @@ if ($connection -notmatch '(?:^|;)\s*Database=([a-zA-Z0-9_]{1,128})\s*(?:;|$)') 
     throw 'Nome do banco ausente ou nao suportado na configuracao do Compose.'
 }
 $database = $Matches[1]
-$query = "SET NOCOUNT ON; DECLARE @Cutoff datetime2 = DATEADD(day, -$RetentionDays, SYSUTCDATETIME()); SELECT @Cutoff AS CutoffUtc; SELECT COUNT_BIG(*) AS EligibleBefore FROM [$database].[dbo].[AuditEvents] WHERE OccurredAtUtc < @Cutoff;"
+$sql = (Get-Content -LiteralPath (Join-Path $PSScriptRoot 'prune-audit.sql') -Raw).Replace('$(DatabaseName)', $database)
+$query = "DECLARE @Cutoff datetime2 = DATEADD(day, -$RetentionDays, SYSUTCDATETIME()); DECLARE @Apply bit = $([int][bool]$Apply); " + $sql
 if ($Apply) {
     # Limita o impacto e preserva todos os eventos no instante de corte ou posteriores.
-    $query += " DELETE TOP (10000) FROM [$database].[dbo].[AuditEvents] WHERE OccurredAtUtc < @Cutoff; SELECT @@ROWCOUNT AS Deleted; SELECT COUNT_BIG(*) AS EligibleRemaining FROM [$database].[dbo].[AuditEvents] WHERE OccurredAtUtc < @Cutoff;"
     Write-Host "Aplicando retencao de $RetentionDays dias no banco $database (ate 10000 eventos)."
 } else {
     Write-Host "Simulacao no banco $database. Nenhum evento sera excluido. Use -Apply para aplicar."

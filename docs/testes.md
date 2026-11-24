@@ -1,5 +1,29 @@
 # Testes
 
+## Resultado local informado em 24/11/2026
+
+O usuário executou `validate-audit.ps1` fora do ambiente restrito: rebuild Docker concluído, API e SQL Server saudáveis, 87 testes .NET aprovados sem ignorados (incluindo auditoria no SQL Server, rollback e retenção) e 34 testes Angular aprovados. O relatório `out/coverage/bd5154e1-5f11-4061-a245-efa3a0853e5f/coverage.cobertura.xml` foi lido: 99,71% das linhas e 97,22% das ramificações no escopo coletado.
+
+A navegação final inicialmente falhou antes de iniciar por ausência do Chromium gerenciado. Corrigido `check-ui.mjs` para reutilizar `CHROME_BIN`, já definido para o Chrome instalado, preservando a precedência de `PLAYWRIGHT_BROWSER_PATH`. O usuário repetiu a etapa com `-BrowserOnly`: `passed: true`, 47 capturas, `errors: []` e mensagem final PASS. API, SQL Server e frontend foram exibidos saudáveis pelo Compose. A consulta de auditoria contra API real, com banco descartável e checagens de layout mobile, passou. As validações locais planejadas da feature estão concluídas; a publicação das alterações adicionais e sua execução no CI permanecem separadas desse resultado.
+
+As seções abaixo preservam o histórico das tentativas anteriores e dos bloqueios do ambiente do agente; o resultado atual é o desta seção.
+
+## Ensaios adicionais preparados em 24/11/2026
+
+- `AuditSqlServerFlowTests` reutiliza as consultas de auditoria no SQL Server e cria uma restrição real no banco descartável para rejeitar eventos. Verifica que alterações de conta e lançamento, exclusão, troca de senha e reset administrativo não persistem parcialmente quando a auditoria falha.
+- O mesmo teste executa o SQL compartilhado de retenção: simulação, lote máximo de 10.000 exclusões, preservação do instante de corte e de eventos posteriores e preservação dos dados financeiros.
+- O CI coleta cobertura Cobertura/XML como artefato, executa as proteções PowerShell, inclui a tela de auditoria no teste de navegador com API real e reconstrói API e frontend em Docker, validando ambos contra SQL Server descartável.
+- Build local e proteções de retenção aprovados; 85 cenários passaram em execução direta, com os dois ensaios SQL condicionais não executados localmente. A tentativa de publicar a validação no GitHub foi recusada com 403 (`Resource not accessible by integration`); nenhuma branch ou PR foi criada. O rebuild no Docker Desktop local foi negado também pela política de elevação desta sessão. Esses ensaios novos ainda não têm resultado de execução no CI.
+- `scripts/validation/validate-audit.ps1` reúne o rebuild, testes com SQL Server do Compose, coleta de cobertura, testes Angular e navegador com API em banco descartável. Deve ser executado em um terminal com acesso ao Docker. Não executa retenção no banco de uso: o teste de retenção usa o banco temporário do xUnit. Ao terminar, remove somente o container e o banco de navegação com identificadores únicos criados pela própria execução; a stack principal permanece ativa. Usa as portas adicionais 5083 e 4203.
+
+## Fechamento de validação da auditoria — 24/11/2026
+
+Verificado o [CI do commit 43ea81a](https://github.com/BernTomaz/FinTrack/actions/runs/44530544162), o mesmo HEAD local, executado em 19/11/2026. Os jobs Backend e Frontend e suas etapas de build e testes concluíram com sucesso. O backend foi executado com `FINTRACK_TEST_SQLSERVER` configurado e serviço SQL Server; o fluxo de navegador e layouts mobile também passou. Os testes Angular incluem os quatro cenários do painel de auditoria.
+
+Essa evidência confirma os executores padrão no CI e o fluxo existente que aplica migrations e grava dados com auditoria no SQL Server. Não comprova cobertura medida, rollback provocado por falha de gravação da auditoria, consultas de auditoria no provedor SQL Server ou a execução real do script de retenção: esses casos não têm ensaio específico nesse workflow. A validação de navegador existente também não inclui a nova tela de auditoria contra API real; sua verificação específica anterior usou API simulada.
+
+Em 24/11/2026, nova tentativa local de acesso ao Docker retornou `permission denied` no pipe `dockerDesktopLinuxEngine`. As imagens não foram reconstruídas e o estado dos containers locais não pôde ser consultado. Não houve execução de limpeza no banco de uso.
+
 ## Auditoria: etapas 1 e 2
 
 - `AuditFlowTests` cobre snapshots de criação, edição e exclusão de lançamentos, contas e categorias; saldo inicial e data de abertura; isolamento de usuários; ausência de eventos de alteração para operações recusadas.

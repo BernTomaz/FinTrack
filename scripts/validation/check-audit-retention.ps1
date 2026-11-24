@@ -12,11 +12,11 @@ function docker {
 }
 
 & $pruneScript
-if ($state.Query -match '\bDELETE\b' -or $state.Query -notmatch 'DATEADD\(day, -365, SYSUTCDATETIME\(\)\)') {
+if ($state.Query -notmatch 'DECLARE @Apply bit = 0;' -or $state.Query -notmatch 'IF @Apply = 1' -or $state.Query -notmatch 'DATEADD\(day, -365, SYSUTCDATETIME\(\)\)') {
     throw 'A simulacao deve usar 365 dias sem executar DELETE.'
 }
 & $pruneScript -RetentionDays 90 -Apply
-if ($state.Query -notmatch 'DELETE TOP \(10000\)' -or $state.Query -notmatch 'OccurredAtUtc < @Cutoff' -or $state.Query -notmatch 'DATEADD\(day, -90,') {
+if ($state.Query -notmatch 'DECLARE @Apply bit = 1;' -or $state.Query -notmatch 'DELETE TOP \(10000\)' -or $state.Query -notmatch 'OccurredAtUtc < @Cutoff' -or $state.Query -notmatch 'DATEADD\(day, -90,') {
     throw 'A limpeza deve limitar a exclusao e preservar o instante de corte.'
 }
 $rejected = $false

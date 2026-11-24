@@ -2,6 +2,7 @@
 
 ## Agora
 
+- Auditoria validada localmente em 24/11/2026: rebuild Docker, 87 testes backend (incluindo SQL Server, rollback e retenção), 34 testes frontend e navegação com API real aprovada em 47 capturas sem erros. Cobertura coletada: 99,71% das linhas e 97,22% das ramificações. Evidências e histórico em `testes.md`.
 - Auditoria por etapas: etapa 1 implementada para criação, edição e exclusão de lançamentos, com snapshots antes/depois, autor, proprietário, data UTC e correlação na tabela AuditEvents.
 - Etapa 2 implementada: criação, edição e exclusão de contas e categorias, incluindo saldo inicial e data de abertura. A gravação da auditoria é compartilhada com os lançamentos e permanece no mesmo SaveChanges da operação. Reutiliza AuditEvents, sem nova migration.
 - Etapa 3 implementada: troca de senha (`PasswordChanged`) e redefinição administrativa (`AdminPasswordReset`), com entidade User, autor autenticado e usuário afetado. Eventos sem snapshots de credenciais, salvos no mesmo SaveChanges da senha. Sem nova migration.

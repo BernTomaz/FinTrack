@@ -16,6 +16,11 @@ public sealed class AuditQueryFlowTests
     public async Task Audit_queries_are_paginated_filtered_and_private_even_for_admin_actors()
     {
         await using var app = new FinTrackApiFactory();
+        await VerifyAuditQueries(app);
+    }
+
+    internal static async Task VerifyAuditQueries(FinTrackApiFactory app)
+    {
         using var admin = app.CreateClient();
         var actor = await RegisterAndAuthorize(admin, "Admin", "admin-audit@fintrack.local");
         using var client = app.CreateClient();

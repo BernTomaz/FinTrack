@@ -30,7 +30,7 @@ const server = http.createServer(async (request, response) => {
   }
 });
 await new Promise((resolve) => server.listen(webPort, '127.0.0.1', resolve));
-const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_BROWSER_PATH, headless: true });
+const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_BROWSER_PATH || process.env.CHROME_BIN || undefined, headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, acceptDownloads: true });
 const errors = [];
 const layouts = [];
@@ -73,7 +73,7 @@ async function screenshot(name) {
   }
   if (await page.locator('.compact-nav').count()) {
     const menu = await page.locator('.compact-nav').boundingBox();
-    const metric = await page.locator('.metric, app-reports-panel .panel').first().boundingBox();
+    const metric = await page.locator('.metric, app-reports-panel .panel, app-audit-panel .panel').first().boundingBox();
     assert(metric && metric.x >= menu.x + menu.width, `${name}: menu compacto cobre o conteúdo`);
   }
 }
@@ -237,6 +237,21 @@ try {
   await page.getByRole('button', { name: 'Baixar CSV', exact: true }).click();
   await (await fullDownload).saveAs(csvPath);
   assert.equal((await fs.readFile(csvPath, 'utf8')).trim().split(/\r?\n/).length, 56);
+  await page.getByTitle('Menu do usuário', { exact: true }).click();
+  await page.getByRole('button', { name: 'Histórico de atividades', exact: true }).click();
+  await page.locator('app-audit-panel').waitFor();
+  await page.locator('app-audit-panel').getByLabel('Registro', { exact: true }).selectOption('Account');
+  await page.locator('app-audit-panel').getByLabel('Ação', { exact: true }).selectOption('Created');
+  await page.locator('app-audit-panel').getByRole('button', { name: 'Atualizar', exact: true }).click();
+  await page.getByText('1 evento(s) encontrado(s)', { exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Ver detalhes', exact: true }).click();
+  await page.locator('.audit-change span').filter({ hasText: 'Conta de validação' }).waitFor();
+  for (const width of [320, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await screenshot(`audit-real-api-${width}`);
+    assert(await page.locator('.audit-pagination > *').evaluateAll(elements =>
+      elements.every(element => { const box = element.getBoundingClientRect(); return box.x >= 0 && box.right <= innerWidth; })), 'Paginação da auditoria cortada');
+  }
   await page.getByTitle('Menu do usuário', { exact: true }).click();
   await page.getByRole('button', { name: 'Sair', exact: true }).click();
   await page.setViewportSize({ width: 320, height: 900 });

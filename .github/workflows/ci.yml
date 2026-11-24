@@ -42,7 +42,19 @@ jobs:
         run: dotnet build FinTrack.slnx --no-restore -m:1
 
       - name: Test
-        run: dotnet test FinTrack.slnx --no-build -m:1
+        run: dotnet test FinTrack.slnx --no-build -m:1 --settings tests/FinTrack.Tests/coverlet.runsettings --collect:"XPlat Code Coverage" --results-directory out/coverage
+
+      - name: Upload backend coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: out/coverage
+          if-no-files-found: error
+
+      - name: Validate retention command guards
+        shell: pwsh
+        run: ./scripts/validation/check-audit-retention.ps1
 
       - name: Setup Node for browser validation
         uses: actions/setup-node@v4
@@ -82,6 +94,44 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: browser-validation
+          path: out/validation
+          if-no-files-found: ignore
+
+      - name: Rebuild and validate Docker images
+        env:
+          FINTRACK_API_URL: http://127.0.0.1:5080
+          FINTRACK_WEB_URL: http://localhost:4200
+        run: |
+          docker build -t fintrack-api:validation -f src/FinTrack.Api/Dockerfile .
+          docker build -t fintrack-web:validation src/FinTrack.Web
+          cleanup() {
+            docker logs fintrack-api-validation > out/validation/docker-api.log 2>&1 || true
+            docker logs fintrack-web-validation > out/validation/docker-web.log 2>&1 || true
+            docker rm -f fintrack-api-validation fintrack-web-validation || true
+          }
+          trap cleanup EXIT
+          docker run -d --name fintrack-api-validation --network host \
+            -e ASPNETCORE_ENVIRONMENT=Development \
+            -e "ConnectionStrings__DefaultConnection=${FINTRACK_TEST_SQLSERVER};Database=FinTrackDockerValidation_CI" \
+            fintrack-api:validation
+          docker run -d --name fintrack-web-validation --network host \
+            fintrack-web:validation
+          node --input-type=module -e '
+            for (let attempt = 0; attempt < 90; attempt++) {
+              try {
+                if ((await fetch(process.env.FINTRACK_API_URL + "/health")).ok &&
+                    (await fetch(process.env.FINTRACK_WEB_URL)).ok) process.exit(0);
+              } catch {}
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            throw new Error("Docker services did not become healthy");'
+          node scripts/validation/check-ui.mjs
+
+      - name: Upload Docker validation results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-validation
           path: out/validation
           if-no-files-found: ignore
 
