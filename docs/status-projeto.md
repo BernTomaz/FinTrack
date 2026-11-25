@@ -4,9 +4,13 @@
 
 MVP funcional validado localmente.
 
-Documentação revisada em 29/10/2026. A revisão não representa uma nova execução completa dos testes nem confirma o CI remoto.
+Documentação revisada em 25/11/2026. A auditoria foi validada localmente em 24/11/2026 com Docker, SQL Server e navegador; veja [Testes](testes.md). A revisão não representa uma nova execução completa dos testes nem confirma o CI remoto.
 
 ## Concluído
+
+- Auditoria de contas, categorias, lançamentos, troca de senha e reset administrativo
+- Histórico de atividades com filtros, paginação e detalhes no menu do usuário
+- Retenção manual da auditoria e validação de rollback no SQL Server
 
 - Documento base `FinTrack.md`
 - Estrutura de pastas
@@ -79,10 +83,12 @@ Documentação revisada em 29/10/2026. A revisão não representa uma nova execu
 ## Em aberto
 
 - Preencher manualmente o painel About do GitHub.
-- CI do commit `85f42af` conferido e aprovado em 30/10/2026; conferir novamente após novos commits.
+- Conferir o CI do commit atual. A última execução remota verificada foi a de `43ea81a`, em 19/11/2026; veja [Testes](testes.md).
 - Escolher hospedagem e preparar homologação, HTTPS, segredos e backup de produção conforme [Preparação para produção](operacao/producao.md).
 
 ## Entregas recentes
+
+- Auditoria concluída e validada localmente em 24/11/2026: 87 testes backend, 34 frontend e navegador com API real aprovado, além do rebuild Docker. Detalhes em [Testes](testes.md).
 
 - Versão `85f42af` validada em 30/10/2026: CI aprovado, 68 testes backend, 30 frontend, build de produção e fluxos de navegador com duplicação, fluxo diário e filtro por categoria. Evidências e limites em [Validação de 30/10/2026](operacao/validacao-2026-10-30.md).
 

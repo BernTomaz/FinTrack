@@ -83,3 +83,11 @@ O frontend agrupa os componentes por funcionalidade em `auth/`, `dashboard/`, `a
 Os testes de fluxo da API estão separados por assunto em `tests/FinTrack.Tests/`. A fábrica da API, os dados e verificações compartilhados e o atributo de teste SQL Server ficam em `Fixtures/`, sem criar uma hierarquia de classes de teste.
 
 Os documentos de arquitetura, testes e roadmap em `docs/` são as fontes principais. As páginas correspondentes em `docs/wiki/` apontam para eles para evitar instruções divergentes.
+
+## Auditoria
+
+`AuditEvent` armazena autor, proprietário, ação, entidade, instante UTC, correlação e snapshots antes/depois. Os endpoints usam `AuditWriter` no mesmo `DbContext` e `SaveChanges` da operação; no SQL Server, a falha de gravação do evento reverte a alteração. Eventos de senha não armazenam snapshots de credenciais.
+
+A API oferece somente consulta, limitada ao proprietário autenticado, inclusive para administradores. A listagem não expõe snapshots; o detalhe inclui os valores permitidos. O painel fica em `settings/audit-panel.component.*`, no menu Histórico de atividades. Veja [Endpoints](endpoints.md).
+
+A auditoria cobre operações implementadas pela API, sem histórico retroativo ou captura de alterações diretas no banco. Não há edição ou exclusão de eventos pela interface ou API. A retenção é manual, com SQL compartilhado entre o script operacional e os testes de integração; veja [Operação do banco](../scripts/database/README.md).

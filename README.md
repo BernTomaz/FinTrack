@@ -18,7 +18,7 @@ Tela de contas mostrando saldo inicial e data de início, usados no cálculo do 
 
 ![Contas do FinTrack](docs/assets/fintrack-accounts.gif)
 
-Menu do usuário com perfil, alteração de senha, preferências, status do sistema e exportação CSV.
+Menu do usuário com perfil, alteração de senha, histórico de atividades, preferências, status do sistema e exportação CSV.
 
 ![Configurações do FinTrack](docs/assets/fintrack-settings.gif)
 
@@ -121,6 +121,12 @@ A solução .NET usa o formato `.slnx`.
 MVP funcional validado localmente. O projeto já possui autenticação, contas, categorias, lançamentos, dashboard mensal, exportação CSV, perfil, alteração de senha, preferências locais, status do sistema, frontend Angular e testes principais.
 
 Contas e categorias com lançamentos vinculados não podem ser excluídas diretamente. Para removê-las, exclua primeiro os lançamentos relacionados.
+
+## Auditoria
+
+Abra o menu do avatar e selecione **Histórico de atividades**. A tela permite filtrar eventos e consultar alterações nos seus registros, inclusive excluídos. O histórico começa na ativação da auditoria, sem preenchimento retroativo. Alterações de senha são registradas sem valores de credenciais.
+
+A retenção inicial é de 365 dias, com limpeza manual: [operação do banco](scripts/database/README.md). Para reconstruir o Docker e validar a feature, execute `.\scripts\validation\validate-audit.ps1` na raiz; requisitos e resultados estão em [Testes](docs/testes.md).
 
 ## Execução local
 

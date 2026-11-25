@@ -4,11 +4,11 @@ Esta página organiza a documentação do FinTrack no formato da wiki de referê
 
 ## Visão Geral
 
-FinTrack é um sistema web para controle financeiro pessoal, com cadastro de usuários, login, contas financeiras, categorias, lançamentos, dashboard mensal, gráfico de fluxo de caixa, exportação CSV, perfil e preferências locais.
+FinTrack é um sistema web para controle financeiro pessoal, com cadastro de usuários, login, contas financeiras, categorias, lançamentos, dashboard mensal, gráfico de fluxo de caixa, exportação CSV, histórico de atividades, perfil e preferências locais.
 
 ## Status Atual
 
-O MVP está funcional e validado localmente com backend, frontend, banco, Docker, testes automatizados e CI.
+O MVP e a auditoria estão funcionais e validados localmente com backend, frontend, banco, Docker e testes automatizados. Veja os resultados e os limites da confirmação do CI em [Testes](testes.md) e o [Status do projeto](status-projeto.md).
 
 Próximas etapas:
 

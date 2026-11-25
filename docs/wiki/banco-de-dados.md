@@ -10,6 +10,7 @@ O FinTrack usa SQL Server com Entity Framework Core.
 - Accounts
 - Categories
 - Transactions
+- AuditEvents
 
 ## Migrations
 
@@ -55,3 +56,9 @@ docker/sqlserver/fintrack-migrations.sql
 - Contas possuem saldo inicial e data de início.
 - Lançamentos possuem descrição com limite alinhado entre API e banco.
 - Contas e categorias com lançamentos vinculados não devem ser removidas diretamente.
+
+## Auditoria e retenção
+
+`AuditEvents` guarda o histórico das operações auditadas, inclusive de registros excluídos. A gravação participa da mesma transação da alteração; eventos de senha não incluem snapshots de credenciais. A consulta é limitada ao proprietário. Não há histórico retroativo nem captura de alterações diretas no banco.
+
+A política inicial de 365 dias exige limpeza manual, sem agendamento automático. Veja [Operação do banco](../../scripts/database/README.md) e [Arquitetura](../arquitetura.md).

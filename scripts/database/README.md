@@ -1,4 +1,4 @@
-# Backup local com Docker
+# Operação do banco com Docker
 
 ## Retenção da auditoria
 
@@ -12,11 +12,11 @@ Na raiz do repositório, simule primeiro:
 
 O script usa o mesmo banco do Compose da API, mostra o instante de corte UTC e a quantidade elegível, sem mostrar snapshots ou credenciais. Depois de conferir o destino, o corte e seu backup, aplique explicitamente:
 
-O SQL está em `prune-audit.sql`, compartilhado com o teste de integração em banco descartável. O comando PowerShell fornece o corte UTC e o modo de execução; mantenha os dois arquivos juntos.
-
 ```powershell
 .\scripts\database\prune-audit.ps1 -Apply
 ```
+
+O SQL está em `prune-audit.sql`, compartilhado com o teste de integração em banco descartável. O comando PowerShell fornece o corte UTC e o modo de execução; mantenha os dois arquivos juntos.
 
 São excluídos até 10.000 eventos anteriores ao corte por execução. Eventos exatamente no corte são preservados. Se `EligibleRemaining` for maior que zero, repita a operação até concluir. Contas, categorias, lançamentos e usuários não são removidos. O comando é irreversível sem restauração do backup.
 
@@ -38,7 +38,7 @@ Para reconstruir o Docker e executar a validação completa (SQL Server, rollbac
 
 O script preserva o banco de uso e deixa a stack principal atualizada e ativa. Os testes SQL e o navegador usam bancos descartáveis. São necessários .NET 10, Node, dependências do frontend instaladas, PowerShell e Chrome instalado ou Chromium do Playwright. As portas 5083 e 4203 devem estar disponíveis. Relatórios de cobertura ficam em `out/coverage` e capturas de navegador em `out/validation/ui`.
 
-Se somente a navegação ficou pendente, execute ` .\scripts\validation\validate-audit.ps1 -BrowserOnly` na raiz. Essa opção reutiliza as imagens e o build existentes, sem repetir rebuild e suítes já aprovadas. O navegador respeita `PLAYWRIGHT_BROWSER_PATH` e, em seguida, `CHROME_BIN`; sem ambos, usa o Chromium gerenciado pelo Playwright.
+Se somente a navegação ficou pendente, execute `.\scripts\validation\validate-audit.ps1 -BrowserOnly` na raiz. Essa opção reutiliza as imagens e o build existentes, sem repetir rebuild e suítes já aprovadas. O navegador respeita `PLAYWRIGHT_BROWSER_PATH` e, em seguida, `CHROME_BIN`; sem ambos, usa o Chromium gerenciado pelo Playwright.
 
 ## Execução do backup
 
